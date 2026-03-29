@@ -77,13 +77,21 @@ const ProductDetail = () => {
           </span>
           <h1 className="text-xl font-extrabold text-foreground mt-1.5 leading-tight">{product.name}</h1>
 
-          <div className="flex items-baseline gap-3 mt-4">
-            <span className="text-3xl font-extrabold text-gradient">R$ {product.price.toFixed(2)}</span>
+          <div className="mt-4">
             {product.originalPrice && (
-              <span className="text-sm text-muted-foreground line-through">
+              <span className="text-xs text-muted-foreground line-through">
                 R$ {product.originalPrice.toFixed(2)}
               </span>
             )}
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-sm font-semibold text-primary">R$</span>
+              <span className="text-4xl font-extrabold text-foreground leading-none tracking-tight">
+                {product.price.toFixed(2).split('.')[0]}
+              </span>
+              <span className="text-lg font-bold text-foreground/70">
+                ,{product.price.toFixed(2).split('.')[1]}
+              </span>
+            </div>
           </div>
 
           <div className="h-px bg-border/60 my-4" />

@@ -49,18 +49,22 @@ const ProductCard = ({ product, index = 0 }: Props) => {
         )}
       </div>
       <div className="p-3.5">
-        <h3 className="text-[13px] font-semibold text-foreground line-clamp-2 leading-snug mb-2.5">
+        <h3 className="text-[13px] font-semibold text-foreground line-clamp-2 leading-snug mb-1">
           {product.name}
         </h3>
-        <div className="flex items-end justify-between">
-          <div>
-            {product.originalPrice && (
-              <span className="text-[11px] text-muted-foreground line-through block mb-0.5">
-                R$ {product.originalPrice.toFixed(2)}
-              </span>
-            )}
-            <span className="text-lg font-extrabold text-gradient">
-              R$ {product.price.toFixed(2)}
+        {product.originalPrice && (
+          <span className="text-[11px] text-muted-foreground line-through">
+            R$ {product.originalPrice.toFixed(2)}
+          </span>
+        )}
+        <div className="flex items-end justify-between mt-1">
+          <div className="flex items-baseline gap-1">
+            <span className="text-[11px] font-medium text-primary">R$</span>
+            <span className="text-xl font-extrabold text-foreground leading-none">
+              {product.price.toFixed(2).split('.')[0]}
+            </span>
+            <span className="text-xs font-bold text-foreground/70">
+              ,{product.price.toFixed(2).split('.')[1]}
             </span>
           </div>
           <button
