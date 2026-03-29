@@ -19,7 +19,6 @@ const CategoryFilter = ({ selected, onSelect }: Props) => {
           }`}
           style={{ animationDelay: `${i * 0.06}s` }}
         >
-          <span className="text-base">{cat.icon}</span>
           {cat.label}
         </button>
       ))}

@@ -58,10 +58,9 @@ const Index = () => {
               onClick={() => navigate(`/catalogo?cat=${cat.id}`)}
               className="flex flex-col items-center gap-2.5 min-w-[76px] group"
             >
-              <div className="w-16 h-16 rounded-2xl bg-card border border-border/60 flex items-center justify-center text-2xl shadow-card group-hover:shadow-elevated group-hover:scale-105 transition-all duration-300">
-                {cat.icon}
+              <div className="px-5 py-3 rounded-2xl bg-card border border-border/60 shadow-card group-hover:shadow-elevated group-hover:scale-105 transition-all duration-300">
+                <span className="text-sm font-semibold text-foreground">{cat.label}</span>
               </div>
-              <span className="text-xs font-semibold text-foreground">{cat.label}</span>
             </button>
           ))}
         </div>
