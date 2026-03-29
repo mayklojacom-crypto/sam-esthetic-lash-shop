@@ -10,12 +10,12 @@ export interface Product {
 }
 
 export const categories = [
-  { id: 'todos', label: 'Todos', icon: '✨' },
-  { id: 'cilios', label: 'Cílios', icon: '👁️' },
-  { id: 'colas', label: 'Colas', icon: '💧' },
-  { id: 'liquidos', label: 'Líquidos', icon: '🧴' },
-  { id: 'ferramentas', label: 'Ferramentas', icon: '🛠️' },
-  { id: 'descartaveis', label: 'Descartáveis', icon: '♻️' },
+  { id: 'todos', label: 'Todos' },
+  { id: 'cilios', label: 'Cílios' },
+  { id: 'colas', label: 'Colas' },
+  { id: 'liquidos', label: 'Líquidos' },
+  { id: 'ferramentas', label: 'Ferramentas' },
+  { id: 'descartaveis', label: 'Descartáveis' },
 ];
 
 export const products: Product[] = [
