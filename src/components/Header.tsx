@@ -8,10 +8,10 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-40 glass-strong">
-      <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
+      <div className="flex items-center justify-between h-16 px-4 max-w-lg mx-auto">
         <div className="w-10" />
         <button onClick={() => navigate('/')} className="flex items-center gap-2">
-          <img src="/logo.png" alt="Sam Esthetic" className="h-10 w-auto drop-shadow-sm" />
+          <img src="/logo.png" alt="Sam Esthetic" className="h-14 w-auto drop-shadow-md" />
         </button>
         <button
           onClick={() => navigate('/carrinho')}
