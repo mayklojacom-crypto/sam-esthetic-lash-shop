@@ -14,27 +14,34 @@ const BottomNav = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border backdrop-blur-lg bg-opacity-95">
-      <div className="flex items-center justify-around h-16 max-w-lg mx-auto">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-border/50">
+      <div className="flex items-center justify-around h-[68px] max-w-lg mx-auto px-2">
         {tabs.map(({ path, icon: Icon, label }) => {
           const active = location.pathname === path;
           return (
             <button
               key={path}
               onClick={() => navigate(path)}
-              className={`flex flex-col items-center gap-0.5 px-4 py-1 transition-colors relative ${
-                active ? 'text-primary' : 'text-muted-foreground'
-              }`}
+              className="flex flex-col items-center gap-1 px-5 py-1.5 rounded-2xl transition-all duration-300 relative"
             >
+              {active && (
+                <div className="absolute inset-0 gradient-primary opacity-10 rounded-2xl animate-scale-in" />
+              )}
               <div className="relative">
-                <Icon size={22} strokeWidth={active ? 2.5 : 1.8} />
+                <Icon
+                  size={22}
+                  strokeWidth={active ? 2.5 : 1.8}
+                  className={`transition-all duration-300 ${active ? 'text-primary' : 'text-muted-foreground'}`}
+                />
                 {label === 'Carrinho' && totalItems > 0 && (
-                  <span className="absolute -top-2 -right-3 bg-accent text-accent-foreground text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  <span className="absolute -top-2 -right-3 gradient-primary text-primary-foreground text-[9px] font-bold rounded-full w-[18px] h-[18px] flex items-center justify-center shadow-sm">
                     {totalItems}
                   </span>
                 )}
               </div>
-              <span className={`text-[10px] ${active ? 'font-semibold' : 'font-medium'}`}>{label}</span>
+              <span className={`text-[10px] transition-all duration-300 ${active ? 'font-bold text-primary' : 'font-medium text-muted-foreground'}`}>
+                {label}
+              </span>
             </button>
           );
         })}

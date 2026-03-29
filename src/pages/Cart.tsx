@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
@@ -10,21 +10,21 @@ const Cart = () => {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-background pb-20">
+      <div className="min-h-screen bg-background pb-24">
         <Header />
-        <div className="flex flex-col items-center justify-center px-4 pt-20">
-          <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mb-4">
-            <ShoppingBag size={32} className="text-muted-foreground" />
+        <div className="flex flex-col items-center justify-center px-4 pt-20 animate-fade-in">
+          <div className="w-24 h-24 rounded-3xl gradient-primary flex items-center justify-center mb-5 shadow-glow animate-float">
+            <ShoppingBag size={36} className="text-primary-foreground" />
           </div>
-          <h2 className="text-lg font-semibold text-foreground">Carrinho vazio</h2>
-          <p className="text-sm text-muted-foreground mt-1 text-center">
-            Adicione produtos para começar sua compra!
+          <h2 className="text-xl font-extrabold text-foreground">Carrinho vazio</h2>
+          <p className="text-sm text-muted-foreground mt-2 text-center max-w-[250px]">
+            Que tal explorar nosso catálogo e adicionar alguns produtos?
           </p>
           <button
             onClick={() => navigate('/catalogo')}
-            className="mt-6 bg-primary text-primary-foreground px-6 py-3 rounded-xl font-semibold active:scale-95 transition-transform"
+            className="mt-7 gradient-primary text-primary-foreground px-7 py-3.5 rounded-2xl font-bold active:scale-95 transition-all duration-300 shadow-glow flex items-center gap-2"
           >
-            Ver Produtos
+            Ver Produtos <ArrowRight size={16} />
           </button>
         </div>
         <BottomNav />
@@ -33,46 +33,52 @@ const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-36">
+    <div className="min-h-screen bg-background pb-40">
       <Header />
 
-      <div className="px-4 mt-4">
-        <h1 className="text-xl font-bold text-foreground">Meu Carrinho</h1>
+      <div className="px-4 mt-5 animate-fade-in">
+        <h1 className="text-2xl font-extrabold text-foreground">Meu Carrinho</h1>
         <p className="text-sm text-muted-foreground mt-1">{items.length} item(ns)</p>
       </div>
 
-      <div className="px-4 mt-4 space-y-3">
-        {items.map(({ product, quantity }) => (
-          <div key={product.id} className="bg-card rounded-xl border border-border p-3 flex gap-3">
+      <div className="px-4 mt-5 space-y-3">
+        {items.map(({ product, quantity }, i) => (
+          <div
+            key={product.id}
+            className="bg-card rounded-2xl border border-border/60 p-3.5 flex gap-3.5 shadow-card opacity-0 animate-fade-in-up"
+            style={{ animationDelay: `${i * 0.08}s` }}
+          >
             <img
               src={product.image}
               alt={product.name}
-              className="w-20 h-20 rounded-lg object-cover flex-shrink-0"
+              className="w-[85px] h-[85px] rounded-xl object-cover flex-shrink-0"
             />
-            <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-medium text-foreground line-clamp-2">{product.name}</h3>
-              <p className="text-base font-bold text-primary mt-1">R$ {product.price.toFixed(2)}</p>
+            <div className="flex-1 min-w-0 flex flex-col justify-between">
+              <div>
+                <h3 className="text-[13px] font-semibold text-foreground line-clamp-2 leading-snug">{product.name}</h3>
+                <p className="text-base font-extrabold text-gradient mt-1">R$ {product.price.toFixed(2)}</p>
+              </div>
               <div className="flex items-center justify-between mt-2">
-                <div className="flex items-center gap-2 bg-secondary rounded-full px-1 py-0.5">
+                <div className="flex items-center gap-1 bg-secondary rounded-full p-0.5">
                   <button
                     onClick={() => updateQuantity(product.id, quantity - 1)}
-                    className="w-7 h-7 rounded-full flex items-center justify-center"
+                    className="w-7 h-7 rounded-full flex items-center justify-center active:scale-90 transition-transform"
                   >
                     <Minus size={12} />
                   </button>
-                  <span className="text-sm font-semibold w-5 text-center">{quantity}</span>
+                  <span className="text-sm font-bold w-5 text-center">{quantity}</span>
                   <button
                     onClick={() => updateQuantity(product.id, quantity + 1)}
-                    className="w-7 h-7 rounded-full flex items-center justify-center"
+                    className="w-7 h-7 rounded-full flex items-center justify-center active:scale-90 transition-transform"
                   >
                     <Plus size={12} />
                   </button>
                 </div>
                 <button
                   onClick={() => removeItem(product.id)}
-                  className="text-muted-foreground hover:text-destructive transition-colors p-1"
+                  className="text-muted-foreground hover:text-destructive transition-colors p-2 rounded-full hover:bg-destructive/10"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={15} />
                 </button>
               </div>
             </div>
@@ -81,16 +87,16 @@ const Cart = () => {
       </div>
 
       {/* Footer */}
-      <div className="fixed bottom-16 left-0 right-0 bg-card border-t border-border p-4 space-y-3">
+      <div className="fixed bottom-[68px] left-0 right-0 glass-strong border-t border-border/50 p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Total</span>
-          <span className="text-xl font-bold text-foreground">R$ {totalPrice.toFixed(2)}</span>
+          <span className="text-sm text-muted-foreground font-medium">Total</span>
+          <span className="text-2xl font-extrabold text-gradient">R$ {totalPrice.toFixed(2)}</span>
         </div>
         <button
           onClick={() => navigate('/checkout')}
-          className="w-full bg-primary text-primary-foreground py-3.5 rounded-xl font-semibold active:scale-[0.98] transition-transform"
+          className="w-full gradient-primary text-primary-foreground py-4 rounded-2xl font-bold active:scale-[0.98] transition-all duration-300 shadow-glow flex items-center justify-center gap-2 text-[15px]"
         >
-          Finalizar Pedido
+          Finalizar Pedido <ArrowRight size={17} />
         </button>
       </div>
 
