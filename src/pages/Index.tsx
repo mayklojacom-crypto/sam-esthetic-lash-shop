@@ -51,15 +51,15 @@ const Index = () => {
       {/* Categories */}
       <section className="mt-7 opacity-0 animate-fade-in stagger-2">
         <h2 className="text-lg font-bold px-4 mb-4 text-foreground">Categorias</h2>
-        <div className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
-          {categories.filter(c => c.id !== 'todos').map((cat, i) => (
+        <div className="flex gap-2.5 overflow-x-auto px-4 pb-2 scrollbar-hide">
+          {categories.filter(c => c.id !== 'todos').map((cat) => (
             <button
               key={cat.id}
               onClick={() => navigate(`/catalogo?cat=${cat.id}`)}
-              className="flex flex-col items-center gap-2.5 min-w-[76px] group"
+              className="shrink-0"
             >
-              <div className="px-5 py-3 rounded-2xl bg-card border border-border/60 shadow-card group-hover:shadow-elevated group-hover:scale-105 transition-all duration-300">
-                <span className="text-sm font-semibold text-foreground">{cat.label}</span>
+              <div className="px-4 py-2.5 rounded-full bg-card border border-border/60 shadow-card hover:shadow-elevated hover:scale-105 transition-all duration-300">
+                <span className="text-sm font-semibold text-foreground whitespace-nowrap">{cat.label}</span>
               </div>
             </button>
           ))}
