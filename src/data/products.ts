@@ -13,7 +13,9 @@ export const categories = [
   { id: 'todos', label: 'Todos', icon: '✨' },
   { id: 'cilios', label: 'Cílios', icon: '👁️' },
   { id: 'colas', label: 'Colas', icon: '💧' },
-  { id: 'acessorios', label: 'Acessórios', icon: '🛠️' },
+  { id: 'liquidos', label: 'Líquidos', icon: '🧴' },
+  { id: 'ferramentas', label: 'Ferramentas', icon: '🛠️' },
+  { id: 'descartaveis', label: 'Descartáveis', icon: '♻️' },
 ];
 
 export const products: Product[] = [
@@ -58,7 +60,7 @@ export const products: Product[] = [
     name: 'Pads (Patch) em Gel Protetor de Pálpebras — 50 Pares',
     price: 18.50,
     image: '/products/pads-gel-50.png',
-    category: 'acessorios',
+    category: 'descartaveis',
     description: 'Pads (Patch) em Gel Protetor de Pálpebras. 50 Pares. Gel suave e hidratante. Protetor. Proteção de pálpebras. Sem fiapos. Formato anatômico.',
   },
   {
@@ -66,7 +68,7 @@ export const products: Product[] = [
     name: 'Microbrush Glitter para Lash Design — 50 uni',
     price: 8.99,
     image: '/products/microbrush-glitter.png',
-    category: 'acessorios',
+    category: 'descartaveis',
     description: 'Microbrush Glitter para Lash Design. Ponta ultrafina de precisão de cabo. Com Glitter elegante no cabo. Descartável e higiênico. Quantidade: 50 unidades.',
   },
   {
@@ -74,7 +76,7 @@ export const products: Product[] = [
     name: 'Fita Micropore Antialérgica',
     price: 3.00,
     image: '/products/fita-micropore.png',
-    category: 'acessorios',
+    category: 'ferramentas',
     description: 'Fita Micropore Antialérgica para alongamento de cílios. Ideal para fixação durante o procedimento.',
   },
   {
@@ -82,7 +84,7 @@ export const products: Product[] = [
     name: 'Fita Transpore para Extensão de Cílios',
     price: 4.00,
     image: '/products/fita-transpore.png',
-    category: 'acessorios',
+    category: 'ferramentas',
     description: 'Fita Transpore para Extensão de Cílios. Respirável. Transparente e perfurada. Ideal para isolar e fixar. Fácil de cortar sem tesoura.',
   },
   {
@@ -90,7 +92,7 @@ export const products: Product[] = [
     name: 'Anel Batoque para Colas com Divisória — 50 uni',
     price: 13.00,
     image: '/products/anel-batoque.png',
-    category: 'acessorios',
+    category: 'descartaveis',
     description: 'Anel Batoque para Colas com Divisória. Higiênico e descartável. Design ergonômico. Divisória prática. Quantidade: 50 unidades.',
   },
   {
@@ -98,7 +100,7 @@ export const products: Product[] = [
     name: 'Aplicador Gloss Descartável Glitter — 50 uni',
     price: 8.99,
     image: '/products/aplicador-gloss.png',
-    category: 'acessorios',
+    category: 'descartaveis',
     description: 'Aplicador Gloss Descartável Glitter. Precisão na aplicação. Ponta de esponja macia. Hastes com glitter elegante. Higiênico e descartável. Quantidade: 50 unidades.',
   },
 ];
