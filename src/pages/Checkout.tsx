@@ -143,9 +143,9 @@ const Checkout = () => {
         {/* Submit */}
         <button
           onClick={handleSubmit}
-          className="w-full mt-5 bg-[#25D366] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all duration-300 shadow-lg hover:shadow-xl text-[15px] opacity-0 animate-fade-in-up stagger-6"
+          className="w-full mt-5 bg-[#25D366] text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg hover:brightness-110 text-[15px] tracking-wide ring-1 ring-[#25D366]/30 opacity-0 animate-fade-in-up stagger-6"
         >
-          <MessageCircle size={20} />
+          <MessageCircle size={20} strokeWidth={2.5} />
           Enviar Pedido via WhatsApp
         </button>
       </div>

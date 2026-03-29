@@ -22,9 +22,9 @@ const Cart = () => {
           </p>
           <button
             onClick={() => navigate('/catalogo')}
-            className="mt-7 gradient-primary text-primary-foreground px-7 py-3.5 rounded-2xl font-bold active:scale-95 transition-all duration-300 shadow-glow flex items-center gap-2"
+            className="mt-7 bg-primary text-primary-foreground px-8 py-3.5 rounded-2xl font-bold active:scale-[0.97] transition-all duration-200 shadow-md hover:shadow-lg hover:bg-primary/90 flex items-center gap-2.5 text-sm tracking-wide"
           >
-            Ver Produtos <ArrowRight size={16} />
+            Ver Produtos <ArrowRight size={16} strokeWidth={2.5} />
           </button>
         </div>
         <BottomNav />
@@ -59,19 +59,19 @@ const Cart = () => {
                 <p className="text-base font-extrabold text-gradient mt-1">R$ {product.price.toFixed(2)}</p>
               </div>
               <div className="flex items-center justify-between mt-2">
-                <div className="flex items-center gap-1 bg-secondary rounded-full p-0.5">
+                <div className="flex items-center gap-0.5 bg-secondary rounded-xl p-0.5 ring-1 ring-border/40">
                   <button
                     onClick={() => updateQuantity(product.id, quantity - 1)}
-                    className="w-7 h-7 rounded-full flex items-center justify-center active:scale-90 transition-transform"
+                    className="w-8 h-8 rounded-lg flex items-center justify-center active:scale-90 transition-all hover:bg-muted"
                   >
-                    <Minus size={12} />
+                    <Minus size={13} strokeWidth={2.5} />
                   </button>
-                  <span className="text-sm font-bold w-5 text-center">{quantity}</span>
+                  <span className="text-sm font-bold w-6 text-center">{quantity}</span>
                   <button
                     onClick={() => updateQuantity(product.id, quantity + 1)}
-                    className="w-7 h-7 rounded-full flex items-center justify-center active:scale-90 transition-transform"
+                    className="w-8 h-8 rounded-lg flex items-center justify-center active:scale-90 transition-all hover:bg-muted"
                   >
-                    <Plus size={12} />
+                    <Plus size={13} strokeWidth={2.5} />
                   </button>
                 </div>
                 <button
@@ -94,9 +94,9 @@ const Cart = () => {
         </div>
         <button
           onClick={() => navigate('/checkout')}
-          className="w-full gradient-primary text-primary-foreground py-4 rounded-2xl font-bold active:scale-[0.98] transition-all duration-300 shadow-glow flex items-center justify-center gap-2 text-[15px]"
+          className="w-full bg-primary text-primary-foreground py-4 rounded-2xl font-bold active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg hover:bg-primary/90 flex items-center justify-center gap-2.5 text-[15px] tracking-wide"
         >
-          Finalizar Pedido <ArrowRight size={17} />
+          Finalizar Pedido <ArrowRight size={17} strokeWidth={2.5} />
         </button>
       </div>
 

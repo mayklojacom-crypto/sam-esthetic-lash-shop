@@ -96,16 +96,16 @@ const ProductDetail = () => {
             <div className="flex items-center gap-1 bg-secondary rounded-full p-1">
               <button
                 onClick={() => setQty(q => Math.max(1, q - 1))}
-                className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors active:scale-90"
+                className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-muted transition-all active:scale-90"
               >
-                <Minus size={15} />
+                <Minus size={15} strokeWidth={2.5} />
               </button>
               <span className="text-sm font-bold w-8 text-center">{qty}</span>
               <button
                 onClick={() => setQty(q => q + 1)}
-                className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors active:scale-90"
+                className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-muted transition-all active:scale-90"
               >
-                <Plus size={15} />
+                <Plus size={15} strokeWidth={2.5} />
               </button>
             </div>
           </div>
@@ -116,9 +116,9 @@ const ProductDetail = () => {
       <div className="fixed bottom-[68px] left-0 right-0 p-4 glass-strong border-t border-border/50">
         <button
           onClick={handleAdd}
-          className="w-full gradient-primary text-primary-foreground py-4 rounded-2xl font-bold flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all duration-300 shadow-glow text-[15px]"
+          className="w-full bg-primary text-primary-foreground py-4 rounded-2xl font-bold flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg hover:bg-primary/90 text-[15px] tracking-wide"
         >
-          <ShoppingBag size={19} />
+          <ShoppingBag size={19} strokeWidth={2.5} />
           Adicionar — R$ {(product.price * qty).toFixed(2)}
         </button>
       </div>

@@ -32,9 +32,9 @@ const Index = () => {
           </p>
           <button
             onClick={() => navigate('/catalogo')}
-            className="mt-5 bg-white text-foreground px-6 py-2.5 rounded-full text-sm font-bold active:scale-95 transition-all duration-300 shadow-elevated hover:shadow-lg"
+            className="mt-5 bg-white text-foreground px-7 py-3 rounded-full text-sm font-bold active:scale-[0.97] transition-all duration-200 shadow-lg hover:shadow-xl ring-1 ring-black/5 tracking-wide"
           >
-            Ver Produtos ✨
+            Ver Produtos →
           </button>
         </div>
       </div>
@@ -71,7 +71,7 @@ const Index = () => {
       <section className="mt-7 px-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-foreground">🔥 Destaques</h2>
-          <button onClick={() => navigate('/catalogo')} className="text-sm text-primary font-semibold hover:underline transition-colors">
+          <button onClick={() => navigate('/catalogo')} className="text-xs text-primary font-bold uppercase tracking-wider hover:opacity-80 transition-opacity">
             Ver todos →
           </button>
         </div>

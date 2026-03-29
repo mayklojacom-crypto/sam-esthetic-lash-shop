@@ -65,10 +65,10 @@ const ProductCard = ({ product, index = 0 }: Props) => {
           </div>
           <button
             onClick={handleAdd}
-            className="gradient-primary text-primary-foreground p-2.5 rounded-xl shadow-glow hover:shadow-elevated transition-all duration-300 active:scale-90"
+            className="bg-primary text-primary-foreground p-2.5 rounded-xl shadow-sm hover:bg-primary/90 hover:shadow-md transition-all duration-200 active:scale-90 ring-1 ring-primary/20"
             aria-label="Adicionar ao carrinho"
           >
-            <ShoppingBag size={15} />
+            <ShoppingBag size={15} strokeWidth={2.5} />
           </button>
         </div>
       </div>
