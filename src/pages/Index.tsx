@@ -82,6 +82,7 @@ const Index = () => {
       </section>
 
       {/* Info Cards */}
+      {/* Info Cards */}
       <section className="px-4 mt-7 space-y-3 opacity-0 animate-fade-in-up stagger-4">
         <div className="bg-card rounded-2xl border border-border/60 p-4 shadow-card flex items-center gap-4">
           <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center flex-shrink-0 shadow-glow">
@@ -103,6 +104,31 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Footer Profissional */}
+      <footer className="mt-10 mb-24 px-4">
+        <div className="border-t border-border/40 pt-6 pb-4">
+          <div className="flex flex-col items-center gap-4">
+            <img src="/logo.png" alt="Sam Esthetic" className="h-10 w-auto opacity-80" />
+            <p className="text-xs text-muted-foreground text-center leading-relaxed max-w-[280px]">
+              Especialistas em materiais para Lash Design e Nail Designer. Qualidade premium com os melhores preços da região.
+            </p>
+            <div className="flex items-center gap-4 text-muted-foreground">
+              <a href="https://wa.me/5562998755213" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                <MessageCircle size={18} />
+              </a>
+              <a href="https://www.instagram.com/sam_esthetic_" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+              </a>
+            </div>
+            <div className="flex items-center gap-2 text-[10px] text-muted-foreground/60 uppercase tracking-widest">
+              <span>© 2025 Sam Esthetic</span>
+              <span>•</span>
+              <span>Todos os direitos reservados</span>
+            </div>
+          </div>
+        </div>
+      </footer>
 
       <BottomNav />
     </div>
