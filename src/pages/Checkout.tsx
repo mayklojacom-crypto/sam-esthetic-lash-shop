@@ -14,7 +14,7 @@ const checkoutSchema = z.object({
   notes: z.string().max(500).optional(),
 });
 
-const WHATSAPP_NUMBER = '5500000000000'; // Número da loja
+const WHATSAPP_NUMBER = '5562998755213';
 
 const Checkout = () => {
   const navigate = useNavigate();
