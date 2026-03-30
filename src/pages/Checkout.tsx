@@ -333,7 +333,7 @@ const Checkout = () => {
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4">
                       <div className="relative">
-                        <InputField field="cep" label="CEP" placeholder="00000-000" icon={<MapPin size={16} />} />
+                        {renderInput('cep', 'CEP', '00000-000', <MapPin size={16} />)}
                         {loadingCEP && (
                           <Loader2 size={14} className="absolute right-3 top-9 animate-spin text-primary" />
                         )}
@@ -346,21 +346,17 @@ const Checkout = () => {
                       </div>
                     </div>
 
-                    <InputField field="street" label="Rua / Avenida" placeholder="Nome da rua" icon={<MapPin size={16} />} disabled={loadingCEP} />
+                    {renderInput('street', 'Rua / Avenida', 'Nome da rua', <MapPin size={16} />, 'text', '', loadingCEP)}
 
                     <div className="grid grid-cols-2 gap-4">
-                      <InputField field="number" label="Número" placeholder="Nº" icon={
-                        <span className="text-xs font-bold">Nº</span>
-                      } />
-                      <InputField field="complement" label="Complemento" placeholder="Apto, bloco..." icon={
-                        <span className="text-xs">🏠</span>
-                      } />
+                      {renderInput('number', 'Número', 'Nº', <span className="text-xs font-bold">Nº</span>)}
+                      {renderInput('complement', 'Complemento', 'Apto, bloco...', <span className="text-xs">🏠</span>)}
                     </div>
 
-                    <InputField field="neighborhood" label="Bairro" placeholder="Seu bairro" icon={<MapPin size={16} />} disabled={loadingCEP} />
+                    {renderInput('neighborhood', 'Bairro', 'Seu bairro', <MapPin size={16} />, 'text', '', loadingCEP)}
 
                     <div className="grid grid-cols-[1fr_100px] gap-4">
-                      <InputField field="city" label="Cidade" placeholder="Sua cidade" icon={<MapPin size={16} />} disabled={loadingCEP} />
+                      {renderInput('city', 'Cidade', 'Sua cidade', <MapPin size={16} />, 'text', '', loadingCEP)}
                       <div>
                         <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">
                           UF
