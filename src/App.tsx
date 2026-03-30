@@ -10,6 +10,7 @@ import ProductDetail from "./pages/ProductDetail.tsx";
 import Cart from "./pages/Cart.tsx";
 import Checkout from "./pages/Checkout.tsx";
 import PaymentStatus from "./pages/PaymentStatus.tsx";
+import ThankYou from "./pages/ThankYou.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import WhatsAppFloat from "./components/WhatsAppFloat.tsx";
 
