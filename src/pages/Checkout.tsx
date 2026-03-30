@@ -77,6 +77,7 @@ const Checkout = () => {
   const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
   const [loadingShipping, setLoadingShipping] = useState(false);
   const [shippingError, setShippingError] = useState('');
+  const [isLocalDelivery, setIsLocalDelivery] = useState(false);
 
   const finalTotal = totalPrice + (selectedShipping?.price || 0);
 
@@ -128,9 +129,14 @@ const Checkout = () => {
     return true;
   };
 
+  const LOCAL_CITIES = ['goiânia', 'goiania', 'aparecida de goiânia', 'aparecida de goiania'];
+
   const calculateShipping = async (cep: string) => {
     const digits = cep.replace(/\D/g, '');
     if (digits.length !== 8) return;
+
+    // Don't calculate if local delivery was detected
+    if (isLocalDelivery) return;
 
     setLoadingShipping(true);
     setShippingError('');
@@ -148,7 +154,6 @@ const Checkout = () => {
 
       if (data?.options && data.options.length > 0) {
         setShippingOptions(data.options);
-        // Auto-select cheapest
         const cheapest = data.options.reduce((a: ShippingOption, b: ShippingOption) => a.price < b.price ? a : b);
         setSelectedShipping(cheapest);
       } else {
@@ -166,6 +171,7 @@ const Checkout = () => {
     const digits = cep.replace(/\D/g, '');
     if (digits.length !== 8) return;
     setLoadingCEP(true);
+    setIsLocalDelivery(false);
     try {
       const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
       const data = await res.json();
@@ -185,11 +191,24 @@ const Checkout = () => {
           delete cleaned.state;
           return cleaned;
         });
+
+        // Check if local delivery region
+        const city = (data.localidade || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const isLocal = LOCAL_CITIES.some(c => c.normalize('NFD').replace(/[\u0300-\u036f]/g, '') === city);
+        
+        if (isLocal && data.uf === 'GO') {
+          setIsLocalDelivery(true);
+          setShippingOptions([]);
+          setSelectedShipping(null);
+          setShippingError('');
+          setLoadingCEP(false);
+          return;
+        }
       }
     } catch { /* ignore */ }
     setLoadingCEP(false);
 
-    // Calculate shipping after CEP lookup
+    // Calculate shipping after CEP lookup (only for non-local)
     calculateShipping(cep);
   };
 
@@ -204,9 +223,11 @@ const Checkout = () => {
     const data = validate();
     if (!data) return;
 
-    const shippingText = selectedShipping
-      ? `*Frete:* ${selectedShipping.service} — R$ ${selectedShipping.price.toFixed(2)} (${selectedShipping.days} dias úteis)`
-      : '*Frete:* A combinar';
+    const shippingText = isLocalDelivery
+      ? '*Frete:* Entrega local (Goiânia/Aparecida) — combinar via app (Uber/99Pop)'
+      : selectedShipping
+        ? `*Frete:* ${selectedShipping.service} — R$ ${selectedShipping.price.toFixed(2)} (${selectedShipping.days} dias úteis)`
+        : '*Frete:* A combinar';
 
     const itemsList = items
       .map(i => {
@@ -453,14 +474,39 @@ const Checkout = () => {
                     Frete
                   </h2>
 
-                  {loadingShipping && (
+                  {isLocalDelivery && (
+                    <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-500 rounded-xl p-4">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                          <MapPin size={16} className="text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-bold text-foreground">📍 Entrega Local Disponível!</p>
+                          <p className="text-xs text-muted-foreground">Goiânia / Aparecida de Goiânia</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        Entregas nessa região são feitas via <strong>Uber</strong> ou <strong>99Pop</strong>. 
+                        Finalize seu pedido pelo WhatsApp para combinar a entrega.
+                      </p>
+                      <button
+                        onClick={handleWhatsApp}
+                        className="w-full bg-[#25D366] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:brightness-110 transition-all text-sm"
+                      >
+                        <img src={whatsappIcon} alt="WhatsApp" className="w-5 h-5" />
+                        Finalizar pelo WhatsApp
+                      </button>
+                    </div>
+                  )}
+
+                  {!isLocalDelivery && loadingShipping && (
                     <div className="flex items-center gap-3 py-4 justify-center text-muted-foreground">
                       <Loader2 size={18} className="animate-spin text-primary" />
                       <span className="text-sm font-medium">Calculando frete...</span>
                     </div>
                   )}
 
-                  {!loadingShipping && shippingOptions.length > 0 && (
+                  {!isLocalDelivery && !loadingShipping && shippingOptions.length > 0 && (
                     <div className="space-y-2.5">
                       {shippingOptions.map(opt => (
                         <button
@@ -494,13 +540,13 @@ const Checkout = () => {
                     </div>
                   )}
 
-                  {!loadingShipping && shippingOptions.length === 0 && !shippingError && (
+                  {!isLocalDelivery && !loadingShipping && shippingOptions.length === 0 && !shippingError && (
                     <p className="text-sm text-muted-foreground py-2">
                       Preencha o CEP acima para calcular o frete.
                     </p>
                   )}
 
-                  {shippingError && (
+                  {!isLocalDelivery && shippingError && (
                     <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-3">
                       <p className="text-xs text-destructive font-medium">{shippingError}</p>
                     </div>
