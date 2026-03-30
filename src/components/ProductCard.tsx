@@ -25,7 +25,7 @@ const ProductCard = ({ product, index = 0 }: Props) => {
 
   return (
     <div
-      onClick={() => navigate(`/produto/${product.id}`)}
+      onClick={() => navigate(`/produto/${product.slug}`)}
       className="group bg-card rounded-xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer active:scale-[0.98] opacity-0 animate-fade-in-up"
       style={{ animationDelay: `${index * 0.06}s` }}
     >

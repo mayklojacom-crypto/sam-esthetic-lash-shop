@@ -1,21 +1,21 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ShoppingBag, Minus, Plus, Share2 } from 'lucide-react';
 import { useState } from 'react';
-import { products } from '@/data/products';
+import { getProductBySlug } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 
 const ProductDetail = () => {
-  const { id } = useParams();
+  const { slug } = useParams();
   const navigate = useNavigate();
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
 
-  const product = products.find(p => p.id === id);
+  const product = slug ? getProductBySlug(slug) : undefined;
 
   if (!product) {
     return (
