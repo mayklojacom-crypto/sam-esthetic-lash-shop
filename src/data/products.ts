@@ -73,6 +73,7 @@ export const products: Product[] = [
   },
   {
     id: '5',
+    slug: 'pads-gel-protetor-palpebras-50-pares',
     name: 'Pads (Patch) em Gel Protetor de Pálpebras — 50 Pares',
     price: 18.50,
     image: '/products/pads-gel-50.png',
