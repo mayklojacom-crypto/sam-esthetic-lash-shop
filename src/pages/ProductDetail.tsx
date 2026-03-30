@@ -13,6 +13,7 @@ const ProductDetail = () => {
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   const product = products.find(p => p.id === id);
 
@@ -48,7 +49,7 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-28 md:pb-8">
+    <div className="min-h-screen bg-background pb-44 md:pb-8">
       <Header />
 
       <div className="max-w-5xl mx-auto">
