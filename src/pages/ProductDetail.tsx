@@ -118,6 +118,28 @@ const ProductDetail = () => {
 
               <p className="text-sm text-muted-foreground leading-relaxed">{product.description}</p>
 
+              {/* Size selector */}
+              {product.sizes && product.sizes.length > 0 && (
+                <div className="mt-5">
+                  <span className="text-sm font-semibold text-foreground">Tamanho</span>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {product.sizes.map(size => (
+                      <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        className={`px-4 py-2.5 rounded-xl text-sm font-bold border-2 transition-all duration-200 ${
+                          selectedSize === size
+                            ? 'border-primary bg-primary text-primary-foreground shadow-md'
+                            : 'border-border bg-secondary text-foreground hover:border-primary/50'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Quantity */}
               <div className="flex items-center justify-between mt-6">
                 <span className="text-sm font-semibold text-foreground">Quantidade</span>
