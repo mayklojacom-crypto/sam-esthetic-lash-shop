@@ -13,6 +13,7 @@ const ProductDetail = () => {
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   const product = products.find(p => p.id === id);
 
