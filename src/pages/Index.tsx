@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Search, Sparkles, Truck, MessageCircle } from 'lucide-react';
+import { Sparkles, Truck, MessageCircle, ArrowRight } from 'lucide-react';
 import { products, categories } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 import Header from '@/components/Header';
@@ -14,40 +14,29 @@ const Index = () => {
       <Header />
 
       <div className="max-w-6xl mx-auto">
-        {/* Hero Banner */}
-        <div className="mx-4 mt-4 rounded-3xl gradient-primary p-6 md:p-10 text-primary-foreground relative overflow-hidden animate-fade-in">
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl" />
-          <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-white/5 rounded-full blur-xl" />
+        {/* Hero Banner — clean, no heavy purple bar */}
+        <div className="mx-4 mt-4 rounded-3xl bg-card border border-border/60 p-6 md:p-10 relative overflow-hidden animate-fade-in shadow-card">
+          <div className="absolute -top-20 -right-20 w-60 h-60 bg-primary/5 rounded-full blur-3xl" />
+          <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-accent/5 rounded-full blur-3xl" />
 
           <div className="relative z-10 md:max-w-xl">
             <div className="flex items-center gap-1.5 mb-2">
-              <Sparkles size={14} className="animate-pulse-soft" />
-              <p className="text-xs font-semibold uppercase tracking-widest opacity-90">Bem-vinda à</p>
+              <Sparkles size={14} className="text-primary animate-pulse-soft" />
+              <p className="text-xs font-semibold uppercase tracking-widest text-primary">Bem-vinda à</p>
             </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold leading-tight">
+            <h1 className="text-3xl md:text-4xl font-extrabold leading-tight text-foreground">
               Sam Esthetic
             </h1>
-            <p className="text-sm md:text-base mt-2 opacity-90 leading-relaxed font-light">
+            <p className="text-sm md:text-base mt-2 text-muted-foreground leading-relaxed font-light">
               Materiais para Lash Design com os melhores preços da região! 💜
             </p>
             <button
               onClick={() => navigate('/catalogo')}
-              className="mt-5 bg-white text-foreground px-7 py-3 rounded-full text-sm font-bold active:scale-[0.97] transition-all duration-200 shadow-lg hover:shadow-xl ring-1 ring-black/5 tracking-wide"
+              className="mt-5 bg-primary text-primary-foreground px-7 py-3 rounded-full text-sm font-bold active:scale-[0.97] transition-all duration-200 shadow-md hover:shadow-lg hover:bg-primary/90 flex items-center gap-2 tracking-wide"
             >
-              Ver Produtos →
+              Ver Produtos <ArrowRight size={15} />
             </button>
           </div>
-        </div>
-
-        {/* Search */}
-        <div className="px-4 mt-5">
-          <button
-            onClick={() => navigate('/catalogo')}
-            className="flex items-center gap-3 w-full md:max-w-md bg-card rounded-2xl px-4 py-3.5 text-muted-foreground border border-border/60 shadow-card hover:shadow-elevated transition-all duration-300 opacity-0 animate-fade-in stagger-1"
-          >
-            <Search size={18} className="text-primary" />
-            <span className="text-sm">Buscar produtos...</span>
-          </button>
         </div>
 
         {/* Categories */}
@@ -58,11 +47,9 @@ const Index = () => {
               <button
                 key={cat.id}
                 onClick={() => navigate(`/catalogo?cat=${cat.id}`)}
-                className="shrink-0"
+                className="shrink-0 px-4 py-2.5 rounded-full bg-card border border-border/60 shadow-card hover:shadow-elevated hover:border-primary/30 transition-all duration-300"
               >
-                <div className="px-4 py-2.5 rounded-full bg-card border border-border/60 shadow-card hover:shadow-elevated hover:scale-105 transition-all duration-300">
-                  <span className="text-sm font-semibold text-foreground whitespace-nowrap">{cat.label}</span>
-                </div>
+                <span className="text-sm font-semibold text-foreground whitespace-nowrap">{cat.label}</span>
               </button>
             ))}
           </div>
@@ -87,8 +74,8 @@ const Index = () => {
         <section className="px-4 mt-7 opacity-0 animate-fade-in-up stagger-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="bg-card rounded-2xl border border-border/60 p-4 shadow-card flex items-center gap-4">
-              <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center flex-shrink-0 shadow-glow">
-                <Truck size={20} className="text-primary-foreground" />
+              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Truck size={20} className="text-primary" />
               </div>
               <div>
                 <p className="text-sm font-bold text-foreground">Entrega para toda a região</p>
@@ -97,8 +84,8 @@ const Index = () => {
             </div>
 
             <div className="bg-card rounded-2xl border border-border/60 p-4 shadow-card flex items-center gap-4">
-              <div className="w-11 h-11 rounded-xl gradient-accent flex items-center justify-center flex-shrink-0">
-                <MessageCircle size={20} className="text-white" />
+              <div className="w-11 h-11 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0">
+                <MessageCircle size={20} className="text-accent" />
               </div>
               <div>
                 <p className="text-sm font-bold text-foreground">Atendimento via WhatsApp</p>

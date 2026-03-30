@@ -14,8 +14,8 @@ const CategoryFilter = ({ selected, onSelect }: Props) => {
           onClick={() => onSelect(cat.id)}
           className={`flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 opacity-0 animate-fade-in ${
             selected === cat.id
-              ? 'gradient-primary text-primary-foreground shadow-glow'
-              : 'bg-card text-secondary-foreground border border-border/60 shadow-card hover:shadow-elevated'
+              ? 'bg-primary text-primary-foreground shadow-md'
+              : 'bg-card text-secondary-foreground border border-border/60 shadow-card hover:shadow-elevated hover:border-primary/30'
           }`}
           style={{ animationDelay: `${i * 0.06}s` }}
         >

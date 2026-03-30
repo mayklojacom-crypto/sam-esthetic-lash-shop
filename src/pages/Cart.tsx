@@ -13,8 +13,8 @@ const Cart = () => {
       <div className="min-h-screen bg-background pb-24 md:pb-8">
         <Header />
         <div className="flex flex-col items-center justify-center px-4 pt-20 animate-fade-in">
-          <div className="w-24 h-24 rounded-3xl gradient-primary flex items-center justify-center mb-5 shadow-glow animate-float">
-            <ShoppingBag size={36} className="text-primary-foreground" />
+          <div className="w-24 h-24 rounded-3xl bg-primary/10 flex items-center justify-center mb-5 animate-float">
+            <ShoppingBag size={36} className="text-primary" />
           </div>
           <h2 className="text-xl font-extrabold text-foreground">Carrinho vazio</h2>
           <p className="text-sm text-muted-foreground mt-2 text-center max-w-[250px]">
@@ -57,7 +57,7 @@ const Cart = () => {
               <div className="flex-1 min-w-0 flex flex-col justify-between">
                 <div>
                   <h3 className="text-[13px] font-semibold text-foreground line-clamp-2 leading-snug">{product.name}</h3>
-                  <p className="text-base font-extrabold text-gradient mt-1">R$ {product.price.toFixed(2)}</p>
+                  <p className="text-base font-extrabold text-primary mt-1">R$ {product.price.toFixed(2)}</p>
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center gap-0.5 bg-secondary rounded-xl p-0.5 ring-1 ring-border/40">
@@ -87,11 +87,11 @@ const Cart = () => {
           ))}
         </div>
 
-        {/* Footer - fixed on mobile, inline on desktop */}
-        <div className="fixed bottom-[68px] left-0 right-0 glass-strong border-t border-border/50 p-4 space-y-3 md:hidden">
+        {/* Footer - fixed on mobile */}
+        <div className="fixed bottom-[68px] left-0 right-0 bg-card/95 backdrop-blur-2xl border-t border-border/30 p-4 space-y-3 md:hidden">
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground font-medium">Total</span>
-            <span className="text-2xl font-extrabold text-gradient">R$ {totalPrice.toFixed(2)}</span>
+            <span className="text-2xl font-extrabold text-primary">R$ {totalPrice.toFixed(2)}</span>
           </div>
           <button
             onClick={() => navigate('/checkout')}
@@ -106,7 +106,7 @@ const Cart = () => {
           <div className="bg-card rounded-2xl border border-border/60 p-5 shadow-card space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground font-medium">Total</span>
-              <span className="text-2xl font-extrabold text-gradient">R$ {totalPrice.toFixed(2)}</span>
+              <span className="text-2xl font-extrabold text-primary">R$ {totalPrice.toFixed(2)}</span>
             </div>
             <button
               onClick={() => navigate('/checkout')}
