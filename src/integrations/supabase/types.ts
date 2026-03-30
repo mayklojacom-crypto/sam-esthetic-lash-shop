@@ -67,7 +67,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      search_orders_by_phone: {
+        Args: { phone_query: string }
+        Returns: {
+          created_at: string
+          customer_name: string
+          external_reference: string
+          id: string
+          items: Json
+          payment_status: string
+          total: number
+        }[]
+      }
+      search_orders_by_reference: {
+        Args: { ref_query: string }
+        Returns: {
+          created_at: string
+          customer_name: string
+          external_reference: string
+          id: string
+          items: Json
+          payment_status: string
+          total: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

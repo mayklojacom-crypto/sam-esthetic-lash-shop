@@ -37,28 +37,15 @@ const OrderTracking = () => {
     setSearched(true);
 
     try {
-      // Search by phone or external_reference
       const phoneDigits = cleaned.replace(/\D/g, '');
-
       let results: OrderResult[] = [];
 
-      if (phoneDigits.length >= 10) {
-        // Search by phone
-        const { data } = await supabase
-          .from('orders')
-          .select('id, external_reference, customer_name, payment_status, total, items, created_at')
-          .ilike('customer_phone', `%${phoneDigits.slice(-8)}%`)
-          .order('created_at', { ascending: false })
-          .limit(10);
-        results = data || [];
+      if (phoneDigits.length >= 8) {
+        const { data } = await supabase.rpc('search_orders_by_phone', { phone_query: phoneDigits.slice(-8) });
+        results = (data as OrderResult[]) || [];
       } else {
-        // Search by order reference
-        const { data } = await supabase
-          .from('orders')
-          .select('id, external_reference, customer_name, payment_status, total, items, created_at')
-          .eq('external_reference', cleaned)
-          .limit(5);
-        results = data || [];
+        const { data } = await supabase.rpc('search_orders_by_reference', { ref_query: cleaned });
+        results = (data as OrderResult[]) || [];
       }
 
       setOrders(results);
