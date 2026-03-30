@@ -62,6 +62,7 @@ export const products: Product[] = [
   },
   {
     id: '4',
+    slug: 'cola-elite-premium-hs16-3ml',
     name: 'Cola Elite Premium HS16 3ml',
     price: 63.99,
     image: '/products/cola-elite-hs16.png',
