@@ -7,6 +7,7 @@ export interface Product {
   category: string;
   description: string;
   featured?: boolean;
+  sizes?: string[];
 }
 
 export const categories = [
@@ -21,30 +22,33 @@ export const categories = [
 export const products: Product[] = [
   {
     id: '1',
-    name: 'Cílios Y Decemars YY',
+    name: 'Cílios Decemars YY Brasileiro',
     price: 21.99,
     image: '/products/cilios-decemars-yy.png',
     category: 'cilios',
-    description: 'Cílios Y Decemars YY — Para um olhar incrível. Cor: Preto. Curvatura: D. Tamanhos disponíveis: 8mm, 10mm, 12mm, 13mm. Premium Y-Shaped Volume Lashes.',
+    description: 'Cílios Decemars YY Brasileiro — Para um olhar incrível. Cor: Preto. Curvatura: D. Premium Y-Shaped Volume Lashes.',
     featured: true,
+    sizes: ['8mm', '10mm', '12mm', '13mm'],
   },
   {
     id: '2',
-    name: 'Cílios Fadvan W 5D',
+    name: 'Cílios Fadvan 5D W',
     price: 43.99,
     image: '/products/cilios-fadvan-w5d.png',
     category: 'cilios',
-    description: 'Cílios Fadvan W 5D — Para um olhar incrível. Cor: Preto. Curvatura: D. Espessura 0.07mm. Mix 8-14mm. Allergy-Free, Premium quality, light weight lashes.',
+    description: 'Cílios Fadvan 5D W — Para um olhar incrível. Cor: Preto. Curvatura: D. Espessura 0.07mm. Allergy-Free, Premium quality, light weight lashes.',
     featured: true,
+    sizes: ['8mm', '10mm', '12mm', '13mm'],
   },
   {
     id: '3',
-    name: 'Cílios Decemars 6D',
+    name: 'Cílios Decemars 6D W',
     price: 44.99,
     image: '/products/cilios-decemars-6d.png',
     category: 'cilios',
-    description: 'Cílios Decemars 6D — Para um olhar incrível. Cor: Preto. Curvatura: D. Efeito: Volume Egípcio (W Shape). Tamanhos: 10mm, 12mm, 13mm. Eyelash Extension.',
+    description: 'Cílios Decemars 6D W — Para um olhar incrível. Cor: Preto. Curvatura: D. Efeito: Volume Egípcio (W Shape). Eyelash Extension.',
     featured: true,
+    sizes: ['8mm', '10mm', '12mm', '13mm'],
   },
   {
     id: '4',

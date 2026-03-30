@@ -4,13 +4,14 @@ import { Product } from '@/data/products';
 export interface CartItem {
   product: Product;
   quantity: number;
+  selectedSize?: string;
 }
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (product: Product) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  addItem: (product: Product, size?: string) => void;
+  removeItem: (cartKey: string) => void;
+  updateQuantity: (cartKey: string, quantity: number) => void;
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
@@ -19,6 +20,9 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_KEY = 'sam-esthetic-cart';
+
+const getCartKey = (productId: string, size?: string) =>
+  size ? `${productId}__${size}` : productId;
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>(() => {
@@ -34,29 +38,40 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem(CART_KEY, JSON.stringify(items));
   }, [items]);
 
-  const addItem = (product: Product) => {
+  const addItem = (product: Product, size?: string) => {
     setItems(prev => {
-      const existing = prev.find(i => i.product.id === product.id);
+      const key = getCartKey(product.id, size);
+      const existing = prev.find(
+        i => getCartKey(i.product.id, i.selectedSize) === key
+      );
       if (existing) {
         return prev.map(i =>
-          i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
+          getCartKey(i.product.id, i.selectedSize) === key
+            ? { ...i, quantity: i.quantity + 1 }
+            : i
         );
       }
-      return [...prev, { product, quantity: 1 }];
+      return [...prev, { product, quantity: 1, selectedSize: size }];
     });
   };
 
-  const removeItem = (productId: string) => {
-    setItems(prev => prev.filter(i => i.product.id !== productId));
+  const removeItem = (cartKey: string) => {
+    setItems(prev =>
+      prev.filter(i => getCartKey(i.product.id, i.selectedSize) !== cartKey)
+    );
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = (cartKey: string, quantity: number) => {
     if (quantity <= 0) {
-      removeItem(productId);
+      removeItem(cartKey);
       return;
     }
     setItems(prev =>
-      prev.map(i => (i.product.id === productId ? { ...i, quantity } : i))
+      prev.map(i =>
+        getCartKey(i.product.id, i.selectedSize) === cartKey
+          ? { ...i, quantity }
+          : i
+      )
     );
   };
 
