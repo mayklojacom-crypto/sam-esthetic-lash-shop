@@ -37,11 +37,26 @@ const OrderTracking = () => {
     setSearched(true);
 
     try {
-      const phoneDigits = cleaned.replace(/\D/g, '');
+      const digitsOnly = cleaned.replace(/\D/g, '');
       let results: OrderResult[] = [];
 
-      if (phoneDigits.length >= 8) {
-        const { data } = await supabase.rpc('search_orders_by_phone', { phone_query: phoneDigits.slice(-8) });
+      if (digitsOnly.length === 11) {
+        // Could be CPF or phone — try both
+        const [phoneRes, cpfRes] = await Promise.all([
+          supabase.rpc('search_orders_by_phone', { phone_query: digitsOnly.slice(-8) }),
+          supabase.rpc('search_orders_by_cpf', { cpf_query: digitsOnly }),
+        ]);
+        const phoneData = (phoneRes.data as OrderResult[]) || [];
+        const cpfData = (cpfRes.data as OrderResult[]) || [];
+        // Merge unique results
+        const seen = new Set<string>();
+        results = [...cpfData, ...phoneData].filter(o => {
+          if (seen.has(o.id)) return false;
+          seen.add(o.id);
+          return true;
+        });
+      } else if (digitsOnly.length >= 8) {
+        const { data } = await supabase.rpc('search_orders_by_phone', { phone_query: digitsOnly.slice(-8) });
         results = (data as OrderResult[]) || [];
       } else {
         const { data } = await supabase.rpc('search_orders_by_reference', { ref_query: cleaned });

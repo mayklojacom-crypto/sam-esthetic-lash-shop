@@ -59,6 +59,7 @@ serve(async (req) => {
       customer_phone: customer.phone,
       customer_address: customer.address,
       customer_notes: customer.notes || '',
+      customer_cpf: customer.cpf || '',
       items: items,
       total,
     });
