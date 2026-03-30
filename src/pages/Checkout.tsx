@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, MessageCircle, ShieldCheck, CreditCard, Loader2, Lock, MapPin, User, Phone, FileText, ChevronRight } from 'lucide-react';
+import { ArrowLeft, MessageCircle, ShieldCheck, CreditCard, Loader2, Lock, MapPin, User, Phone, FileText, ChevronRight, Truck, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -29,6 +29,13 @@ const STATES = [
   'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA',
   'PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'
 ];
+
+interface ShippingOption {
+  service: string;
+  code: string;
+  price: number;
+  days: number;
+}
 
 const formatCPF = (value: string) => {
   const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -63,6 +70,14 @@ const Checkout = () => {
   const [loadingMP, setLoadingMP] = useState(false);
   const [loadingCEP, setLoadingCEP] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
+
+  // Shipping state
+  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+  const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
+  const [loadingShipping, setLoadingShipping] = useState(false);
+  const [shippingError, setShippingError] = useState('');
+
+  const finalTotal = totalPrice + (selectedShipping?.price || 0);
 
   if (items.length === 0) {
     navigate('/carrinho');
@@ -112,6 +127,40 @@ const Checkout = () => {
     return true;
   };
 
+  const calculateShipping = async (cep: string) => {
+    const digits = cep.replace(/\D/g, '');
+    if (digits.length !== 8) return;
+
+    setLoadingShipping(true);
+    setShippingError('');
+    setShippingOptions([]);
+    setSelectedShipping(null);
+
+    try {
+      const totalWeight = items.reduce((sum, i) => sum + (i.product.weight || 100) * i.quantity, 0);
+
+      const { data, error } = await supabase.functions.invoke('calculate-shipping', {
+        body: { cepDestino: digits, pesoGramas: totalWeight },
+      });
+
+      if (error) throw error;
+
+      if (data?.options && data.options.length > 0) {
+        setShippingOptions(data.options);
+        // Auto-select cheapest
+        const cheapest = data.options.reduce((a: ShippingOption, b: ShippingOption) => a.price < b.price ? a : b);
+        setSelectedShipping(cheapest);
+      } else {
+        setShippingError(data?.error || 'Não foi possível calcular o frete para este CEP');
+      }
+    } catch (err) {
+      console.error('Shipping error:', err);
+      setShippingError('Erro ao calcular frete. Você pode continuar e combinar o frete depois.');
+    } finally {
+      setLoadingShipping(false);
+    }
+  };
+
   const fetchCEP = async (cep: string) => {
     const digits = cep.replace(/\D/g, '');
     if (digits.length !== 8) return;
@@ -138,6 +187,9 @@ const Checkout = () => {
       }
     } catch { /* ignore */ }
     setLoadingCEP(false);
+
+    // Calculate shipping after CEP lookup
+    calculateShipping(cep);
   };
 
   const buildAddress = () => {
@@ -151,8 +203,15 @@ const Checkout = () => {
     const data = validate();
     if (!data) return;
 
+    const shippingText = selectedShipping
+      ? `*Frete:* ${selectedShipping.service} — R$ ${selectedShipping.price.toFixed(2)} (${selectedShipping.days} dias úteis)`
+      : '*Frete:* A combinar';
+
     const itemsList = items
-      .map(i => `▪️ ${i.quantity}x ${i.product.name} — R$ ${(i.product.price * i.quantity).toFixed(2)}`)
+      .map(i => {
+        const sizeText = i.selectedSize ? ` (${i.selectedSize})` : '';
+        return `▪️ ${i.quantity}x ${i.product.name}${sizeText} — R$ ${(i.product.price * i.quantity).toFixed(2)}`;
+      })
       .join('\n');
 
     const message = `🛍️ *NOVO PEDIDO — Sam Esthetic*\n\n` +
@@ -163,7 +222,8 @@ const Checkout = () => {
       `*Endereço:* ${buildAddress()}\n` +
       `${data.notes ? `*Obs:* ${data.notes}\n` : ''}` +
       `\n*Itens:*\n${itemsList}\n\n` +
-      `💰 *Total: R$ ${totalPrice.toFixed(2)}*`;
+      `${shippingText}\n` +
+      `💰 *Total: R$ ${finalTotal.toFixed(2)}*`;
 
     const encoded = encodeURIComponent(message);
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`, '_blank');
@@ -179,10 +239,19 @@ const Checkout = () => {
     setLoadingMP(true);
     try {
       const mpItems = items.map(i => ({
-        name: i.product.name,
+        name: i.selectedSize ? `${i.product.name} (${i.selectedSize})` : i.product.name,
         quantity: i.quantity,
         price: i.product.price,
       }));
+
+      // Add shipping as an item if selected
+      if (selectedShipping) {
+        mpItems.push({
+          name: `Frete ${selectedShipping.service}`,
+          quantity: 1,
+          price: selectedShipping.price,
+        });
+      }
 
       const { data: response, error } = await supabase.functions.invoke('create-mp-preference', {
         body: {
@@ -376,6 +445,67 @@ const Checkout = () => {
                   </div>
                 </div>
 
+                {/* Shipping Options */}
+                <div className="bg-card rounded-2xl border border-border p-5 md:p-6 shadow-sm animate-fade-in">
+                  <h2 className="text-base font-bold text-foreground flex items-center gap-2 mb-4">
+                    <Truck size={18} className="text-primary" />
+                    Frete
+                  </h2>
+
+                  {loadingShipping && (
+                    <div className="flex items-center gap-3 py-4 justify-center text-muted-foreground">
+                      <Loader2 size={18} className="animate-spin text-primary" />
+                      <span className="text-sm font-medium">Calculando frete...</span>
+                    </div>
+                  )}
+
+                  {!loadingShipping && shippingOptions.length > 0 && (
+                    <div className="space-y-2.5">
+                      {shippingOptions.map(opt => (
+                        <button
+                          key={opt.code}
+                          onClick={() => setSelectedShipping(opt)}
+                          className={`w-full flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all duration-200 text-left ${
+                            selectedShipping?.code === opt.code
+                              ? 'border-primary bg-primary/5'
+                              : 'border-border hover:border-primary/30'
+                          }`}
+                        >
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                            selectedShipping?.code === opt.code ? 'border-primary' : 'border-muted-foreground/30'
+                          }`}>
+                            {selectedShipping?.code === opt.code && (
+                              <div className="w-2.5 h-2.5 rounded-full bg-primary" />
+                            )}
+                          </div>
+                          <Package size={18} className="text-muted-foreground flex-shrink-0" />
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-foreground">{opt.service}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {opt.days} {opt.days === 1 ? 'dia útil' : 'dias úteis'}
+                            </p>
+                          </div>
+                          <span className="text-sm font-bold text-foreground">
+                            R$ {opt.price.toFixed(2)}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {!loadingShipping && shippingOptions.length === 0 && !shippingError && (
+                    <p className="text-sm text-muted-foreground py-2">
+                      Preencha o CEP acima para calcular o frete.
+                    </p>
+                  )}
+
+                  {shippingError && (
+                    <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-3">
+                      <p className="text-xs text-destructive font-medium">{shippingError}</p>
+                    </div>
+                  )}
+                </div>
+
                 {/* Notes */}
                 <div className="bg-card rounded-2xl border border-border p-5 md:p-6 shadow-sm animate-fade-in">
                   <h2 className="text-base font-bold text-foreground flex items-center gap-2 mb-4">
@@ -438,18 +568,22 @@ const Checkout = () => {
               </h3>
               
               <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
-                {items.map(i => (
-                  <div key={i.product.id} className="flex gap-3 items-center">
-                    <img src={i.product.image} alt={i.product.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0 border border-border" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-foreground line-clamp-1">{i.product.name}</p>
-                      <p className="text-xs text-muted-foreground">Qtd: {i.quantity}</p>
+                {items.map(i => {
+                  const key = i.selectedSize ? `${i.product.id}__${i.selectedSize}` : i.product.id;
+                  return (
+                    <div key={key} className="flex gap-3 items-center">
+                      <img src={i.product.image} alt={i.product.name} className="w-12 h-12 rounded-lg object-cover flex-shrink-0 border border-border" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-foreground line-clamp-1">{i.product.name}</p>
+                        {i.selectedSize && <p className="text-[10px] text-muted-foreground">Tam: {i.selectedSize}</p>}
+                        <p className="text-xs text-muted-foreground">Qtd: {i.quantity}</p>
+                      </div>
+                      <span className="text-sm font-bold text-foreground whitespace-nowrap">
+                        R$ {(i.product.price * i.quantity).toFixed(2)}
+                      </span>
                     </div>
-                    <span className="text-sm font-bold text-foreground whitespace-nowrap">
-                      R$ {(i.product.price * i.quantity).toFixed(2)}
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="border-t border-border mt-4 pt-4 space-y-2">
@@ -459,11 +593,18 @@ const Checkout = () => {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Frete</span>
-                  <span className="text-xs text-primary font-medium">A combinar</span>
+                  {selectedShipping ? (
+                    <span className="font-medium text-foreground">
+                      R$ {selectedShipping.price.toFixed(2)}
+                      <span className="text-[10px] text-muted-foreground ml-1">({selectedShipping.service})</span>
+                    </span>
+                  ) : (
+                    <span className="text-xs text-primary font-medium">A calcular</span>
+                  )}
                 </div>
                 <div className="border-t border-border pt-3 flex justify-between items-center">
                   <span className="text-sm font-bold text-foreground">Total</span>
-                  <span className="text-xl font-extrabold text-primary">R$ {totalPrice.toFixed(2)}</span>
+                  <span className="text-xl font-extrabold text-primary">R$ {finalTotal.toFixed(2)}</span>
                 </div>
               </div>
 

@@ -8,6 +8,7 @@ export interface Product {
   description: string;
   featured?: boolean;
   sizes?: string[];
+  weight?: number; // peso em gramas
 }
 
 export const categories = [
@@ -29,6 +30,7 @@ export const products: Product[] = [
     description: 'Cílios Decemars YY Brasileiro — Para um olhar incrível. Cor: Preto. Curvatura: D. Premium Y-Shaped Volume Lashes.',
     featured: true,
     sizes: ['8mm', '10mm', '12mm', '13mm'],
+    weight: 50,
   },
   {
     id: '2',
@@ -39,6 +41,7 @@ export const products: Product[] = [
     description: 'Cílios Fadvan 5D W — Para um olhar incrível. Cor: Preto. Curvatura: D. Espessura 0.07mm. Allergy-Free, Premium quality, light weight lashes.',
     featured: true,
     sizes: ['8mm', '10mm', '12mm', '13mm'],
+    weight: 50,
   },
   {
     id: '3',
@@ -49,6 +52,7 @@ export const products: Product[] = [
     description: 'Cílios Decemars 6D W — Para um olhar incrível. Cor: Preto. Curvatura: D. Efeito: Volume Egípcio (W Shape). Eyelash Extension.',
     featured: true,
     sizes: ['8mm', '10mm', '12mm', '13mm'],
+    weight: 50,
   },
   {
     id: '4',
@@ -58,6 +62,7 @@ export const products: Product[] = [
     category: 'colas',
     description: 'Cola Elite Premium HS16 3ml. Nível de habilidade: Avançado. Anvisa: nº 2.05.754-4. Cor: Preta. Secagem: 1 a 2 segundos. Duração: 6 a 8 semanas. Eyelash Maker Magic Pack.',
     featured: true,
+    weight: 100,
   },
   {
     id: '5',
@@ -66,6 +71,7 @@ export const products: Product[] = [
     image: '/products/pads-gel-50.png',
     category: 'descartaveis',
     description: 'Pads (Patch) em Gel Protetor de Pálpebras. 50 Pares. Gel suave e hidratante. Protetor. Proteção de pálpebras. Sem fiapos. Formato anatômico.',
+    weight: 200,
   },
   {
     id: '6',
@@ -74,6 +80,7 @@ export const products: Product[] = [
     image: '/products/microbrush-glitter.png',
     category: 'descartaveis',
     description: 'Microbrush Glitter para Lash Design. Ponta ultrafina de precisão de cabo. Com Glitter elegante no cabo. Descartável e higiênico. Quantidade: 50 unidades.',
+    weight: 80,
   },
   {
     id: '7',
@@ -82,6 +89,7 @@ export const products: Product[] = [
     image: '/products/fita-micropore.png',
     category: 'ferramentas',
     description: 'Fita Micropore Antialérgica para alongamento de cílios. Ideal para fixação durante o procedimento.',
+    weight: 30,
   },
   {
     id: '8',
@@ -90,6 +98,7 @@ export const products: Product[] = [
     image: '/products/fita-transpore.png',
     category: 'ferramentas',
     description: 'Fita Transpore para Extensão de Cílios. Respirável. Transparente e perfurada. Ideal para isolar e fixar. Fácil de cortar sem tesoura.',
+    weight: 30,
   },
   {
     id: '9',
@@ -98,6 +107,7 @@ export const products: Product[] = [
     image: '/products/anel-batoque.png',
     category: 'descartaveis',
     description: 'Anel Batoque para Colas com Divisória. Higiênico e descartável. Design ergonômico. Divisória prática. Quantidade: 50 unidades.',
+    weight: 100,
   },
   {
     id: '10',
@@ -106,5 +116,6 @@ export const products: Product[] = [
     image: '/products/aplicador-gloss.png',
     category: 'descartaveis',
     description: 'Aplicador Gloss Descartável Glitter. Precisão na aplicação. Ponta de esponja macia. Hastes com glitter elegante. Higiênico e descartável. Quantidade: 50 unidades.',
+    weight: 80,
   },
 ];
