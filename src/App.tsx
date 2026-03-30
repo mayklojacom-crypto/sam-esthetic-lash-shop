@@ -30,6 +30,7 @@ const App = () => (
             <Route path="/carrinho" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/pagamento/status" element={<PaymentStatus />} />
+            <Route path="/obrigado" element={<ThankYou />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <WhatsAppFloat />
