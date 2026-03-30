@@ -17,26 +17,8 @@ const Index = () => {
 
       <div className="max-w-6xl mx-auto">
         {/* Hero Banner */}
-        <div className="mx-4 mt-4 rounded-2xl bg-card border border-border p-6 md:p-10 relative overflow-hidden animate-fade-in shadow-sm">
-          <div className="absolute -top-20 -right-20 w-60 h-60 bg-primary/5 rounded-full blur-3xl" />
-          <div className="relative z-10 md:max-w-xl">
-            <div className="flex items-center gap-1.5 mb-2">
-              <Sparkles size={14} className="text-primary" />
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary">Bem-vinda à</p>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold leading-tight text-foreground">
-              Sam Esthetic
-            </h1>
-            <p className="text-sm md:text-base mt-2 text-muted-foreground leading-relaxed">
-              Materiais para Lash Design com os melhores preços do Brasil! 💜
-            </p>
-            <button
-              onClick={() => navigate('/catalogo')}
-              className="mt-5 bg-primary text-primary-foreground px-7 py-3 rounded-xl text-sm font-bold transition-all duration-200 shadow-sm hover:bg-primary/90 flex items-center gap-2"
-            >
-              Ver Produtos <ArrowRight size={15} />
-            </button>
-          </div>
+        <div className="mx-4 mt-4 rounded-2xl overflow-hidden animate-fade-in shadow-sm cursor-pointer" onClick={() => navigate('/catalogo')}>
+          <img src={heroBanner} alt="Bem-Vinda à SAM Esthetic — Sua Fonte de Materiais Premium para Lash e Estética" className="w-full h-auto object-cover rounded-2xl" />
         </div>
 
         {/* Trust Bar */}
