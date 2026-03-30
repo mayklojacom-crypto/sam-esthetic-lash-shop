@@ -103,6 +103,7 @@ export const products: Product[] = [
   },
   {
     id: '8',
+    slug: 'fita-transpore-extensao-cilios',
     name: 'Fita Transpore para Extensão de Cílios',
     price: 4.00,
     image: '/products/fita-transpore.png',
