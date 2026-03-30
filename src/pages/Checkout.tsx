@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ArrowLeft, MessageCircle, ShieldCheck, CreditCard, Loader2, Lock, MapPin, User, Phone, FileText, ChevronRight, Truck, Package } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, CreditCard, Loader2, Lock, MapPin, User, Phone, FileText, ChevronRight, Truck, Package } from 'lucide-react';
+import whatsappIcon from '@/assets/whatsapp-icon.png';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -551,7 +552,7 @@ const Checkout = () => {
                       onClick={handleWhatsApp}
                       className="w-full bg-[#25D366] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:brightness-110 transition-all text-sm"
                     >
-                      <MessageCircle size={18} />
+                      <img src={whatsappIcon} alt="WhatsApp" className="w-5 h-5" />
                       Enviar Pedido via WhatsApp
                     </button>
                   </div>

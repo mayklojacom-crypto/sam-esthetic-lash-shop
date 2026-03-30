@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Truck, MessageCircle, ArrowRight, ShieldCheck, CreditCard } from 'lucide-react';
+import { Sparkles, Truck, ArrowRight, ShieldCheck, CreditCard } from 'lucide-react';
+import whatsappIcon from '@/assets/whatsapp-icon.png';
 import { products, categories } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 import Header from '@/components/Header';
@@ -96,7 +97,7 @@ const Index = () => {
             </div>
             <div className="bg-card rounded-xl border border-border p-4 shadow-sm flex items-center gap-4">
               <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <MessageCircle size={20} className="text-primary" />
+                <img src={whatsappIcon} alt="WhatsApp" className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-sm font-bold text-foreground">Atendimento via WhatsApp</p>
@@ -119,7 +120,7 @@ const Index = () => {
               <div className="flex flex-col items-center md:items-end gap-4">
                 <div className="flex items-center gap-4 text-muted-foreground">
                   <a href="https://wa.me/5562998755213" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
-                    <MessageCircle size={18} />
+                    <img src={whatsappIcon} alt="WhatsApp" className="w-5 h-5" />
                   </a>
                   <a href="https://www.instagram.com/sam_esthetic_" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
