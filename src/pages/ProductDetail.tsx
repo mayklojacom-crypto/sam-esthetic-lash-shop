@@ -12,6 +12,7 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
 
   const product = products.find(p => p.id === id);
 
@@ -33,7 +34,13 @@ const ProductDetail = () => {
     : null;
 
   const handleAdd = () => {
-    for (let i = 0; i < qty; i++) addItem(product);
+    if (product.sizes && !selectedSize) {
+      toast.error('Selecione o tamanho antes de adicionar! 📏', {
+        duration: 2000,
+      });
+      return;
+    }
+    for (let i = 0; i < qty; i++) addItem(product, selectedSize || undefined);
     toast.success(`${qty}x adicionado ao carrinho! 🛍️`, {
       duration: 1500,
       style: { background: 'hsl(272 60% 45%)', color: '#fff', border: 'none' },
@@ -110,6 +117,28 @@ const ProductDetail = () => {
               <div className="h-px bg-border/60 my-4" />
 
               <p className="text-sm text-muted-foreground leading-relaxed">{product.description}</p>
+
+              {/* Size selector */}
+              {product.sizes && product.sizes.length > 0 && (
+                <div className="mt-5">
+                  <span className="text-sm font-semibold text-foreground">Tamanho</span>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {product.sizes.map(size => (
+                      <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        className={`px-4 py-2.5 rounded-xl text-sm font-bold border-2 transition-all duration-200 ${
+                          selectedSize === size
+                            ? 'border-primary bg-primary text-primary-foreground shadow-md'
+                            : 'border-border bg-secondary text-foreground hover:border-primary/50'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Quantity */}
               <div className="flex items-center justify-between mt-6">
