@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Truck, MessageCircle, ArrowRight, ShieldCheck, CreditCard } from 'lucide-react';
+import { Sparkles, Truck, ArrowRight, ShieldCheck, CreditCard } from 'lucide-react';
+import whatsappIcon from '@/assets/whatsapp-icon.png';
 import { products, categories } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 import Header from '@/components/Header';
