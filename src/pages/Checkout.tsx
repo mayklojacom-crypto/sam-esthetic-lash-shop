@@ -129,9 +129,14 @@ const Checkout = () => {
     return true;
   };
 
+  const LOCAL_CITIES = ['goiânia', 'goiania', 'aparecida de goiânia', 'aparecida de goiania'];
+
   const calculateShipping = async (cep: string) => {
     const digits = cep.replace(/\D/g, '');
     if (digits.length !== 8) return;
+
+    // Don't calculate if local delivery was detected
+    if (isLocalDelivery) return;
 
     setLoadingShipping(true);
     setShippingError('');
@@ -149,7 +154,6 @@ const Checkout = () => {
 
       if (data?.options && data.options.length > 0) {
         setShippingOptions(data.options);
-        // Auto-select cheapest
         const cheapest = data.options.reduce((a: ShippingOption, b: ShippingOption) => a.price < b.price ? a : b);
         setSelectedShipping(cheapest);
       } else {
@@ -167,6 +171,7 @@ const Checkout = () => {
     const digits = cep.replace(/\D/g, '');
     if (digits.length !== 8) return;
     setLoadingCEP(true);
+    setIsLocalDelivery(false);
     try {
       const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
       const data = await res.json();
@@ -186,11 +191,24 @@ const Checkout = () => {
           delete cleaned.state;
           return cleaned;
         });
+
+        // Check if local delivery region
+        const city = (data.localidade || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const isLocal = LOCAL_CITIES.some(c => c.normalize('NFD').replace(/[\u0300-\u036f]/g, '') === city);
+        
+        if (isLocal && data.uf === 'GO') {
+          setIsLocalDelivery(true);
+          setShippingOptions([]);
+          setSelectedShipping(null);
+          setShippingError('');
+          setLoadingCEP(false);
+          return;
+        }
       }
     } catch { /* ignore */ }
     setLoadingCEP(false);
 
-    // Calculate shipping after CEP lookup
+    // Calculate shipping after CEP lookup (only for non-local)
     calculateShipping(cep);
   };
 
