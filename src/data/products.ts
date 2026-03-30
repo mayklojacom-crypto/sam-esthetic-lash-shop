@@ -7,6 +7,7 @@ export interface Product {
   category: string;
   description: string;
   featured?: boolean;
+  sizes?: string[];
 }
 
 export const categories = [
