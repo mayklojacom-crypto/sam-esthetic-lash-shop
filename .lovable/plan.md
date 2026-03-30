@@ -1,49 +1,70 @@
 
 
-# Sam Esthetic — E-commerce Mobile-First
+# Integração Mercado Pago + PDF do Pedido via WhatsApp
 
-Loja 100% independente construída diretamente no Lovable, sem dependência de Shopify ou plataformas externas.
+## Pré-requisito
 
-## Visão Geral
+Antes de implementar, precisamos **ativar o Lovable Cloud/Supabase** no projeto. Sem isso, não é possível criar Edge Functions para processar o pagamento de forma segura. O Access Token do Mercado Pago **nunca** pode ficar exposto no frontend.
 
-E-commerce mobile-first para venda de produtos de cílios e materiais para Lash Design, com catálogo de produtos, carrinho de compras, e checkout via WhatsApp (forma mais prática para começar sem gateway de pagamento).
+## Arquitetura
 
-## Estrutura de Páginas
+```text
+[Cliente preenche dados] → [Escolhe: Mercado Pago ou WhatsApp]
+         ↓ (Mercado Pago)
+[Edge Function: create-mp-preference]
+         ↓
+[API Mercado Pago → gera link de pagamento]
+         ↓
+[Cliente paga (Pix/Cartão/Boleto)]
+         ↓
+[Retorna à loja → /pagamento/status]
+         ↓
+[Edge Function: generate-order-pdf]
+         ↓
+[Gera PDF do pedido + Envia link do PDF via WhatsApp para você]
+```
 
-1. **Home** — Banner principal, categorias em destaque, produtos populares
-2. **Catálogo** — Grid de produtos com filtro por categoria
-3. **Produto** — Detalhes, fotos, preço, botão adicionar ao carrinho
-4. **Carrinho** — Lista de itens, quantidades, total
-5. **Checkout** — Formulário de dados + envio do pedido via WhatsApp
+## Etapas
 
-## Design
+### 1. Ativar Lovable Cloud
+- Habilitar backend para ter Edge Functions e armazenamento seguro de secrets.
 
-- Paleta baseada na identidade visual da marca (rosa/roxo conforme logo enviado)
-- Layout mobile-first (otimizado para tela ~592px)
-- Navegação inferior fixa (Home, Catálogo, Carrinho)
-- Cards de produto com imagem, nome e preço
+### 2. Armazenar credenciais como secrets
+- `MP_ACCESS_TOKEN` — Access Token fornecido
+- `MP_PUBLIC_KEY` — Public Key (pode ficar no frontend para SDK)
 
-## Funcionalidades
+### 3. Edge Function `create-mp-preference`
+- Recebe itens do carrinho + dados do cliente
+- Valida com Zod
+- Chama `POST https://api.mercadopago.com/checkout/preferences`
+- Configura `back_urls` para página de retorno da loja
+- Retorna `init_point` (URL de pagamento)
 
-- **Catálogo estático** — produtos definidos em arquivo de dados (sem backend inicialmente)
-- **Carrinho** — estado local com Context API, persistido em localStorage
-- **Busca** — filtro por nome de produto
-- **Categorias** — Cílios, Colas, Ferramentas, Kits
-- **Checkout WhatsApp** — monta mensagem com resumo do pedido e abre WhatsApp
+### 4. Edge Function `generate-order-pdf`
+- Recebe dados do pedido (itens, cliente, payment_id)
+- Gera PDF profissional com: logo, dados do cliente, lista de itens, total, status do pagamento
+- Salva o PDF no Supabase Storage
+- Envia mensagem no WhatsApp (5562998755213) com link do PDF usando a API do WhatsApp
 
-## Detalhes Técnicos
+### 5. Atualizar Checkout
+- Dois botões: "Pagar com Mercado Pago" e "Enviar via WhatsApp"
+- Mercado Pago: chama edge function → redireciona para pagamento
+- WhatsApp: mantém o fluxo atual
 
-- React + TypeScript + Tailwind (stack existente)
-- Context API para estado do carrinho
-- React Router para navegação entre páginas
-- Dados de produtos em `src/data/products.ts`
-- Componentes: `Header`, `BottomNav`, `ProductCard`, `CartItem`, `CategoryFilter`
-- Páginas: `Index`, `Catalog`, `ProductDetail`, `Cart`, `Checkout`
+### 6. Nova página `/pagamento/status`
+- Lê query params retornados pelo Mercado Pago (`status`, `payment_id`)
+- Se aprovado: chama edge function para gerar PDF e enviar no WhatsApp
+- Mostra feedback visual (sucesso/pendente/falha)
+- Limpa carrinho em caso de sucesso
 
-## Evolução Futura (não inclusa agora)
+### 7. Nova rota no App.tsx
+- Adicionar `/pagamento/status` → componente `PaymentStatus`
 
-- Backend com Supabase para gestão de produtos e pedidos
-- Autenticação de clientes
-- Integração com gateway de pagamento (Stripe/Mercado Pago)
-- Painel admin para gerenciar estoque
+## Credenciais recebidas
+- Public Key: `APP_USR-b31e9fe3-...` (vai no frontend para SDK)
+- Access Token: `APP_USR-487365...` (secret, apenas na Edge Function)
+- Client ID e Client Secret: backup para webhook futuro
+
+## Resultado final
+Após o cliente pagar, você recebe no seu WhatsApp um PDF profissional com todos os detalhes do pedido para dar sequência.
 

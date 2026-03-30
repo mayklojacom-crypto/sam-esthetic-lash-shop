@@ -1,4 +1,4 @@
-import { ShoppingBag, Heart } from 'lucide-react';
+import { ShoppingBag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Product } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
@@ -16,10 +16,7 @@ const ProductCard = ({ product, index = 0 }: Props) => {
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
     addItem(product);
-    toast.success('Adicionado ao carrinho! 🛍️', {
-      duration: 1500,
-      style: { background: 'hsl(272 60% 45%)', color: '#fff', border: 'none' },
-    });
+    toast.success('Adicionado ao carrinho! 🛍️', { duration: 1500 });
   };
 
   const discount = product.originalPrice
@@ -29,8 +26,8 @@ const ProductCard = ({ product, index = 0 }: Props) => {
   return (
     <div
       onClick={() => navigate(`/produto/${product.id}`)}
-      className={`group bg-card rounded-2xl border border-border/60 overflow-hidden shadow-card hover:shadow-elevated transition-all duration-300 cursor-pointer active:scale-[0.97] opacity-0 animate-fade-in-up`}
-      style={{ animationDelay: `${index * 0.08}s` }}
+      className="group bg-card rounded-xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer active:scale-[0.98] opacity-0 animate-fade-in-up"
+      style={{ animationDelay: `${index * 0.06}s` }}
     >
       <div className="relative aspect-square bg-muted overflow-hidden">
         <img
@@ -39,17 +36,14 @@ const ProductCard = ({ product, index = 0 }: Props) => {
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
         />
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
         {discount && (
-          <span className="absolute top-2.5 left-2.5 gradient-accent text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md animate-scale-in">
+          <span className="absolute top-2 left-2 bg-accent text-accent-foreground text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-sm">
             -{discount}%
           </span>
         )}
       </div>
-      <div className="p-3.5">
-        <h3 className="text-[13px] font-semibold text-foreground line-clamp-2 leading-snug mb-1">
+      <div className="p-3">
+        <h3 className="text-[13px] font-semibold text-foreground line-clamp-2 leading-snug mb-1.5">
           {product.name}
         </h3>
         {product.originalPrice && (
@@ -58,21 +52,21 @@ const ProductCard = ({ product, index = 0 }: Props) => {
           </span>
         )}
         <div className="flex items-end justify-between mt-1">
-          <div className="flex items-baseline gap-1">
+          <div className="flex items-baseline gap-0.5">
             <span className="text-[11px] font-medium text-primary">R$</span>
-            <span className="text-xl font-extrabold text-foreground leading-none">
+            <span className="text-lg font-extrabold text-foreground leading-none">
               {product.price.toFixed(2).split('.')[0]}
             </span>
-            <span className="text-xs font-bold text-foreground/70">
+            <span className="text-xs font-bold text-muted-foreground">
               ,{product.price.toFixed(2).split('.')[1]}
             </span>
           </div>
           <button
             onClick={handleAdd}
-            className="bg-primary text-primary-foreground p-2.5 rounded-xl shadow-sm hover:bg-primary/90 hover:shadow-md transition-all duration-200 active:scale-90 ring-1 ring-primary/20"
+            className="bg-primary text-primary-foreground p-2 rounded-lg shadow-sm hover:bg-primary/90 transition-all duration-200 active:scale-90"
             aria-label="Adicionar ao carrinho"
           >
-            <ShoppingBag size={15} strokeWidth={2.5} />
+            <ShoppingBag size={14} strokeWidth={2.5} />
           </button>
         </div>
       </div>

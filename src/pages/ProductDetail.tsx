@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { products } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
+import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 
 const ProductDetail = () => {
@@ -40,88 +41,111 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-28">
-      {/* Image */}
-      <div className="relative animate-fade-in">
-        <div className="aspect-square bg-muted overflow-hidden">
-          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-        </div>
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute top-4 left-4 glass p-2.5 rounded-full shadow-elevated"
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <button
-          className="absolute top-4 right-4 glass p-2.5 rounded-full shadow-elevated"
-          onClick={() => {
-            navigator.share?.({ title: product.name, url: window.location.href }).catch(() => {});
-          }}
-        >
-          <Share2 size={20} />
-        </button>
-        {discount && (
-          <span className="absolute bottom-6 left-4 gradient-accent text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-md">
-            -{discount}% OFF
-          </span>
-        )}
-      </div>
+    <div className="min-h-screen bg-background pb-28 md:pb-8">
+      <Header />
 
-      {/* Info */}
-      <div className="px-4 -mt-4 relative z-10 animate-fade-in-up">
-        <div className="bg-card rounded-3xl border border-border/60 shadow-elevated p-5">
-          <span className="text-[11px] font-bold text-primary uppercase tracking-widest">
-            {product.category}
-          </span>
-          <h1 className="text-xl font-extrabold text-foreground mt-1.5 leading-tight">{product.name}</h1>
-
-          <div className="mt-4">
-            {product.originalPrice && (
-              <span className="text-xs text-muted-foreground line-through">
-                R$ {product.originalPrice.toFixed(2)}
+      <div className="max-w-5xl mx-auto">
+        {/* Desktop: side by side. Mobile: stacked */}
+        <div className="md:grid md:grid-cols-2 md:gap-8 md:px-4 md:mt-6">
+          {/* Image */}
+          <div className="relative animate-fade-in">
+            <div className="aspect-square bg-muted overflow-hidden md:rounded-3xl">
+              <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent md:hidden" />
+            <button
+              onClick={() => navigate(-1)}
+              className="absolute top-4 left-4 glass p-2.5 rounded-full shadow-elevated md:hidden"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <button
+              className="absolute top-4 right-4 glass p-2.5 rounded-full shadow-elevated md:hidden"
+              onClick={() => {
+                navigator.share?.({ title: product.name, url: window.location.href }).catch(() => {});
+              }}
+            >
+              <Share2 size={20} />
+            </button>
+            {discount && (
+              <span className="absolute bottom-6 left-4 md:top-4 md:left-4 md:bottom-auto gradient-accent text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-md">
+                -{discount}% OFF
               </span>
             )}
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-sm font-semibold text-primary">R$</span>
-              <span className="text-4xl font-extrabold text-foreground leading-none tracking-tight">
-                {product.price.toFixed(2).split('.')[0]}
-              </span>
-              <span className="text-lg font-bold text-foreground/70">
-                ,{product.price.toFixed(2).split('.')[1]}
-              </span>
-            </div>
           </div>
 
-          <div className="h-px bg-border/60 my-4" />
+          {/* Info */}
+          <div className="px-4 -mt-4 relative z-10 animate-fade-in-up md:mt-0 md:px-0">
+            {/* Desktop back button */}
+            <button
+              onClick={() => navigate(-1)}
+              className="hidden md:flex items-center gap-1.5 text-sm text-muted-foreground mb-4 font-medium hover:text-foreground transition-colors"
+            >
+              <ArrowLeft size={16} /> Voltar
+            </button>
 
-          <p className="text-sm text-muted-foreground leading-relaxed">{product.description}</p>
+            <div className="bg-card rounded-3xl border border-border/60 shadow-elevated p-5">
+              <span className="text-[11px] font-bold text-primary uppercase tracking-widest">
+                {product.category}
+              </span>
+              <h1 className="text-xl md:text-2xl font-extrabold text-foreground mt-1.5 leading-tight">{product.name}</h1>
 
-          {/* Quantity */}
-          <div className="flex items-center justify-between mt-6">
-            <span className="text-sm font-semibold text-foreground">Quantidade</span>
-            <div className="flex items-center gap-1 bg-secondary rounded-full p-1">
+              <div className="mt-4">
+                {product.originalPrice && (
+                  <span className="text-xs text-muted-foreground line-through">
+                    R$ {product.originalPrice.toFixed(2)}
+                  </span>
+                )}
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-sm font-semibold text-primary">R$</span>
+                  <span className="text-4xl font-extrabold text-foreground leading-none tracking-tight">
+                    {product.price.toFixed(2).split('.')[0]}
+                  </span>
+                  <span className="text-lg font-bold text-foreground/70">
+                    ,{product.price.toFixed(2).split('.')[1]}
+                  </span>
+                </div>
+              </div>
+
+              <div className="h-px bg-border/60 my-4" />
+
+              <p className="text-sm text-muted-foreground leading-relaxed">{product.description}</p>
+
+              {/* Quantity */}
+              <div className="flex items-center justify-between mt-6">
+                <span className="text-sm font-semibold text-foreground">Quantidade</span>
+                <div className="flex items-center gap-1 bg-secondary rounded-full p-1">
+                  <button
+                    onClick={() => setQty(q => Math.max(1, q - 1))}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-muted transition-all active:scale-90"
+                  >
+                    <Minus size={15} strokeWidth={2.5} />
+                  </button>
+                  <span className="text-sm font-bold w-8 text-center">{qty}</span>
+                  <button
+                    onClick={() => setQty(q => q + 1)}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-muted transition-all active:scale-90"
+                  >
+                    <Plus size={15} strokeWidth={2.5} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Desktop add button */}
               <button
-                onClick={() => setQty(q => Math.max(1, q - 1))}
-                className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-muted transition-all active:scale-90"
+                onClick={handleAdd}
+                className="hidden md:flex w-full mt-6 bg-primary text-primary-foreground py-4 rounded-2xl font-bold items-center justify-center gap-2.5 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg hover:bg-primary/90 text-[15px] tracking-wide"
               >
-                <Minus size={15} strokeWidth={2.5} />
-              </button>
-              <span className="text-sm font-bold w-8 text-center">{qty}</span>
-              <button
-                onClick={() => setQty(q => q + 1)}
-                className="w-9 h-9 rounded-lg flex items-center justify-center hover:bg-muted transition-all active:scale-90"
-              >
-                <Plus size={15} strokeWidth={2.5} />
+                <ShoppingBag size={19} strokeWidth={2.5} />
+                Adicionar — R$ {(product.price * qty).toFixed(2)}
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Add Button */}
-      <div className="fixed bottom-[68px] left-0 right-0 p-4 glass-strong border-t border-border/50">
+      {/* Mobile Add Button */}
+      <div className="fixed bottom-[68px] left-0 right-0 p-4 glass-strong border-t border-border/50 md:hidden">
         <button
           onClick={handleAdd}
           className="w-full bg-primary text-primary-foreground py-4 rounded-2xl font-bold flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg hover:bg-primary/90 text-[15px] tracking-wide"
