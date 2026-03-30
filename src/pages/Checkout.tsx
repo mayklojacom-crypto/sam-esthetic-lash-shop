@@ -225,10 +225,8 @@ const Checkout = () => {
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
   };
 
-  const InputField = ({ field, label, placeholder, icon, type = 'text', className = '', disabled = false }: {
-    field: string; label: string; placeholder: string; icon: React.ReactNode; type?: string; className?: string; disabled?: boolean;
-  }) => (
-    <div className={className}>
+  const renderInput = (field: string, label: string, placeholder: string, icon: React.ReactNode, type = 'text', className = '', disabled = false) => (
+    <div className={className} key={field}>
       <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">
         {label}
       </label>
@@ -284,16 +282,14 @@ const Checkout = () => {
                 </h2>
 
                 <div className="space-y-4">
-                  <InputField field="name" label="Nome completo" placeholder="Seu nome completo" icon={<User size={16} />} />
+                  {renderInput('name', 'Nome completo', 'Seu nome completo', <User size={16} />)}
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <InputField field="cpf" label="CPF" placeholder="000.000.000-00" icon={<FileText size={16} />} />
-                    <InputField field="phone" label="Telefone / WhatsApp" placeholder="(00) 00000-0000" icon={<Phone size={16} />} />
+                    {renderInput('cpf', 'CPF', '000.000.000-00', <FileText size={16} />)}
+                    {renderInput('phone', 'Telefone / WhatsApp', '(00) 00000-0000', <Phone size={16} />)}
                   </div>
 
-                  <InputField field="email" label="E-mail" placeholder="seu@email.com" icon={
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                  } type="email" />
+                  {renderInput('email', 'E-mail', 'seu@email.com', <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>, 'email')}
                 </div>
 
                 <button
@@ -337,7 +333,7 @@ const Checkout = () => {
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4">
                       <div className="relative">
-                        <InputField field="cep" label="CEP" placeholder="00000-000" icon={<MapPin size={16} />} />
+                        {renderInput('cep', 'CEP', '00000-000', <MapPin size={16} />)}
                         {loadingCEP && (
                           <Loader2 size={14} className="absolute right-3 top-9 animate-spin text-primary" />
                         )}
@@ -350,21 +346,17 @@ const Checkout = () => {
                       </div>
                     </div>
 
-                    <InputField field="street" label="Rua / Avenida" placeholder="Nome da rua" icon={<MapPin size={16} />} disabled={loadingCEP} />
+                    {renderInput('street', 'Rua / Avenida', 'Nome da rua', <MapPin size={16} />, 'text', '', loadingCEP)}
 
                     <div className="grid grid-cols-2 gap-4">
-                      <InputField field="number" label="Número" placeholder="Nº" icon={
-                        <span className="text-xs font-bold">Nº</span>
-                      } />
-                      <InputField field="complement" label="Complemento" placeholder="Apto, bloco..." icon={
-                        <span className="text-xs">🏠</span>
-                      } />
+                      {renderInput('number', 'Número', 'Nº', <span className="text-xs font-bold">Nº</span>)}
+                      {renderInput('complement', 'Complemento', 'Apto, bloco...', <span className="text-xs">🏠</span>)}
                     </div>
 
-                    <InputField field="neighborhood" label="Bairro" placeholder="Seu bairro" icon={<MapPin size={16} />} disabled={loadingCEP} />
+                    {renderInput('neighborhood', 'Bairro', 'Seu bairro', <MapPin size={16} />, 'text', '', loadingCEP)}
 
                     <div className="grid grid-cols-[1fr_100px] gap-4">
-                      <InputField field="city" label="Cidade" placeholder="Sua cidade" icon={<MapPin size={16} />} disabled={loadingCEP} />
+                      {renderInput('city', 'Cidade', 'Sua cidade', <MapPin size={16} />, 'text', '', loadingCEP)}
                       <div>
                         <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">
                           UF
