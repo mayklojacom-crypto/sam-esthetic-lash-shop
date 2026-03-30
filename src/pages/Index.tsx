@@ -1,5 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Truck, MessageCircle, ArrowRight, ShieldCheck, CreditCard } from 'lucide-react';
+import { Truck, ArrowRight, ShieldCheck, CreditCard } from 'lucide-react';
+import whatsappIcon from '@/assets/whatsapp-icon.png';
+import heroBanner from '@/assets/hero-banner.jpg';
 import { products, categories } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 import Header from '@/components/Header';
@@ -15,26 +17,8 @@ const Index = () => {
 
       <div className="max-w-6xl mx-auto">
         {/* Hero Banner */}
-        <div className="mx-4 mt-4 rounded-2xl bg-card border border-border p-6 md:p-10 relative overflow-hidden animate-fade-in shadow-sm">
-          <div className="absolute -top-20 -right-20 w-60 h-60 bg-primary/5 rounded-full blur-3xl" />
-          <div className="relative z-10 md:max-w-xl">
-            <div className="flex items-center gap-1.5 mb-2">
-              <Sparkles size={14} className="text-primary" />
-              <p className="text-xs font-semibold uppercase tracking-widest text-primary">Bem-vinda à</p>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold leading-tight text-foreground">
-              Sam Esthetic
-            </h1>
-            <p className="text-sm md:text-base mt-2 text-muted-foreground leading-relaxed">
-              Materiais para Lash Design com os melhores preços do Brasil! 💜
-            </p>
-            <button
-              onClick={() => navigate('/catalogo')}
-              className="mt-5 bg-primary text-primary-foreground px-7 py-3 rounded-xl text-sm font-bold transition-all duration-200 shadow-sm hover:bg-primary/90 flex items-center gap-2"
-            >
-              Ver Produtos <ArrowRight size={15} />
-            </button>
-          </div>
+        <div className="mx-4 mt-4 rounded-2xl overflow-hidden animate-fade-in shadow-sm cursor-pointer" onClick={() => navigate('/catalogo')}>
+          <img src={heroBanner} alt="Bem-Vinda à SAM Esthetic — Sua Fonte de Materiais Premium para Lash e Estética" className="w-full h-auto object-cover rounded-2xl" />
         </div>
 
         {/* Trust Bar */}
@@ -96,7 +80,7 @@ const Index = () => {
             </div>
             <div className="bg-card rounded-xl border border-border p-4 shadow-sm flex items-center gap-4">
               <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <MessageCircle size={20} className="text-primary" />
+                <img src={whatsappIcon} alt="WhatsApp" className="w-5 h-5" />
               </div>
               <div>
                 <p className="text-sm font-bold text-foreground">Atendimento via WhatsApp</p>
@@ -119,9 +103,9 @@ const Index = () => {
               <div className="flex flex-col items-center md:items-end gap-4">
                 <div className="flex items-center gap-4 text-muted-foreground">
                   <a href="https://wa.me/5562998755213" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
-                    <MessageCircle size={18} />
+                    <img src={whatsappIcon} alt="WhatsApp" className="w-5 h-5" />
                   </a>
-                  <a href="https://www.instagram.com/sam_esthetic_" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                  <a href="https://www.instagram.com/sam_estheticoficial" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
                   </a>
                 </div>
