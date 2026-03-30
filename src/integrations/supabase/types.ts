@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          password_hash: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          password_hash: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          password_hash?: string
+        }
+        Relationships: []
+      }
+      daily_visits: {
+        Row: {
+          id: string
+          visit_count: number
+          visit_date: string
+        }
+        Insert: {
+          id?: string
+          visit_count?: number
+          visit_date?: string
+        }
+        Update: {
+          id?: string
+          visit_count?: number
+          visit_date?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string
@@ -25,10 +64,12 @@ export type Database = {
           external_reference: string
           id: string
           items: Json
+          order_status: Database["public"]["Enums"]["order_status_enum"] | null
           payment_id: string | null
           payment_status: string | null
           pdf_url: string | null
           total: number
+          tracking_code: string | null
           updated_at: string
         }
         Insert: {
@@ -41,10 +82,12 @@ export type Database = {
           external_reference: string
           id?: string
           items: Json
+          order_status?: Database["public"]["Enums"]["order_status_enum"] | null
           payment_id?: string | null
           payment_status?: string | null
           pdf_url?: string | null
           total?: number
+          tracking_code?: string | null
           updated_at?: string
         }
         Update: {
@@ -57,10 +100,12 @@ export type Database = {
           external_reference?: string
           id?: string
           items?: Json
+          order_status?: Database["public"]["Enums"]["order_status_enum"] | null
           payment_id?: string | null
           payment_status?: string | null
           pdf_url?: string | null
           total?: number
+          tracking_code?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -108,7 +153,12 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      order_status_enum:
+        | "novo"
+        | "processando"
+        | "enviado"
+        | "entregue"
+        | "cancelado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -235,6 +285,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      order_status_enum: [
+        "novo",
+        "processando",
+        "enviado",
+        "entregue",
+        "cancelado",
+      ],
+    },
   },
 } as const
