@@ -2,7 +2,6 @@ name: Sync from source repo
 
 on:
   schedule:
-    # Sincroniza a cada 6 horas
     - cron: '0 */6 * * *'
   workflow_dispatch:
 
@@ -16,19 +15,16 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Sync from source repository
+      - name: Sync repository
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
           
-          # Adiciona o repositório de origem como remote
           git remote add upstream https://github.com/wodnutritiongyn-cyber/sam-esthetic-lash-shop.git || true
-          
-          # Busca as mudanças do repositório de origem
           git fetch upstream
           
-          # Faz merge das mudanças
-          git merge upstream/main --allow-unrelated-histories || git merge upstream/main
+          # Identifica a branch principal
+          MAIN_BRANCH=$(git rev-parse --abbrev-ref HEAD)
           
-          # Envia para o repositório atual
-          git push origin main
+          git merge upstream/$MAIN_BRANCH --allow-unrelated-histories -m "Sync: $(date)"
+          git push origin $MAIN_BRANCH
