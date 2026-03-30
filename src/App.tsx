@@ -31,6 +31,7 @@ const App = () => (
             <Route path="/pagamento/status" element={<PaymentStatus />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <WhatsAppFloat />
         </BrowserRouter>
       </CartProvider>
     </TooltipProvider>
