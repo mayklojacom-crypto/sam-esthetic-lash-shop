@@ -552,7 +552,7 @@ const Checkout = () => {
                       onClick={handleWhatsApp}
                       className="w-full bg-[#25D366] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:brightness-110 transition-all text-sm"
                     >
-                      <MessageCircle size={18} />
+                      <img src={whatsappIcon} alt="WhatsApp" className="w-5 h-5" />
                       Enviar Pedido via WhatsApp
                     </button>
                   </div>
