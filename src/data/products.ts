@@ -93,6 +93,7 @@ export const products: Product[] = [
   },
   {
     id: '7',
+    slug: 'fita-micropore-antialergica',
     name: 'Fita Micropore Antialérgica',
     price: 3.00,
     image: '/products/fita-micropore.png',
