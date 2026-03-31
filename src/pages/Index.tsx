@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Truck, ArrowRight, ShieldCheck, CreditCard } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import whatsappIcon from '@/assets/whatsapp-icon.png';
 import heroBanner from '@/assets/hero-banner.jpg';
 import { products, categories } from '@/data/products';
@@ -10,6 +12,13 @@ import BottomNav from '@/components/BottomNav';
 const Index = () => {
   const navigate = useNavigate();
   const featured = products.filter(p => p.featured);
+
+  // Track visit once per session
+  useEffect(() => {
+    if (sessionStorage.getItem('visit_tracked')) return;
+    sessionStorage.setItem('visit_tracked', '1');
+    supabase.functions.invoke('track-visit').catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">

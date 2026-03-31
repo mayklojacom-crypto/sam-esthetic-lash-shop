@@ -1,4 +1,4 @@
-import { Home, Search, ShoppingBag } from 'lucide-react';
+import { Home, Search, ShoppingBag, Package } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 
@@ -10,6 +10,7 @@ const BottomNav = () => {
   const tabs = [
     { path: '/', icon: Home, label: 'Início' },
     { path: '/catalogo', icon: Search, label: 'Catálogo' },
+    { path: '/meu-pedido', icon: Package, label: 'Pedido' },
     { path: '/carrinho', icon: ShoppingBag, label: 'Carrinho' },
   ];
 
