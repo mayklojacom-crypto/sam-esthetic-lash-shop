@@ -20,6 +20,7 @@ import AdminLayout from "./components/admin/AdminLayout.tsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
 import AdminOrders from "./pages/admin/AdminOrders.tsx";
 import AdminOrderDetail from "./pages/admin/AdminOrderDetail.tsx";
+import AdminProducts from "./pages/admin/AdminProducts.tsx";
 
 const queryClient = new QueryClient();
 
