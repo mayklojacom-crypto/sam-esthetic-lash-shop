@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ArrowLeft, ShieldCheck, CreditCard, Loader2, Lock, MapPin, User, Phone, FileText, ChevronRight, Truck, Package } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, ShieldCheck, CreditCard, Loader2, Lock, MapPin, User, Phone, FileText, ChevronRight, Truck, Package, Copy, Check, QrCode } from 'lucide-react';
 import whatsappIcon from '@/assets/whatsapp-icon.png';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
@@ -79,7 +79,69 @@ const Checkout = () => {
   const [shippingError, setShippingError] = useState('');
   const [isLocalDelivery, setIsLocalDelivery] = useState(false);
 
+  // Pix payment state
+  const [pixData, setPixData] = useState<{
+    payment_id: number;
+    qr_code_base64: string;
+    qr_code: string;
+    external_reference: string;
+  } | null>(null);
+  const [pixCopied, setPixCopied] = useState(false);
+  const [pixStatus, setPixStatus] = useState<'pending' | 'approved' | 'rejected'>('pending');
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollingStartRef = useRef<number>(0);
+
   const finalTotal = totalPrice + (selectedShipping?.price || 0);
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, []);
+
+  // Start polling when pixData is set
+  useEffect(() => {
+    if (!pixData || pixStatus !== 'pending') return;
+
+    pollingStartRef.current = Date.now();
+    pollingRef.current = setInterval(async () => {
+      // Stop after 30 minutes
+      if (Date.now() - pollingStartRef.current > 30 * 60 * 1000) {
+        if (pollingRef.current) clearInterval(pollingRef.current);
+        toast.error('Tempo expirado. Gere um novo pagamento.');
+        setPixData(null);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.functions.invoke('check-payment-status', {
+          body: { payment_id: pixData.payment_id },
+        });
+
+        if (error) return;
+
+        if (data?.status === 'approved') {
+          setPixStatus('approved');
+          if (pollingRef.current) clearInterval(pollingRef.current);
+          clearCart();
+          toast.success('Pagamento aprovado! 🎉');
+          navigate(`/obrigado?pedido=${pixData.external_reference}`);
+        } else if (data?.status === 'rejected' || data?.status === 'cancelled') {
+          setPixStatus('rejected');
+          if (pollingRef.current) clearInterval(pollingRef.current);
+          toast.error('Pagamento recusado. Tente novamente.');
+          setPixData(null);
+        }
+      } catch {
+        // ignore polling errors
+      }
+    }, 5000);
+
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, [pixData, pixStatus, clearCart, navigate]);
 
   if (items.length === 0) {
     navigate('/carrinho');
@@ -254,7 +316,7 @@ const Checkout = () => {
     navigate('/');
   };
 
-  const handleMercadoPago = async () => {
+  const handlePixPayment = async () => {
     const data = validate();
     if (!data) return;
 
@@ -275,7 +337,7 @@ const Checkout = () => {
         });
       }
 
-      const { data: response, error } = await supabase.functions.invoke('create-mp-preference', {
+      const { data: response, error } = await supabase.functions.invoke('create-pix-payment', {
         body: {
           items: mpItems,
           customer: {
@@ -286,22 +348,37 @@ const Checkout = () => {
             address: buildAddress(),
             notes: data.notes || '',
           },
-          siteUrl: 'https://samestheticlash.shop',
         },
       });
 
       if (error) throw error;
-      if (response?.init_point) {
-        window.location.href = response.init_point;
+
+      if (response?.qr_code_base64 && response?.qr_code) {
+        setPixData({
+          payment_id: response.payment_id,
+          qr_code_base64: response.qr_code_base64,
+          qr_code: response.qr_code,
+          external_reference: response.external_reference,
+        });
+        setPixStatus('pending');
+        toast.success('QR Code Pix gerado! Escaneie para pagar.');
       } else {
-        throw new Error('No payment URL returned');
+        throw new Error('QR Code não retornado');
       }
     } catch (err) {
-      console.error('Mercado Pago error:', err);
-      toast.error('Erro ao processar pagamento. Tente novamente.');
+      console.error('Pix payment error:', err);
+      toast.error('Erro ao gerar pagamento Pix. Tente novamente.');
     } finally {
       setLoadingMP(false);
     }
+  };
+
+  const handleCopyPix = () => {
+    if (!pixData?.qr_code) return;
+    navigator.clipboard.writeText(pixData.qr_code);
+    setPixCopied(true);
+    toast.success('Código Pix copiado!');
+    setTimeout(() => setPixCopied(false), 3000);
   };
 
   const updateField = (field: string, value: string) => {
@@ -567,41 +644,94 @@ const Checkout = () => {
                   />
                 </div>
 
-                {/* Payment Buttons */}
+                {/* Payment Section */}
                 <div className="bg-card rounded-2xl border border-border p-5 md:p-6 shadow-sm animate-fade-in">
                   <h2 className="text-base font-bold text-foreground flex items-center gap-2 mb-5">
                     <CreditCard size={18} className="text-primary" />
                     Forma de Pagamento
                   </h2>
 
-                  <div className="space-y-3">
-                    <button
-                      onClick={handleMercadoPago}
-                      disabled={loadingMP}
-                      className="w-full bg-[#009ee3] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:brightness-110 transition-all text-sm disabled:opacity-60"
-                    >
-                      {loadingMP ? <Loader2 size={18} className="animate-spin" /> : <CreditCard size={18} />}
-                      {loadingMP ? 'Processando...' : 'Pagar com Mercado Pago'}
-                    </button>
+                  {/* Pix QR Code Display */}
+                  {pixData && pixStatus === 'pending' ? (
+                    <div className="space-y-4">
+                      <div className="bg-primary/5 border-2 border-primary/20 rounded-xl p-5 text-center">
+                        <div className="flex items-center justify-center gap-2 mb-3">
+                          <Loader2 size={16} className="animate-spin text-primary" />
+                          <span className="text-sm font-semibold text-primary">Aguardando pagamento...</span>
+                        </div>
 
-                    <p className="text-[11px] text-muted-foreground text-center">
-                      Pix, Cartão de Crédito e Boleto disponíveis
-                    </p>
+                        <img
+                          src={`data:image/png;base64,${pixData.qr_code_base64}`}
+                          alt="QR Code Pix"
+                          className="mx-auto w-48 h-48 rounded-lg border border-border"
+                        />
 
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1 h-px bg-border" />
-                      <span className="text-xs text-muted-foreground font-medium">ou</span>
-                      <div className="flex-1 h-px bg-border" />
+                        <p className="text-xs text-muted-foreground mt-3 mb-2">
+                          Escaneie o QR Code acima com seu app bancário
+                        </p>
+
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={pixData.qr_code}
+                            readOnly
+                            className="flex-1 bg-background rounded-lg px-3 py-2 text-xs text-foreground border border-border truncate font-mono"
+                          />
+                          <button
+                            onClick={handleCopyPix}
+                            className="flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary/90 transition-all whitespace-nowrap"
+                          >
+                            {pixCopied ? <Check size={14} /> : <Copy size={14} />}
+                            {pixCopied ? 'Copiado!' : 'Copiar'}
+                          </button>
+                        </div>
+
+                        <p className="text-[10px] text-muted-foreground mt-3">
+                          ⏱️ O pagamento será confirmado automaticamente. Não feche esta página.
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          if (pollingRef.current) clearInterval(pollingRef.current);
+                          setPixData(null);
+                          setPixStatus('pending');
+                        }}
+                        className="w-full text-sm text-muted-foreground font-medium hover:text-foreground transition-colors py-2"
+                      >
+                        ← Cancelar e escolher outro método
+                      </button>
                     </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <button
+                        onClick={handlePixPayment}
+                        disabled={loadingMP}
+                        className="w-full bg-[#009ee3] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:brightness-110 transition-all text-sm disabled:opacity-60"
+                      >
+                        {loadingMP ? <Loader2 size={18} className="animate-spin" /> : <QrCode size={18} />}
+                        {loadingMP ? 'Gerando QR Code...' : 'Pagar com Pix'}
+                      </button>
 
-                    <button
-                      onClick={handleWhatsApp}
-                      className="w-full bg-[#25D366] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:brightness-110 transition-all text-sm"
-                    >
-                      <img src={whatsappIcon} alt="WhatsApp" className="w-5 h-5" />
-                      Enviar Pedido via WhatsApp
-                    </button>
-                  </div>
+                      <p className="text-[11px] text-muted-foreground text-center">
+                        Pagamento instantâneo via Pix — aprovação imediata
+                      </p>
+
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 h-px bg-border" />
+                        <span className="text-xs text-muted-foreground font-medium">ou</span>
+                        <div className="flex-1 h-px bg-border" />
+                      </div>
+
+                      <button
+                        onClick={handleWhatsApp}
+                        className="w-full bg-[#25D366] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:brightness-110 transition-all text-sm"
+                      >
+                        <img src={whatsappIcon} alt="WhatsApp" className="w-5 h-5" />
+                        Enviar Pedido via WhatsApp
+                      </button>
+                    </div>
+                  )}
                 </div>
               </>
             )}
