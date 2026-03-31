@@ -16,4 +16,4 @@ User-agent: *
 Allow: /
 Disallow: /admin
 
-Sitemap: https://samesthetic.com/sitemap.xml
+Sitemap: https://samestheticlash.shop/sitemap.xml
