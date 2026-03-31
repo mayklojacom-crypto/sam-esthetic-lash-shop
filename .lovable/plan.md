@@ -1,61 +1,57 @@
 
 
-# Checkout Transparente com Pix — Sam Esthetic
+# Importar Catálogo Completo com 45% de Lucro
 
-## Problema Atual
-Hoje o checkout redireciona o cliente para o Mercado Pago (Checkout Pro via `init_point`). Quando o cliente paga por Pix, ele sai do site e ao tentar voltar, encontra erro 404. Não vê a página de agradecimento.
+## Resumo
+Extrair todos os produtos dos dois catálogos Word, aplicar 45% de margem sobre o preço de custo, copiar as imagens dos documentos para o projeto, e atualizar `src/data/products.ts` com ~130 novos produtos.
 
-## Solução
-Implementar **Checkout Transparente** com Pix diretamente no site, sem sair da Sam Esthetic. O fluxo será:
+## Fórmula de Preço
+`preço de venda = custo × 1.45` (arredondado para .99 ou .50)
 
-1. Cliente preenche dados → clica "Pagar com Pix"
-2. Edge function cria o pagamento via API `/v1/payments` do Mercado Pago (não mais `/checkout/preferences`)
-3. Retorna o QR Code (base64) e código Pix Copia e Cola
-4. Exibe o QR Code e o código na própria página do checkout
-5. Frontend faz polling no status do pagamento a cada 5 segundos
-6. Quando aprovado → limpa carrinho → redireciona para `/obrigado`
+Exemplo: Cola HS16 custa R$50 → venda R$72.50
 
-```text
-Checkout → [Pagar com Pix] → Mostra QR Code no site
-                                    ↓ (polling)
-                              Pagamento aprovado?
-                                    ↓ sim
-                              Redireciona → /obrigado 🎉
-```
+## Novas Categorias
+Adicionar ao array `categories`:
+- **pincas** — Pinças
+- **sobrancelhas** — Sobrancelhas
+- **lash-lift** — Lash Lift
+- **treino** — Treino
 
-## Alterações
+## Produtos Extraídos
 
-### 1. Nova Edge Function `create-pix-payment`
-- Recebe: items, customer data
-- Cria pagamento via `POST /v1/payments` com `payment_method_id: "pix"`
-- Salva pedido no banco (como já faz a `create-mp-preference`)
-- Retorna: `payment_id`, `qr_code_base64`, `qr_code` (copia e cola), `ticket_url`
+### Catálogo Cílios (~40 produtos)
+Marcas: Nagaraku, Fadvan, Decemars, Maria Sasha. Inclui variações Individual/Mix, curvaturas D/C/L/M, cores Preto/Marrom, e modelos Y/W 3D-6D.
 
-### 2. Nova Edge Function `check-payment-status`
-- Recebe: `payment_id`
-- Consulta `GET /v1/payments/{id}` no Mercado Pago
-- Retorna: `status` (pending, approved, rejected)
-- Quando approved, atualiza o pedido no banco e gera o PDF (mesma lógica do webhook)
+### Catálogo Acessórios (~90 produtos)
+Categorias: Colas (Cherry, Sobelle, Macy, Ôxe), Descartáveis (pads, escovinhas, anéis, microbrush), Ferramentas (higrômetro, pisseta, suportes, espelhos, pinças Nagaraku), Líquidos (espumas, primers, removedores, aceleradores, finalizadores), Sobrancelhas (Depil Bella, hennas Glance/Menela/Della&Delle, ceras), Lash Lift (kits, passos, brow lamination), Treino (cabeça boneca, esponja, suporte facial, cílios treino).
 
-### 3. Atualizar `src/pages/Checkout.tsx`
-- Ao clicar "Pagar com Mercado Pago", chamar `create-pix-payment` em vez de `create-mp-preference`
-- Mostrar um modal/seção com:
-  - QR Code renderizado (imagem base64)
-  - Código Pix Copia e Cola com botão "Copiar"
-  - Timer de expiração (30 min)
-  - Mensagem "Aguardando pagamento..."
-- Iniciar polling via `setInterval` chamando `check-payment-status` a cada 5s
-- Quando status = `approved`: limpar carrinho, navegar para `/obrigado?pedido={ref}`
-- Quando status = `rejected`: mostrar erro e permitir tentar novamente
-- Manter o botão WhatsApp como alternativa
+## Alterações Técnicas
 
-### 4. Manter a Edge Function `mp-webhook` existente
-- Continua funcionando como backup (Mercado Pago envia webhook independente)
-- Garante que o pedido seja processado mesmo se o polling falhar
+### 1. Copiar imagens dos documentos
+- Copiar ~130 imagens de `parsed-documents://` para `public/products/`
+- Nomear com slugs consistentes (ex: `nagaraku-volume-russo-individual.jpg`)
 
-## Detalhes Técnicos
-- A API de pagamento Pix do Mercado Pago requer: `transaction_amount`, `payment_method_id: "pix"`, `payer.email`, `payer.identification` (CPF)
-- O QR Code tem validade padrão de 24h (pode ser configurado via `date_of_expiration`)
-- O polling para após 30 minutos ou quando o status muda de `pending`
-- Nenhuma biblioteca extra necessária — o QR Code vem como base64 do Mercado Pago
+### 2. Atualizar `src/data/products.ts`
+- Adicionar 4 novas categorias
+- Atualizar preços dos 10 produtos existentes com base nos custos reais dos catálogos + 45%
+- Adicionar ~120 novos produtos com: id, slug, name, price (custo×1.45), image, category, description, sizes (quando aplicável), weight
+- Marcar os mais populares como `featured: true`
+
+### 3. Atualizar `public/sitemap.xml`
+- Adicionar URLs das novas páginas de produto
+
+## Produtos Existentes que Serão Atualizados
+| Produto | Preço Atual | Custo Catálogo | Novo Preço (×1.45) |
+|---------|------------|----------------|-------------------|
+| Cola HS16 3ml | R$63.99 | R$50 | R$72.50 |
+| Pads Gel 50 pares | R$18.50 | R$10 | R$14.50 |
+| Microbrush 50 uni | R$8.99 | R$3.50 | R$5.08 |
+| Aplicador Gloss 50 uni | R$8.99 | R$3.50 | R$5.08 |
+| Anel Batoque 50 uni | R$13.00 | R$9 | R$13.05 |
+| Fita Transpore | R$4.00 | R$3 | R$4.35 |
+
+**Nota importante:** Alguns preços atuais no site (ex: Microbrush R$8.99) ficariam menores com a fórmula de 45% (R$5.08). Preciso de confirmação se devo manter os preços atuais maiores ou substituir pelo cálculo de 45%.
+
+## Observação sobre Imagens
+As imagens extraídas dos documentos Word são fotos de catálogo. Serão usadas como placeholder. Você pode substituí-las depois por fotos profissionais de melhor qualidade.
 
