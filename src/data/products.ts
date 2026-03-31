@@ -28,7 +28,7 @@ export const products: Product[] = [
     id: '1',
     slug: 'cilios-decemars-yy-brasileiro',
     name: 'Cílios Decemars YY Brasileiro',
-    price: 2.50,
+    price: 21.99,
     image: '/products/cilios-decemars-yy.png',
     category: 'cilios',
     description: 'Cílios Decemars YY Brasileiro — Para um olhar incrível. Cor: Preto. Curvatura: D. Premium Y-Shaped Volume Lashes.',
