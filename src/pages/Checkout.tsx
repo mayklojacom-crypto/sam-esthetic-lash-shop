@@ -316,7 +316,7 @@ const Checkout = () => {
     navigate('/');
   };
 
-  const handleMercadoPago = async () => {
+  const handlePixPayment = async () => {
     const data = validate();
     if (!data) return;
 
@@ -337,7 +337,7 @@ const Checkout = () => {
         });
       }
 
-      const { data: response, error } = await supabase.functions.invoke('create-mp-preference', {
+      const { data: response, error } = await supabase.functions.invoke('create-pix-payment', {
         body: {
           items: mpItems,
           customer: {
@@ -348,22 +348,37 @@ const Checkout = () => {
             address: buildAddress(),
             notes: data.notes || '',
           },
-          siteUrl: 'https://samestheticlash.shop',
         },
       });
 
       if (error) throw error;
-      if (response?.init_point) {
-        window.location.href = response.init_point;
+
+      if (response?.qr_code_base64 && response?.qr_code) {
+        setPixData({
+          payment_id: response.payment_id,
+          qr_code_base64: response.qr_code_base64,
+          qr_code: response.qr_code,
+          external_reference: response.external_reference,
+        });
+        setPixStatus('pending');
+        toast.success('QR Code Pix gerado! Escaneie para pagar.');
       } else {
-        throw new Error('No payment URL returned');
+        throw new Error('QR Code não retornado');
       }
     } catch (err) {
-      console.error('Mercado Pago error:', err);
-      toast.error('Erro ao processar pagamento. Tente novamente.');
+      console.error('Pix payment error:', err);
+      toast.error('Erro ao gerar pagamento Pix. Tente novamente.');
     } finally {
       setLoadingMP(false);
     }
+  };
+
+  const handleCopyPix = () => {
+    if (!pixData?.qr_code) return;
+    navigator.clipboard.writeText(pixData.qr_code);
+    setPixCopied(true);
+    toast.success('Código Pix copiado!');
+    setTimeout(() => setPixCopied(false), 3000);
   };
 
   const updateField = (field: string, value: string) => {
