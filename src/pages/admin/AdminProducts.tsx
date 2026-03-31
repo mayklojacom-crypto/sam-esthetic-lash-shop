@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,7 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Search, Pencil, Trash2, Upload, Package } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, Upload, Package, ChevronUp, ChevronDown, ImagePlus, X } from 'lucide-react';
 import { categories } from '@/data/products';
 
 interface DBProduct {
@@ -53,6 +53,8 @@ const AdminProducts = () => {
   const [editProduct, setEditProduct] = useState<Partial<DBProduct> | null>(null);
   const [saving, setSaving] = useState(false);
   const [seeding, setSeeding] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -113,8 +115,75 @@ const AdminProducts = () => {
     }
   };
 
+  const handleReorder = async (productId: string, direction: 'up' | 'down') => {
+    const idx = products.findIndex(p => p.id === productId);
+    if (idx < 0) return;
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= products.length) return;
+
+    const current = products[idx];
+    const swap = products[swapIdx];
+
+    try {
+      // Swap sort_order values
+      await Promise.all([
+        supabase.functions.invoke(`admin-products?action=update`, {
+          headers: { Authorization: `Bearer ${token}` },
+          body: { id: current.id, sort_order: swap.sort_order },
+        }),
+        supabase.functions.invoke(`admin-products?action=update`, {
+          headers: { Authorization: `Bearer ${token}` },
+          body: { id: swap.id, sort_order: current.sort_order },
+        }),
+      ]);
+
+      // Optimistic update
+      const updated = [...products];
+      updated[idx] = { ...current, sort_order: swap.sort_order };
+      updated[swapIdx] = { ...swap, sort_order: current.sort_order };
+      updated.sort((a, b) => a.sort_order - b.sort_order);
+      setProducts(updated);
+    } catch {
+      toast({ title: 'Erro ao reordenar', variant: 'destructive' });
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const slug = editProduct?.slug || 'produto';
+      const fileName = `${slug}-${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(fileName);
+
+      setEditProduct(prev => ({ ...prev, image: urlData.publicUrl }));
+      toast({ title: 'Imagem enviada!' });
+    } catch (err: any) {
+      toast({ title: 'Erro ao enviar imagem', description: err.message, variant: 'destructive' });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setEditProduct(prev => ({ ...prev, image: '/placeholder.svg' }));
+  };
+
   const handleSeedFromStatic = async () => {
-    if (!confirm('Importar todos os produtos do catálogo estático para o banco de dados? Produtos existentes (mesmo slug) serão atualizados.')) return;
+    if (!confirm('Importar todos os produtos do catálogo estático para o banco de dados?')) return;
     setSeeding(true);
     try {
       const { products: staticProducts } = await import('@/data/products');
@@ -156,9 +225,10 @@ const AdminProducts = () => {
       .replace(/(^-|-$)/g, '');
 
   const catOptions = categories.filter(c => c.id !== 'todos');
+  const catLabel = (id: string) => categories.find(c => c.id === id)?.label || id;
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6">
+    <div className="p-3 md:p-6 lg:p-8 space-y-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h1 className="text-xl md:text-2xl font-bold text-slate-900">Produtos</h1>
         <div className="flex flex-wrap gap-2">
@@ -197,7 +267,7 @@ const AdminProducts = () => {
         </Select>
       </div>
 
-      {/* Product Grid */}
+      {/* Product List */}
       {loading ? (
         <div className="text-slate-500 py-8 text-center">Carregando...</div>
       ) : products.length === 0 ? (
@@ -211,49 +281,92 @@ const AdminProducts = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-          {products.map(p => (
-            <Card key={p.id} className="border-slate-200 overflow-hidden">
-              <div className="aspect-square bg-slate-100 relative">
-                <img
-                  src={p.image}
-                  alt={p.name}
-                  className="w-full h-full object-contain p-2"
-                  onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
-                />
-                {p.featured && (
-                  <Badge className="absolute top-2 left-2 bg-primary text-xs">Destaque</Badge>
-                )}
-                {!p.active && (
-                  <Badge variant="secondary" className="absolute top-2 right-2 text-xs">Inativo</Badge>
-                )}
+        <div className="space-y-1">
+          {/* Header - hidden on mobile */}
+          <div className="hidden md:grid md:grid-cols-[60px_48px_1fr_120px_120px_100px_120px] gap-2 px-3 py-2 text-xs font-medium text-slate-500 uppercase">
+            <span>Ordem</span>
+            <span>Foto</span>
+            <span>Nome</span>
+            <span>Categoria</span>
+            <span>Preço</span>
+            <span>Status</span>
+            <span className="text-right">Ações</span>
+          </div>
+
+          {products.map((p, idx) => (
+            <div
+              key={p.id}
+              className={`flex flex-col md:grid md:grid-cols-[60px_48px_1fr_120px_120px_100px_120px] gap-2 items-center px-3 py-2 rounded-lg border border-slate-100 bg-white hover:bg-slate-50 transition-colors ${!p.active ? 'opacity-50' : ''}`}
+            >
+              {/* Sort buttons */}
+              <div className="flex md:flex-col items-center gap-0.5 self-start md:self-center">
+                <button
+                  onClick={() => handleReorder(p.id, 'up')}
+                  disabled={idx === 0}
+                  className="p-0.5 rounded hover:bg-slate-200 disabled:opacity-20 disabled:cursor-not-allowed"
+                >
+                  <ChevronUp size={16} className="text-slate-600" />
+                </button>
+                <span className="text-[10px] text-slate-400 w-5 text-center">{p.sort_order}</span>
+                <button
+                  onClick={() => handleReorder(p.id, 'down')}
+                  disabled={idx === products.length - 1}
+                  className="p-0.5 rounded hover:bg-slate-200 disabled:opacity-20 disabled:cursor-not-allowed"
+                >
+                  <ChevronDown size={16} className="text-slate-600" />
+                </button>
               </div>
-              <CardContent className="p-3">
-                <h3 className="font-medium text-sm text-slate-900 line-clamp-2 mb-1">{p.name}</h3>
-                <p className="text-xs text-slate-500 mb-2">{p.category}</p>
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900">R$ {Number(p.price).toFixed(2)}</span>
-                  <div className="flex gap-1">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8"
-                      onClick={() => setEditProduct({ ...p })}
-                    >
-                      <Pencil size={14} />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-red-500 hover:text-red-700"
-                      onClick={() => handleDelete(p.id)}
-                    >
-                      <Trash2 size={14} />
-                    </Button>
-                  </div>
+
+              {/* Image */}
+              <img
+                src={p.image}
+                alt={p.name}
+                className="w-10 h-10 md:w-10 md:h-10 object-contain rounded border border-slate-200 bg-slate-50 flex-shrink-0"
+                onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
+              />
+
+              {/* Name + mobile info */}
+              <div className="flex-1 min-w-0 w-full">
+                <p className="text-sm font-medium text-slate-900 truncate">{p.name}</p>
+                <div className="flex items-center gap-2 md:hidden mt-0.5">
+                  <span className="text-xs text-slate-500">{catLabel(p.category)}</span>
+                  <span className="text-xs font-semibold text-slate-800">R$ {Number(p.price).toFixed(2)}</span>
+                  {p.featured && <Badge className="bg-primary text-[10px] px-1 py-0 h-4">Destaque</Badge>}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+
+              {/* Category - desktop */}
+              <span className="hidden md:block text-xs text-slate-600 truncate">{catLabel(p.category)}</span>
+
+              {/* Price - desktop */}
+              <span className="hidden md:block text-sm font-semibold text-slate-900">R$ {Number(p.price).toFixed(2)}</span>
+
+              {/* Status - desktop */}
+              <div className="hidden md:flex gap-1 flex-wrap">
+                {p.featured && <Badge className="bg-primary text-[10px] px-1.5 py-0 h-5">Destaque</Badge>}
+                {!p.active && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5">Inativo</Badge>}
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-1 justify-end self-start md:self-center">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8"
+                  onClick={() => setEditProduct({ ...p })}
+                >
+                  <Pencil size={14} />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 text-red-500 hover:text-red-700"
+                  onClick={() => handleDelete(p.id)}
+                >
+                  <Trash2 size={14} />
+                </Button>
+              </div>
+            </div>
           ))}
         </div>
       )}
@@ -324,22 +437,56 @@ const AdminProducts = () => {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Image section with upload */}
               <div>
-                <Label>URL da Imagem</Label>
-                <Input
-                  value={editProduct.image || ''}
-                  onChange={e => setEditProduct(prev => ({ ...prev, image: e.target.value }))}
-                  placeholder="/products/nome-produto.jpg"
-                />
-                {editProduct.image && editProduct.image !== '/placeholder.svg' && (
-                  <img
-                    src={editProduct.image}
-                    alt="Preview"
-                    className="mt-2 h-24 w-24 object-contain rounded border"
-                    onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
-                  />
-                )}
+                <Label>Imagem do Produto</Label>
+                <div className="mt-2 flex items-start gap-3">
+                  <div className="relative w-24 h-24 rounded-lg border border-slate-200 bg-slate-50 overflow-hidden flex-shrink-0">
+                    <img
+                      src={editProduct.image || '/placeholder.svg'}
+                      alt="Preview"
+                      className="w-full h-full object-contain"
+                      onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
+                    />
+                    {editProduct.image && editProduct.image !== '/placeholder.svg' && (
+                      <button
+                        onClick={handleRemoveImage}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploading}
+                      className="w-full"
+                    >
+                      <ImagePlus size={14} className="mr-1" />
+                      {uploading ? 'Enviando...' : 'Enviar Imagem'}
+                    </Button>
+                    <Input
+                      value={editProduct.image || ''}
+                      onChange={e => setEditProduct(prev => ({ ...prev, image: e.target.value }))}
+                      placeholder="Ou cole a URL da imagem"
+                      className="text-xs"
+                    />
+                  </div>
+                </div>
               </div>
+
               <div>
                 <Label>Descrição</Label>
                 <Textarea

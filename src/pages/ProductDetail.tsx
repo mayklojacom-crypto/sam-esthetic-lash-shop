@@ -1,11 +1,12 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, ShoppingBag, Minus, Plus, Share2 } from 'lucide-react';
-import { useState } from 'react';
-import { getProductBySlug } from '@/data/products';
+import { useState, useMemo } from 'react';
+import { getProductBySlug, products } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
+import ProductCard from '@/components/ProductCard';
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -16,6 +17,15 @@ const ProductDetail = () => {
   const [imgLoaded, setImgLoaded] = useState(false);
 
   const product = slug ? getProductBySlug(slug) : undefined;
+
+  const suggested = useMemo(() => {
+    if (!product) return [];
+    // Same category first, then random others, exclude current
+    const sameCategory = products.filter(p => p.id !== product.id && p.category === product.category);
+    const others = products.filter(p => p.id !== product.id && p.category !== product.category);
+    const shuffled = [...sameCategory.sort(() => Math.random() - 0.5), ...others.sort(() => Math.random() - 0.5)];
+    return shuffled.slice(0, 8);
+  }, [product]);
 
   if (!product) {
     return (
@@ -172,6 +182,18 @@ const ProductDetail = () => {
             </div>
           </div>
         </div>
+
+        {/* Produtos Sugeridos */}
+        {suggested.length > 0 && (
+          <div className="px-4 mt-10">
+            <h2 className="text-lg font-extrabold text-foreground mb-4">Você também pode gostar</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {suggested.map((p, i) => (
+                <ProductCard key={p.id} product={p} index={i} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Mobile Add Button */}
