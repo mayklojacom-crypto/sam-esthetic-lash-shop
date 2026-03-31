@@ -110,6 +110,60 @@ export type Database = {
         }
         Relationships: []
       }
+      products: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          description: string
+          featured: boolean
+          id: string
+          image: string
+          name: string
+          original_price: number | null
+          price: number
+          sizes: string[] | null
+          slug: string
+          sort_order: number
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          description?: string
+          featured?: boolean
+          id?: string
+          image?: string
+          name: string
+          original_price?: number | null
+          price?: number
+          sizes?: string[] | null
+          slug: string
+          sort_order?: number
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          description?: string
+          featured?: boolean
+          id?: string
+          image?: string
+          name?: string
+          original_price?: number | null
+          price?: number
+          sizes?: string[] | null
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
