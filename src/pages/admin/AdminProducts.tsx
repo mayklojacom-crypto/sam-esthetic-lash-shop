@@ -404,10 +404,15 @@ const AdminProducts = () => {
                 <div>
                   <Label>Preço (R$)</Label>
                   <Input
-                    type="number"
-                    step="0.01"
-                    value={editProduct.price || 0}
-                    onChange={e => setEditProduct(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                    type="text"
+                    inputMode="decimal"
+                    value={editProduct.price === 0 && editProduct._priceRaw === '' ? '' : (editProduct._priceRaw ?? String(editProduct.price))}
+                    onChange={e => {
+                      const raw = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+                      const parsed = parseFloat(raw);
+                      setEditProduct(prev => ({ ...prev, price: isNaN(parsed) ? 0 : parsed, _priceRaw: raw }));
+                    }}
+                    onBlur={() => setEditProduct(prev => ({ ...prev, _priceRaw: undefined }))}
                   />
                 </div>
                 <div>
