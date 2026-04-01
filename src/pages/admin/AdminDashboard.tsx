@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Package, DollarSign, ShoppingCart, Eye, TrendingUp, TrendingDown } from 'lucide-react';
+import { Package, DollarSign, ShoppingCart, Eye, TrendingUp } from 'lucide-react';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
 } from 'recharts';
 
 const statusColors: Record<string, string> = {
