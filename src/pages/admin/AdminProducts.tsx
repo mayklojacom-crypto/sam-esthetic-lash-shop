@@ -28,6 +28,7 @@ interface DBProduct {
   weight: number;
   active: boolean;
   sort_order: number;
+  _priceRaw?: string;
 }
 
 const emptyProduct: Omit<DBProduct, 'id'> = {
