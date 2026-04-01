@@ -374,14 +374,14 @@ const AdminProducts = () => {
 
       {/* Edit Dialog */}
       <Dialog open={!!editProduct} onOpenChange={open => !open && setEditProduct(null)}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-lg w-[95vw] max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle>{editProduct?.id ? 'Editar Produto' : 'Novo Produto'}</DialogTitle>
+            <DialogTitle className="text-lg">{editProduct?.id ? 'Editar Produto' : 'Novo Produto'}</DialogTitle>
           </DialogHeader>
           {editProduct && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div>
-                <Label>Nome</Label>
+                <Label className="text-xs font-semibold text-slate-600">Nome</Label>
                 <Input
                   value={editProduct.name || ''}
                   onChange={e => {
@@ -392,18 +392,20 @@ const AdminProducts = () => {
                       slug: prev?.id ? prev.slug : generateSlug(name),
                     }));
                   }}
+                  className="mt-1"
                 />
               </div>
               <div>
-                <Label>Slug</Label>
+                <Label className="text-xs font-semibold text-slate-600">Slug</Label>
                 <Input
                   value={editProduct.slug || ''}
                   onChange={e => setEditProduct(prev => ({ ...prev, slug: e.target.value }))}
+                  className="mt-1 text-xs"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label>Preço (R$)</Label>
+                  <Label className="text-xs font-semibold text-slate-600">Preço (R$)</Label>
                   <Input
                     type="text"
                     inputMode="decimal"
@@ -414,26 +416,31 @@ const AdminProducts = () => {
                       setEditProduct(prev => ({ ...prev, price: isNaN(parsed) ? 0 : parsed, _priceRaw: raw }));
                     }}
                     onBlur={() => setEditProduct(prev => ({ ...prev, _priceRaw: undefined }))}
+                    className="mt-1"
                   />
                 </div>
                 <div>
-                  <Label>Preço Original (R$)</Label>
+                  <Label className="text-xs font-semibold text-slate-600">Preço Original (R$)</Label>
                   <Input
-                    type="number"
-                    step="0.01"
+                    type="text"
+                    inputMode="decimal"
                     value={editProduct.original_price || ''}
-                    onChange={e => setEditProduct(prev => ({ ...prev, original_price: parseFloat(e.target.value) || undefined }))}
+                    onChange={e => {
+                      const raw = e.target.value.replace(/[^0-9.,]/g, '').replace(',', '.');
+                      setEditProduct(prev => ({ ...prev, original_price: parseFloat(raw) || undefined }));
+                    }}
                     placeholder="Opcional"
+                    className="mt-1"
                   />
                 </div>
               </div>
               <div>
-                <Label>Categoria</Label>
+                <Label className="text-xs font-semibold text-slate-600">Categoria</Label>
                 <Select
                   value={editProduct.category || 'cilios'}
                   onValueChange={v => setEditProduct(prev => ({ ...prev, category: v }))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -444,11 +451,11 @@ const AdminProducts = () => {
                 </Select>
               </div>
 
-              {/* Image section with upload */}
+              {/* Image section */}
               <div>
-                <Label>Imagem do Produto</Label>
-                <div className="mt-2 flex items-start gap-3">
-                  <div className="relative w-24 h-24 rounded-lg border border-slate-200 bg-slate-50 overflow-hidden flex-shrink-0">
+                <Label className="text-xs font-semibold text-slate-600">Imagem do Produto</Label>
+                <div className="mt-1 flex items-start gap-3">
+                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-lg border border-slate-200 bg-slate-50 overflow-hidden flex-shrink-0">
                     <img
                       src={editProduct.image || '/placeholder.svg'}
                       alt="Preview"
@@ -486,68 +493,130 @@ const AdminProducts = () => {
                     <Input
                       value={editProduct.image || ''}
                       onChange={e => setEditProduct(prev => ({ ...prev, image: e.target.value }))}
-                      placeholder="Ou cole a URL da imagem"
+                      placeholder="Ou cole a URL"
                       className="text-xs"
                     />
                   </div>
                 </div>
               </div>
 
+              {/* Descrição */}
               <div>
-                <Label>Descrição</Label>
+                <Label className="text-xs font-semibold text-slate-600">Descrição</Label>
                 <Textarea
                   value={editProduct.description || ''}
                   onChange={e => setEditProduct(prev => ({ ...prev, description: e.target.value }))}
-                  rows={3}
+                  rows={4}
+                  className="mt-1 text-sm"
+                  placeholder="Descreva o produto..."
                 />
               </div>
+
+              {/* Tamanhos / Medidas - chip system */}
+              <div>
+                <Label className="text-xs font-semibold text-slate-600">Tamanhos / Medidas</Label>
+                <p className="text-[11px] text-slate-400 mb-1.5">Ex: 8mm, 10mm, 0.07, Mix, 50ml</p>
+                <div className="flex flex-wrap gap-1.5 mb-2 min-h-[32px] p-2 rounded-md border border-slate-200 bg-slate-50">
+                  {(editProduct.sizes || []).map((size, i) => (
+                    <span
+                      key={i}
+                      className="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs font-medium px-2 py-1 rounded-full"
+                    >
+                      {size}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditProduct(prev => ({
+                            ...prev,
+                            sizes: prev?.sizes?.filter((_, idx) => idx !== i) || null,
+                          }));
+                        }}
+                        className="hover:text-red-500 transition-colors"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                  {(!editProduct.sizes || editProduct.sizes.length === 0) && (
+                    <span className="text-xs text-slate-400 py-1">Nenhum tamanho adicionado</span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    id="size-input"
+                    placeholder="Digite e pressione Enter"
+                    className="flex-1 text-sm"
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const input = e.currentTarget;
+                        const val = input.value.trim();
+                        if (!val) return;
+                        const newSizes = val.split(',').map(s => s.trim()).filter(Boolean);
+                        setEditProduct(prev => ({
+                          ...prev,
+                          sizes: [...(prev?.sizes || []), ...newSizes],
+                        }));
+                        input.value = '';
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const input = document.getElementById('size-input') as HTMLInputElement;
+                      const val = input?.value.trim();
+                      if (!val) return;
+                      const newSizes = val.split(',').map(s => s.trim()).filter(Boolean);
+                      setEditProduct(prev => ({
+                        ...prev,
+                        sizes: [...(prev?.sizes || []), ...newSizes],
+                      }));
+                      if (input) input.value = '';
+                    }}
+                  >
+                    <Plus size={14} />
+                  </Button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label>Peso (g)</Label>
+                  <Label className="text-xs font-semibold text-slate-600">Peso (g)</Label>
                   <Input
                     type="number"
                     value={editProduct.weight || 50}
                     onChange={e => setEditProduct(prev => ({ ...prev, weight: parseInt(e.target.value) || 50 }))}
+                    className="mt-1"
                   />
                 </div>
                 <div>
-                  <Label>Ordem</Label>
+                  <Label className="text-xs font-semibold text-slate-600">Ordem</Label>
                   <Input
                     type="number"
                     value={editProduct.sort_order || 0}
                     onChange={e => setEditProduct(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
+                    className="mt-1"
                   />
                 </div>
               </div>
-              <div>
-                <Label>Tamanhos (separados por vírgula)</Label>
-                <Input
-                  value={editProduct.sizes?.join(', ') || ''}
-                  onChange={e => {
-                    const val = e.target.value;
-                    setEditProduct(prev => ({
-                      ...prev,
-                      sizes: val ? val.split(',').map(s => s.trim()).filter(Boolean) : null,
-                    }));
-                  }}
-                  placeholder="8mm, 9mm, 10mm..."
-                />
-              </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50">
+                <Label className="text-sm">Produto em Destaque</Label>
                 <Switch
                   checked={editProduct.featured || false}
                   onCheckedChange={v => setEditProduct(prev => ({ ...prev, featured: v }))}
                 />
-                <Label>Produto em Destaque</Label>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50">
+                <Label className="text-sm">Ativo</Label>
                 <Switch
                   checked={editProduct.active !== false}
                   onCheckedChange={v => setEditProduct(prev => ({ ...prev, active: v }))}
                 />
-                <Label>Ativo</Label>
               </div>
-              <Button onClick={handleSave} disabled={saving} className="w-full">
+              <Button onClick={handleSave} disabled={saving} className="w-full mt-2">
                 {saving ? 'Salvando...' : 'Salvar'}
               </Button>
             </div>
