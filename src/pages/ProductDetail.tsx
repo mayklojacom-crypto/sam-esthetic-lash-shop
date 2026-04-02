@@ -18,6 +18,10 @@ const ProductDetail = () => {
 
   const product = slug ? getProductBySlug(slug) : undefined;
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [slug]);
+
   const suggested = useMemo(() => {
     if (!product) return [];
     // Same category first, then random others, exclude current
