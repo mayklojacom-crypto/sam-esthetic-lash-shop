@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, ShoppingBag, Minus, Plus, Share2 } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { getProductBySlug, products } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
@@ -17,6 +17,10 @@ const ProductDetail = () => {
   const [imgLoaded, setImgLoaded] = useState(false);
 
   const product = slug ? getProductBySlug(slug) : undefined;
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [slug]);
 
   const suggested = useMemo(() => {
     if (!product) return [];

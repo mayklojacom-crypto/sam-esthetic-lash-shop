@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Truck, ArrowRight, ShieldCheck, CreditCard } from 'lucide-react';
+import { Truck, ShieldCheck, CreditCard, Sparkles, Leaf } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import whatsappIcon from '@/assets/whatsapp-icon.png';
-import heroBanner from '@/assets/hero-banner.jpg';
+import HeroBannerCarousel from '@/components/HeroBannerCarousel';
+import promoMaster from '@/assets/promo-master-beauty.png';
+import promoProtagonista from '@/assets/promo-protagonista.png';
 import { products, categories } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 import Header from '@/components/Header';
@@ -26,9 +28,7 @@ const Index = () => {
 
       <div className="max-w-6xl mx-auto">
         {/* Hero Banner */}
-        <div className="mx-4 mt-4 rounded-2xl overflow-hidden animate-fade-in shadow-sm cursor-pointer" onClick={() => navigate('/catalogo')}>
-          <img src={heroBanner} alt="Bem-Vinda à SAM Esthetic — Sua Fonte de Materiais Premium para Lash e Estética" className="w-full h-auto object-cover rounded-2xl" />
-        </div>
+        <HeroBannerCarousel />
 
         {/* Trust Bar */}
         <div className="mx-4 mt-4 grid grid-cols-3 gap-3">
@@ -57,6 +57,81 @@ const Index = () => {
                 <span className="text-sm font-semibold text-foreground whitespace-nowrap">{cat.label}</span>
               </button>
             ))}
+          </div>
+        </section>
+
+        {/* Promoções de Outono */}
+        <section className="mt-7 px-4">
+          <div className="flex items-center gap-2 mb-5">
+            <Leaf size={20} className="text-primary" />
+            <h2 className="text-lg font-bold text-foreground">🍂 Promoções de Outono — Edição Limitada</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Kit 1 — Master Beauty Set */}
+            <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden group cursor-pointer" onClick={() => navigate('/produto/kit-master-beauty-set')}>
+              <div className="overflow-hidden">
+                <img src={promoMaster} alt="Kit Master Beauty Set: O Poder do Olhar" className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+              </div>
+              <div className="p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">Edição Limitada</span>
+                  <Sparkles size={14} className="text-primary" />
+                </div>
+                <h3 className="text-base font-bold text-foreground leading-snug">Kit Master Beauty Set: O Poder do Olhar 👁️✨</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Mais que um kit, uma seleção estratégica para a Lash que deseja entregar resultados de elite. Reunimos o que há de melhor em tecnologia de fios e precisão de pinças.
+                </p>
+                <ul className="text-xs text-muted-foreground space-y-1.5">
+                  <li>💎 Mix de Fios Fadvan: 4D Duplo, YY e 6D</li>
+                  <li>💎 Pinças Nagaraku N-07 e NH-12</li>
+                  <li>💎 Cola One Cherry — retenção máxima</li>
+                  <li>💎 Espelho Princesa + descartáveis completos</li>
+                </ul>
+                <div className="flex items-center gap-3 pt-1">
+                  <span className="text-xs text-muted-foreground line-through">R$ 529,00</span>
+                  <span className="text-lg font-extrabold text-green-500">R$ 307,00</span>
+                </div>
+                <button
+                  className="block w-full text-center bg-primary text-primary-foreground font-bold text-sm py-3 rounded-xl hover:bg-primary/90 transition-colors"
+                >
+                  Comprar Agora
+                </button>
+              </div>
+            </div>
+
+            {/* Kit 2 — Coleção Protagonista */}
+            <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden group cursor-pointer" onClick={() => navigate('/produto/kit-colecao-protagonista')}>
+              <div className="overflow-hidden">
+                <img src={promoProtagonista} alt="Coleção Protagonista — Edição Alta Performance" className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+              </div>
+              <div className="p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="bg-destructive/10 text-destructive text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">Apenas 50 kits</span>
+                  <Sparkles size={14} className="text-destructive" />
+                </div>
+                <h3 className="text-base font-bold text-foreground leading-snug">Coleção Protagonista — Edição Alta Performance 🏆</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Chegou para elevar o nível dos seus atendimentos. Reunimos os materiais mais desejados pelas profissionais que não abrem mão de qualidade e acabamento impecável.
+                </p>
+                <ul className="text-xs text-muted-foreground space-y-1.5">
+                  <li>📦 Cílios Brasileiro YY (8mm, 10mm, 12mm)</li>
+                  <li>📦 Cílios 5D Fadvan W (8mm, 10mm, 12mm)</li>
+                  <li>📦 Cola HS 16 (3g) — Alta retenção</li>
+                  <li>📦 Pads, Microbrushes, Escovinhas, Lip Gloss</li>
+                  <li>📦 Fitas: Micropore branca + Transpore transparente</li>
+                </ul>
+                <div className="flex items-center gap-3 pt-1">
+                  <span className="text-xs text-muted-foreground line-through">R$ 489,90</span>
+                  <span className="text-lg font-extrabold text-green-500">R$ 297,00</span>
+                </div>
+                <button
+                  className="block w-full text-center bg-primary text-primary-foreground font-bold text-sm py-3 rounded-xl hover:bg-primary/90 transition-colors"
+                >
+                  Comprar Agora
+                </button>
+              </div>
+            </div>
           </div>
         </section>
 
