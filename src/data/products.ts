@@ -25,6 +25,7 @@ export const categories = [
   { id: 'sobrancelhas', label: 'Sobrancelhas' },
   { id: 'lash-lift', label: 'Lash Lift' },
   { id: 'treino', label: 'Treino' },
+  { id: 'kits', label: 'Kits Promocionais' },
 ];
 
 // Fórmula: custo × 1.45, arredondado para .99 ou .50
@@ -1925,5 +1926,29 @@ export const products: Product[] = [
     category: 'descartaveis',
     description: 'Disco de Algodão Apolo 70g. Discos macios para limpeza e remoção de maquiagem.',
     weight: 100,
+  },
+  {
+    id: 'kit-master-beauty-set',
+    slug: 'kit-master-beauty-set',
+    name: 'Kit Master Beauty Set: O Poder do Olhar',
+    price: 307.00,
+    originalPrice: 529.00,
+    image: '/placeholder.svg',
+    category: 'kits',
+    description: 'Mais que um kit, uma seleção estratégica para a Lash que deseja entregar resultados de elite. Reunimos o que há de melhor em tecnologia de fios e precisão de pinças para transformar cada atendimento em uma obra de arte.\n\n💎 Mix de Fios Fadvan: 4D Duplo, YY e 6D\n💎 Pinças Nagaraku N-07 e NH-12\n💎 Cola One Cherry — retenção máxima\n💎 Espelho de mão Princesa\n💎 Kit completo de descartáveis (Batoque Coração, Pads, Escovinhas e Lip Gloss)\n\n🍂 Edição Limitada de Outono.',
+    featured: true,
+    weight: 800,
+  },
+  {
+    id: 'kit-colecao-protagonista',
+    slug: 'kit-colecao-protagonista',
+    name: 'Coleção Protagonista — Edição Alta Performance',
+    price: 297.00,
+    originalPrice: 489.90,
+    image: '/placeholder.svg',
+    category: 'kits',
+    description: 'A Coleção Protagonista chegou para elevar o nível dos seus atendimentos. Reunimos os materiais mais desejados pelas profissionais que não abrem mão de qualidade e acabamento impecável.\n\n📦 Cílios Brasileiro YY (8mm, 10mm e 12mm)\n📦 Cílios 5D Fadvan W (8mm, 10mm e 12mm)\n📦 Cola HS 16 (3g) — Alta retenção\n📦 Pads, Microbrushes, Escovinhas e Aplicadores de Lip Gloss\n📦 Fitas: Micropore branca e Transpore transparente\n\n⚠️ Especial de Outono — Apenas 50 kits disponíveis.',
+    featured: true,
+    weight: 700,
   },
 ];
