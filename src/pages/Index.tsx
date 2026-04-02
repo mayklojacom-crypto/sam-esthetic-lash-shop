@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Truck, ArrowRight, ShieldCheck, CreditCard } from 'lucide-react';
+import { Truck, ArrowRight, ShieldCheck, CreditCard, Sparkles, Leaf } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import whatsappIcon from '@/assets/whatsapp-icon.png';
 import heroBanner from '@/assets/hero-banner.jpg';
+import promoMaster from '@/assets/promo-master-beauty.png';
+import promoProtagonista from '@/assets/promo-protagonista.png';
 import { products, categories } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 import Header from '@/components/Header';
