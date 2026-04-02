@@ -1933,7 +1933,7 @@ export const products: Product[] = [
     name: 'Kit Master Beauty Set: O Poder do Olhar',
     price: 307.00,
     originalPrice: 529.00,
-    image: '/placeholder.svg',
+    image: '/products/kit-master-beauty-set.jpg',
     category: 'kits',
     description: 'Mais que um kit, uma seleção estratégica para a Lash que deseja entregar resultados de elite. Reunimos o que há de melhor em tecnologia de fios e precisão de pinças para transformar cada atendimento em uma obra de arte.\n\n💎 Mix de Fios Fadvan: 4D Duplo, YY e 6D\n💎 Pinças Nagaraku N-07 e NH-12\n💎 Cola One Cherry — retenção máxima\n💎 Espelho de mão Princesa\n💎 Kit completo de descartáveis (Batoque Coração, Pads, Escovinhas e Lip Gloss)\n\n🍂 Edição Limitada de Outono.',
     featured: true,
