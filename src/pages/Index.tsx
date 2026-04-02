@@ -62,23 +62,8 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Featured */}
-        <section className="mt-7 px-4">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-foreground">🔥 Destaques</h2>
-            <button onClick={() => navigate('/catalogo')} className="text-xs text-primary font-bold uppercase tracking-wider hover:opacity-80 transition-opacity">
-              Ver todos →
-            </button>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
-            {featured.map((p, i) => (
-              <ProductCard key={p.id} product={p} index={i} />
-            ))}
-          </div>
-        </section>
-
         {/* Promoções de Outono */}
-        <section className="mt-10 px-4">
+        <section className="mt-7 px-4">
           <div className="flex items-center gap-2 mb-5">
             <Leaf size={20} className="text-primary" />
             <h2 className="text-lg font-bold text-foreground">🍂 Promoções de Outono — Edição Limitada</h2>
@@ -155,6 +140,21 @@ const Index = () => {
                 </a>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Featured */}
+        <section className="mt-7 px-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-foreground">🔥 Destaques</h2>
+            <button onClick={() => navigate('/catalogo')} className="text-xs text-primary font-bold uppercase tracking-wider hover:opacity-80 transition-opacity">
+              Ver todos →
+            </button>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
+            {featured.map((p, i) => (
+              <ProductCard key={p.id} product={p} index={i} />
+            ))}
           </div>
         </section>
 
