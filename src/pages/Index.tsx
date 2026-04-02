@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Truck, ArrowRight, ShieldCheck, CreditCard, Sparkles, Leaf } from 'lucide-react';
+import { Truck, ShieldCheck, CreditCard, Sparkles, Leaf } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import whatsappIcon from '@/assets/whatsapp-icon.png';
 import HeroBannerCarousel from '@/components/HeroBannerCarousel';
