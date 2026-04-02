@@ -103,7 +103,7 @@ const Index = () => {
             </div>
 
             {/* Kit 2 — Coleção Protagonista */}
-            <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden group">
+            <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden group cursor-pointer" onClick={() => navigate('/produto/kit-colecao-protagonista')}>
               <div className="overflow-hidden">
                 <img src={promoProtagonista} alt="Coleção Protagonista — Edição Alta Performance" className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-300" />
               </div>
@@ -127,14 +127,11 @@ const Index = () => {
                   <span className="text-xs text-muted-foreground line-through">R$ 489,90</span>
                   <span className="text-lg font-extrabold text-primary">R$ 297,00</span>
                 </div>
-                <a
-                  href="https://wa.me/5562998755213?text=Ol%C3%A1!%20Tenho%20interesse%20no%20Kit%20Cole%C3%A7%C3%A3o%20Protagonista%20por%20R%24297,00"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
                   className="block w-full text-center bg-primary text-primary-foreground font-bold text-sm py-3 rounded-xl hover:bg-primary/90 transition-colors"
                 >
-                  Garantir meu Kit via WhatsApp
-                </a>
+                  Comprar Agora
+                </button>
               </div>
             </div>
           </div>
