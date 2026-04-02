@@ -77,6 +77,87 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Promoções de Outono */}
+        <section className="mt-10 px-4">
+          <div className="flex items-center gap-2 mb-5">
+            <Leaf size={20} className="text-primary" />
+            <h2 className="text-lg font-bold text-foreground">🍂 Promoções de Outono — Edição Limitada</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Kit 1 — Master Beauty Set */}
+            <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden group">
+              <div className="overflow-hidden">
+                <img src={promoMaster} alt="Kit Master Beauty Set: O Poder do Olhar" className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+              </div>
+              <div className="p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">Edição Limitada</span>
+                  <Sparkles size={14} className="text-primary" />
+                </div>
+                <h3 className="text-base font-bold text-foreground leading-snug">Kit Master Beauty Set: O Poder do Olhar 👁️✨</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Mais que um kit, uma seleção estratégica para a Lash que deseja entregar resultados de elite. Reunimos o que há de melhor em tecnologia de fios e precisão de pinças.
+                </p>
+                <ul className="text-xs text-muted-foreground space-y-1.5">
+                  <li>💎 Mix de Fios Fadvan: 4D Duplo, YY e 6D</li>
+                  <li>💎 Pinças Nagaraku N-07 e NH-12</li>
+                  <li>💎 Cola One Cherry — retenção máxima</li>
+                  <li>💎 Espelho Princesa + descartáveis completos</li>
+                </ul>
+                <div className="flex items-center gap-3 pt-1">
+                  <span className="text-xs text-muted-foreground line-through">R$ 529,00</span>
+                  <span className="text-lg font-extrabold text-primary">R$ 307,00</span>
+                </div>
+                <a
+                  href="https://wa.me/5562998755213?text=Ol%C3%A1!%20Tenho%20interesse%20no%20Kit%20Master%20Beauty%20Set%20por%20R%24307,00"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full text-center bg-primary text-primary-foreground font-bold text-sm py-3 rounded-xl hover:bg-primary/90 transition-colors"
+                >
+                  Garantir meu Kit via WhatsApp
+                </a>
+              </div>
+            </div>
+
+            {/* Kit 2 — Coleção Protagonista */}
+            <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden group">
+              <div className="overflow-hidden">
+                <img src={promoProtagonista} alt="Coleção Protagonista — Edição Alta Performance" className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-300" />
+              </div>
+              <div className="p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="bg-destructive/10 text-destructive text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">Apenas 50 kits</span>
+                  <Sparkles size={14} className="text-destructive" />
+                </div>
+                <h3 className="text-base font-bold text-foreground leading-snug">Coleção Protagonista — Edição Alta Performance 🏆</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Chegou para elevar o nível dos seus atendimentos. Reunimos os materiais mais desejados pelas profissionais que não abrem mão de qualidade e acabamento impecável.
+                </p>
+                <ul className="text-xs text-muted-foreground space-y-1.5">
+                  <li>📦 Cílios Brasileiro YY (8mm, 10mm, 12mm)</li>
+                  <li>📦 Cílios 5D Fadvan W (8mm, 10mm, 12mm)</li>
+                  <li>📦 Cola HS 16 (3g) — Alta retenção</li>
+                  <li>📦 Pads, Microbrushes, Escovinhas, Lip Gloss</li>
+                  <li>📦 Fitas: Micropore branca + Transpore transparente</li>
+                </ul>
+                <div className="flex items-center gap-3 pt-1">
+                  <span className="text-xs text-muted-foreground line-through">R$ 489,90</span>
+                  <span className="text-lg font-extrabold text-primary">R$ 297,00</span>
+                </div>
+                <a
+                  href="https://wa.me/5562998755213?text=Ol%C3%A1!%20Tenho%20interesse%20no%20Kit%20Cole%C3%A7%C3%A3o%20Protagonista%20por%20R%24297,00"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full text-center bg-primary text-primary-foreground font-bold text-sm py-3 rounded-xl hover:bg-primary/90 transition-colors"
+                >
+                  Garantir meu Kit via WhatsApp
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Info Cards */}
         <section className="px-4 mt-7">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
