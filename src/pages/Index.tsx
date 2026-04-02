@@ -92,7 +92,7 @@ const Index = () => {
                 </ul>
                 <div className="flex items-center gap-3 pt-1">
                   <span className="text-xs text-muted-foreground line-through">R$ 529,00</span>
-                  <span className="text-lg font-extrabold text-primary">R$ 307,00</span>
+                  <span className="text-lg font-extrabold text-green-500">R$ 307,00</span>
                 </div>
                 <button
                   className="block w-full text-center bg-primary text-primary-foreground font-bold text-sm py-3 rounded-xl hover:bg-primary/90 transition-colors"
