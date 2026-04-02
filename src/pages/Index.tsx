@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Truck, ArrowRight, ShieldCheck, CreditCard, Sparkles, Leaf } from 'lucide-react';
+import { Truck, ShieldCheck, CreditCard, Sparkles, Leaf } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import whatsappIcon from '@/assets/whatsapp-icon.png';
-import heroBanner from '@/assets/hero-banner.jpg';
+import HeroBannerCarousel from '@/components/HeroBannerCarousel';
 import promoMaster from '@/assets/promo-master-beauty.png';
 import promoProtagonista from '@/assets/promo-protagonista.png';
 import { products, categories } from '@/data/products';
@@ -28,9 +28,7 @@ const Index = () => {
 
       <div className="max-w-6xl mx-auto">
         {/* Hero Banner */}
-        <div className="mx-4 mt-4 rounded-2xl overflow-hidden animate-fade-in shadow-sm cursor-pointer" onClick={() => navigate('/catalogo')}>
-          <img src={heroBanner} alt="Bem-Vinda à SAM Esthetic — Sua Fonte de Materiais Premium para Lash e Estética" className="w-full h-auto object-cover rounded-2xl" />
-        </div>
+        <HeroBannerCarousel />
 
         {/* Trust Bar */}
         <div className="mx-4 mt-4 grid grid-cols-3 gap-3">
