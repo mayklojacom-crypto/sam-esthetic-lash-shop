@@ -25,6 +25,7 @@ export const categories = [
   { id: 'sobrancelhas', label: 'Sobrancelhas' },
   { id: 'lash-lift', label: 'Lash Lift' },
   { id: 'treino', label: 'Treino' },
+  { id: 'kits', label: 'Kits Promocionais' },
 ];
 
 // Fórmula: custo × 1.45, arredondado para .99 ou .50
