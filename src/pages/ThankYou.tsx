@@ -1,7 +1,14 @@
+import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, ShoppingBag, MessageCircle, ArrowLeft, Package, Heart } from 'lucide-react';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
+
+declare global {
+  interface Window {
+    fbq?: (...args: unknown[]) => void;
+  }
+}
 
 const ThankYou = () => {
   const navigate = useNavigate();
