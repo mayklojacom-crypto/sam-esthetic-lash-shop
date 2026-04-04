@@ -15,6 +15,12 @@ const ThankYou = () => {
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get('pedido') || '';
 
+  useEffect(() => {
+    if (window.fbq) {
+      window.fbq('track', 'Purchase');
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-8">
       <Header />
