@@ -15,6 +15,7 @@ import ThankYou from "./pages/ThankYou.tsx";
 import OrderTracking from "./pages/OrderTracking.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import WhatsAppFloat from "./components/WhatsAppFloat.tsx";
+import ExitIntentPopup from "./components/ExitIntentPopup.tsx";
 import AdminLogin from "./pages/admin/AdminLogin.tsx";
 import AdminLayout from "./components/admin/AdminLayout.tsx";
 import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
@@ -53,6 +54,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             <WhatsAppFloat />
+            <ExitIntentPopup />
           </BrowserRouter>
         </AdminAuthProvider>
       </CartProvider>

@@ -1,5 +1,5 @@
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, ShoppingBag, Minus, Plus, Share2 } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft, ShoppingBag, Minus, Plus, Share2, Zap, Flame } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import { getProductBySlug, products } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import ProductCard from '@/components/ProductCard';
+import StarRating from '@/components/StarRating';
+import { getProductRating, getRecentSales, getStockLeft, getViewersNow } from '@/lib/socialProof';
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -14,7 +16,7 @@ const ProductDetail = () => {
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
-  const [imgLoaded, setImgLoaded] = useState(false);
+  
 
   const product = slug ? getProductBySlug(slug) : undefined;
 
@@ -61,6 +63,20 @@ const ProductDetail = () => {
       style: { background: 'hsl(272 60% 45%)', color: '#fff', border: 'none' },
     });
   };
+
+  const handleBuyNow = () => {
+    if (product.sizes && !selectedSize) {
+      toast.error('Selecione o tamanho antes de comprar! 📏', { duration: 2000 });
+      return;
+    }
+    for (let i = 0; i < qty; i++) addItem(product, selectedSize || undefined);
+    navigate('/checkout');
+  };
+
+  const { rating, reviewCount } = getProductRating(product.id);
+  const recentSales = getRecentSales(product.id);
+  const stockLeft = getStockLeft(product.id);
+  const viewersNow = getViewersNow(product.id);
 
   return (
     <div className="min-h-screen bg-background pb-44 md:pb-8">
@@ -112,6 +128,10 @@ const ProductDetail = () => {
               </span>
               <h1 className="text-xl md:text-2xl font-extrabold text-foreground mt-1.5 leading-tight">{product.name}</h1>
 
+              <div className="mt-2 flex items-center gap-2">
+                <StarRating rating={rating} reviewCount={reviewCount} size={14} />
+              </div>
+
               <div className="mt-4">
                 {product.originalPrice && (
                   <span className="text-xs text-muted-foreground line-through">
@@ -127,11 +147,34 @@ const ProductDetail = () => {
                     ,{product.price.toFixed(2).split('.')[1]}
                   </span>
                 </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  ou em até <span className="font-bold text-foreground">3x de R$ {(product.price / 3).toFixed(2)}</span> sem juros
+                </p>
+              </div>
+
+              {/* Provas sociais */}
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-foreground font-semibold">{viewersNow} pessoas vendo agora</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <Flame size={14} className="text-orange-500" />
+                  <span className="text-foreground font-semibold">{recentSales} vendidos nas últimas 24h</span>
+                </div>
+                {stockLeft <= 8 && (
+                  <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900 rounded-lg px-3 py-2 flex items-center gap-2">
+                    <span className="text-xs font-bold text-orange-700 dark:text-orange-400">
+                      ⚡ Apenas {stockLeft} unidades em estoque!
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="h-px bg-border/60 my-4" />
 
               <p className="text-sm text-muted-foreground leading-relaxed">{product.description}</p>
+
 
               {/* Size selector */}
               {product.sizes && product.sizes.length > 0 && (
@@ -175,14 +218,26 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              {/* Desktop add button */}
-              <button
-                onClick={handleAdd}
-                className="hidden md:flex w-full mt-6 bg-primary text-primary-foreground py-4 rounded-2xl font-bold items-center justify-center gap-2.5 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg hover:bg-primary/90 text-[15px] tracking-wide"
-              >
-                <ShoppingBag size={19} strokeWidth={2.5} />
-                Adicionar — R$ {(product.price * qty).toFixed(2)}
-              </button>
+              {/* Desktop buttons */}
+              <div className="hidden md:grid grid-cols-2 gap-2 mt-6">
+                <button
+                  onClick={handleAdd}
+                  className="bg-secondary text-foreground py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 hover:bg-secondary/80 text-sm border border-border"
+                >
+                  <ShoppingBag size={17} strokeWidth={2.5} />
+                  Adicionar
+                </button>
+                <button
+                  onClick={handleBuyNow}
+                  className="bg-gradient-to-r from-accent to-primary text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg text-sm"
+                >
+                  <Zap size={17} fill="currentColor" />
+                  Comprar Agora
+                </button>
+              </div>
+              <p className="hidden md:flex items-center justify-center gap-1.5 text-xs text-muted-foreground mt-3">
+                🔒 Compra 100% segura · 🚚 Enviamos para todo Brasil
+              </p>
             </div>
           </div>
         </div>
@@ -200,14 +255,21 @@ const ProductDetail = () => {
         )}
       </div>
 
-      {/* Mobile Add Button */}
-      <div className="fixed bottom-[68px] left-0 right-0 p-4 glass-strong border-t border-border/50 md:hidden">
+      {/* Mobile Buttons */}
+      <div className="fixed bottom-[68px] left-0 right-0 p-3 glass-strong border-t border-border/50 md:hidden grid grid-cols-2 gap-2">
         <button
           onClick={handleAdd}
-          className="w-full bg-primary text-primary-foreground py-4 rounded-2xl font-bold flex items-center justify-center gap-2.5 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg hover:bg-primary/90 text-[15px] tracking-wide"
+          className="bg-secondary text-foreground py-3.5 rounded-2xl font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all border border-border text-[13px]"
         >
-          <ShoppingBag size={19} strokeWidth={2.5} />
-          Adicionar — R$ {(product.price * qty).toFixed(2)}
+          <ShoppingBag size={16} strokeWidth={2.5} />
+          Adicionar
+        </button>
+        <button
+          onClick={handleBuyNow}
+          className="bg-gradient-to-r from-accent to-primary text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all shadow-md text-[13px]"
+        >
+          <Zap size={16} fill="currentColor" />
+          Comprar Agora
         </button>
       </div>
 

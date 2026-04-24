@@ -1,12 +1,28 @@
 import { useNavigate } from 'react-router-dom';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ShieldCheck } from 'lucide-react';
+import whatsappIcon from '@/assets/whatsapp-icon.png';
 import { useCart } from '@/contexts/CartContext';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 
+const WHATSAPP_NUMBER = '5562998755213';
+
 const Cart = () => {
   const navigate = useNavigate();
   const { items, updateQuantity, removeItem, totalPrice } = useCart();
+
+  const sendToWhatsApp = () => {
+    const itemsText = items
+      .map(({ product, quantity, selectedSize }) => {
+        const sizeText = selectedSize ? ` (${selectedSize})` : '';
+        return `▪️ ${quantity}x ${product.name}${sizeText} — R$ ${(product.price * quantity).toFixed(2)}`;
+      })
+      .join('\n');
+    const msg =
+      `🛍️ *Olá Sam Esthetic!*\n\nQuero finalizar este pedido:\n\n${itemsText}\n\n` +
+      `💰 *Subtotal: R$ ${totalPrice.toFixed(2)}*\n\nAguardo retorno para combinar entrega e pagamento. Obrigado!`;
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+  };
 
   if (items.length === 0) {
     return (
@@ -99,27 +115,51 @@ const Cart = () => {
             <span className="text-sm text-muted-foreground font-medium">Total</span>
             <span className="text-2xl font-extrabold text-primary">R$ {totalPrice.toFixed(2)}</span>
           </div>
-          <button
-            onClick={() => navigate('/checkout')}
-            className="w-full bg-primary text-primary-foreground py-4 rounded-2xl font-bold active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg hover:bg-primary/90 flex items-center justify-center gap-2.5 text-[15px] tracking-wide"
-          >
-            Finalizar Pedido <ArrowRight size={17} strokeWidth={2.5} />
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={sendToWhatsApp}
+              className="bg-[#25D366] text-white py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-1.5 text-[13px]"
+            >
+              <img src={whatsappIcon} alt="" className="w-4 h-4" />
+              WhatsApp
+            </button>
+            <button
+              onClick={() => navigate('/checkout')}
+              className="bg-primary text-primary-foreground py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-1.5 text-[13px]"
+            >
+              Pagar Online <ArrowRight size={15} strokeWidth={2.5} />
+            </button>
+          </div>
+          <p className="text-[10px] text-center text-muted-foreground flex items-center justify-center gap-1">
+            <ShieldCheck size={11} /> Pix, Cartão ou WhatsApp · 100% seguro
+          </p>
         </div>
 
         {/* Desktop checkout footer */}
         <div className="hidden md:block px-4 mt-6">
-          <div className="bg-card rounded-2xl border border-border/60 p-5 shadow-card space-y-4">
+          <div className="bg-card rounded-2xl border border-border/60 p-5 shadow-card space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground font-medium">Total</span>
               <span className="text-2xl font-extrabold text-primary">R$ {totalPrice.toFixed(2)}</span>
             </div>
-            <button
-              onClick={() => navigate('/checkout')}
-              className="w-full bg-primary text-primary-foreground py-4 rounded-2xl font-bold active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg hover:bg-primary/90 flex items-center justify-center gap-2.5 text-[15px] tracking-wide"
-            >
-              Finalizar Pedido <ArrowRight size={17} strokeWidth={2.5} />
-            </button>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={sendToWhatsApp}
+                className="bg-[#25D366] text-white py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2 text-sm"
+              >
+                <img src={whatsappIcon} alt="" className="w-4 h-4" />
+                Comprar via WhatsApp
+              </button>
+              <button
+                onClick={() => navigate('/checkout')}
+                className="bg-primary text-primary-foreground py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2 text-sm"
+              >
+                Pagamento Online <ArrowRight size={15} strokeWidth={2.5} />
+              </button>
+            </div>
+            <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1.5 pt-1">
+              <ShieldCheck size={13} className="text-green-600" /> Compra 100% segura · Pix, Cartão ou WhatsApp
+            </p>
           </div>
         </div>
       </div>

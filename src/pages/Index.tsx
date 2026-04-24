@@ -10,6 +10,7 @@ import { products, categories } from '@/data/products';
 import ProductCard from '@/components/ProductCard';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
+import UrgencyBar from '@/components/UrgencyBar';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
+      <UrgencyBar />
       <Header />
 
       <div className="max-w-6xl mx-auto">
@@ -60,81 +62,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Promoções de Outono */}
-        <section className="mt-7 px-4">
-          <div className="flex items-center gap-2 mb-5">
-            <Leaf size={20} className="text-primary" />
-            <h2 className="text-lg font-bold text-foreground">🍂 Promoções de Outono — Edição Limitada</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Kit 1 — Master Beauty Set */}
-            <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden group cursor-pointer" onClick={() => navigate('/produto/kit-master-beauty-set')}>
-              <div className="overflow-hidden">
-                <img src={promoMaster} alt="Kit Master Beauty Set: O Poder do Olhar" className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-              </div>
-              <div className="p-4 space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">Edição Limitada</span>
-                  <Sparkles size={14} className="text-primary" />
-                </div>
-                <h3 className="text-base font-bold text-foreground leading-snug">Kit Master Beauty Set: O Poder do Olhar 👁️✨</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Mais que um kit, uma seleção estratégica para a Lash que deseja entregar resultados de elite. Reunimos o que há de melhor em tecnologia de fios e precisão de pinças.
-                </p>
-                <ul className="text-xs text-muted-foreground space-y-1.5">
-                  <li>💎 Mix de Fios Fadvan: 4D Duplo, YY e 6D</li>
-                  <li>💎 Pinças Nagaraku N-07 e NH-12</li>
-                  <li>💎 Cola One Cherry — retenção máxima</li>
-                  <li>💎 Espelho Princesa + descartáveis completos</li>
-                </ul>
-                <div className="flex items-center gap-3 pt-1">
-                  <span className="text-xs text-muted-foreground line-through">R$ 529,00</span>
-                  <span className="text-lg font-extrabold text-green-500">R$ 307,00</span>
-                </div>
-                <button
-                  className="block w-full text-center bg-primary text-primary-foreground font-bold text-sm py-3 rounded-xl hover:bg-primary/90 transition-colors"
-                >
-                  Comprar Agora
-                </button>
-              </div>
-            </div>
-
-            {/* Kit 2 — Coleção Protagonista */}
-            <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden group cursor-pointer" onClick={() => navigate('/produto/kit-colecao-protagonista')}>
-              <div className="overflow-hidden">
-                <img src={promoProtagonista} alt="Coleção Protagonista — Edição Alta Performance" className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-300" />
-              </div>
-              <div className="p-4 space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="bg-destructive/10 text-destructive text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full">Apenas 50 kits</span>
-                  <Sparkles size={14} className="text-destructive" />
-                </div>
-                <h3 className="text-base font-bold text-foreground leading-snug">Coleção Protagonista — Edição Alta Performance 🏆</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Chegou para elevar o nível dos seus atendimentos. Reunimos os materiais mais desejados pelas profissionais que não abrem mão de qualidade e acabamento impecável.
-                </p>
-                <ul className="text-xs text-muted-foreground space-y-1.5">
-                  <li>📦 Cílios Brasileiro YY (8mm, 10mm, 12mm)</li>
-                  <li>📦 Cílios 5D Fadvan W (8mm, 10mm, 12mm)</li>
-                  <li>📦 Cola HS 16 (3g) — Alta retenção</li>
-                  <li>📦 Pads, Microbrushes, Escovinhas, Lip Gloss</li>
-                  <li>📦 Fitas: Micropore branca + Transpore transparente</li>
-                </ul>
-                <div className="flex items-center gap-3 pt-1">
-                  <span className="text-xs text-muted-foreground line-through">R$ 489,90</span>
-                  <span className="text-lg font-extrabold text-green-500">R$ 297,00</span>
-                </div>
-                <button
-                  className="block w-full text-center bg-primary text-primary-foreground font-bold text-sm py-3 rounded-xl hover:bg-primary/90 transition-colors"
-                >
-                  Comprar Agora
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Featured */}
         <section className="mt-7 px-4">
           <div className="flex items-center justify-between mb-4">
@@ -144,8 +71,74 @@ const Index = () => {
             </button>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
-            {featured.map((p, i) => (
+            {featured.slice(0, 2).map((p, i) => (
               <ProductCard key={p.id} product={p} index={i} />
+            ))}
+
+            {/* Promo Kits — compactos, intercalados */}
+            <div className="col-span-2 sm:col-span-3 md:col-span-4 lg:col-span-5">
+              <div className="flex items-center gap-2 mb-3 mt-1">
+                <Leaf size={16} className="text-primary" />
+                <h3 className="text-sm font-bold text-foreground">🍂 Promoções de Outono</h3>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-accent">Edição Limitada</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {/* Kit 1 — Master Beauty Set */}
+                <div
+                  onClick={() => navigate('/produto/kit-master-beauty-set')}
+                  className="group bg-card rounded-xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer active:scale-[0.98] flex flex-col"
+                >
+                  <div className="relative aspect-square bg-muted overflow-hidden">
+                    <img src={promoMaster} alt="Kit Master Beauty Set" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                    <span className="absolute top-2 left-2 bg-primary text-primary-foreground text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow-sm">Kit Premium</span>
+                  </div>
+                  <div className="p-3 flex flex-col flex-1">
+                    <h4 className="text-[13px] font-semibold text-foreground line-clamp-2 leading-snug mb-1">Master Beauty Set 👁️✨</h4>
+                    <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">Fios Fadvan, Pinças Nagaraku, Cola Cherry + acessórios.</p>
+                    <div className="mt-auto">
+                      <span className="text-[10px] text-muted-foreground line-through">R$ 529,00</span>
+                      <div className="flex items-baseline gap-0.5">
+                        <span className="text-[11px] font-medium text-primary">R$</span>
+                        <span className="text-lg font-extrabold text-foreground leading-none">307</span>
+                        <span className="text-xs font-bold text-muted-foreground">,00</span>
+                      </div>
+                      <button className="mt-2 w-full bg-gradient-to-r from-accent to-primary text-white py-1.5 rounded-lg font-bold text-[11px] active:scale-95 transition-all">
+                        Comprar Kit
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Kit 2 — Coleção Protagonista */}
+                <div
+                  onClick={() => navigate('/produto/kit-colecao-protagonista')}
+                  className="group bg-card rounded-xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer active:scale-[0.98] flex flex-col"
+                >
+                  <div className="relative aspect-square bg-muted overflow-hidden">
+                    <img src={promoProtagonista} alt="Coleção Protagonista" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                    <span className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow-sm">Só 50 kits</span>
+                  </div>
+                  <div className="p-3 flex flex-col flex-1">
+                    <h4 className="text-[13px] font-semibold text-foreground line-clamp-2 leading-snug mb-1">Coleção Protagonista 🏆</h4>
+                    <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">Cílios YY + 5D, Cola HS 16, Pads, Microbrushes e mais.</p>
+                    <div className="mt-auto">
+                      <span className="text-[10px] text-muted-foreground line-through">R$ 489,90</span>
+                      <div className="flex items-baseline gap-0.5">
+                        <span className="text-[11px] font-medium text-primary">R$</span>
+                        <span className="text-lg font-extrabold text-foreground leading-none">297</span>
+                        <span className="text-xs font-bold text-muted-foreground">,00</span>
+                      </div>
+                      <button className="mt-2 w-full bg-gradient-to-r from-accent to-primary text-white py-1.5 rounded-lg font-bold text-[11px] active:scale-95 transition-all">
+                        Comprar Kit
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {featured.slice(2).map((p, i) => (
+              <ProductCard key={p.id} product={p} index={i + 2} />
             ))}
           </div>
         </section>

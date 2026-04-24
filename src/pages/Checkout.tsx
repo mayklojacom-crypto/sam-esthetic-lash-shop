@@ -59,18 +59,35 @@ const formatCEP = (value: string) => {
   return `${digits.slice(0, 5)}-${digits.slice(5)}`;
 };
 
+const VALID_COUPONS: Record<string, number> = {
+  RECUPERA10: 0.10,
+  VOLTA15: 0.15,
+};
+
+const CUSTOMER_KEY = 'sam-customer-data';
+
 const Checkout = () => {
   const navigate = useNavigate();
   const { items, totalPrice, clearCart } = useCart();
-  const [form, setForm] = useState({
-    name: '', cpf: '', email: '', phone: '',
-    cep: '', street: '', number: '', complement: '',
-    neighborhood: '', city: '', state: '', notes: ''
+  const [form, setForm] = useState(() => {
+    try {
+      const saved = localStorage.getItem(CUSTOMER_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch { /* ignore */ }
+    return {
+      name: '', cpf: '', email: '', phone: '',
+      cep: '', street: '', number: '', complement: '',
+      neighborhood: '', city: '', state: '', notes: ''
+    };
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loadingMP, setLoadingMP] = useState(false);
   const [loadingCEP, setLoadingCEP] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
+
+  // Coupon state
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
 
   // Shipping state
   const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
@@ -91,7 +108,29 @@ const Checkout = () => {
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollingStartRef = useRef<number>(0);
 
-  const finalTotal = totalPrice + (selectedShipping?.price || 0);
+  // Persist customer data on every change
+  useEffect(() => {
+    try {
+      localStorage.setItem(CUSTOMER_KEY, JSON.stringify(form));
+    } catch { /* ignore */ }
+  }, [form]);
+
+  const discountAmount = appliedCoupon ? totalPrice * appliedCoupon.discount : 0;
+  const finalTotal = totalPrice - discountAmount + (selectedShipping?.price || 0);
+
+  const applyCoupon = () => {
+    const code = couponInput.trim().toUpperCase();
+    if (!code) return;
+    const discount = VALID_COUPONS[code];
+    if (discount) {
+      setAppliedCoupon({ code, discount });
+      toast.success(`Cupom ${code} aplicado! Você economizou ${(discount * 100).toFixed(0)}% 🎉`);
+      setCouponInput('');
+    } else {
+      toast.error('Cupom inválido ou expirado');
+    }
+  };
+
 
   // Cleanup polling on unmount
   useEffect(() => {
@@ -763,11 +802,52 @@ const Checkout = () => {
                 })}
               </div>
 
+              {/* Cupom */}
+              <div className="border-t border-border mt-4 pt-4">
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900 rounded-lg px-3 py-2">
+                    <div>
+                      <p className="text-xs font-bold text-green-700 dark:text-green-400">✓ {appliedCoupon.code}</p>
+                      <p className="text-[10px] text-muted-foreground">{(appliedCoupon.discount * 100).toFixed(0)}% de desconto aplicado</p>
+                    </div>
+                    <button
+                      onClick={() => setAppliedCoupon(null)}
+                      className="text-xs text-destructive font-semibold hover:underline"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Cupom de desconto"
+                      value={couponInput}
+                      onChange={e => setCouponInput(e.target.value.toUpperCase())}
+                      onKeyDown={e => e.key === 'Enter' && applyCoupon()}
+                      className="flex-1 bg-background rounded-lg px-3 py-2 text-xs text-foreground border border-border outline-none focus:border-primary uppercase font-bold tracking-wider"
+                    />
+                    <button
+                      onClick={applyCoupon}
+                      className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary/90 transition-all"
+                    >
+                      Aplicar
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <div className="border-t border-border mt-4 pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Subtotal</span>
                   <span className="font-medium text-foreground">R$ {totalPrice.toFixed(2)}</span>
                 </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-green-600 font-semibold">Desconto ({appliedCoupon.code})</span>
+                    <span className="font-bold text-green-600">- R$ {discountAmount.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Frete</span>
                   {selectedShipping ? (
@@ -783,6 +863,9 @@ const Checkout = () => {
                   <span className="text-sm font-bold text-foreground">Total</span>
                   <span className="text-xl font-extrabold text-primary">R$ {finalTotal.toFixed(2)}</span>
                 </div>
+                <p className="text-[10px] text-muted-foreground text-center pt-1">
+                  ou em até 3x de R$ {(finalTotal / 3).toFixed(2)} sem juros
+                </p>
               </div>
 
               {/* Trust badges */}
