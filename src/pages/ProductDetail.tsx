@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ShoppingBag, Minus, Plus, Share2, Zap, Flame } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
-import { getProductBySlug, products } from '@/data/products';
+import { useProducts, useProductBySlug } from '@/hooks/useProducts';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import Header from '@/components/Header';
@@ -18,7 +18,8 @@ const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   
 
-  const product = slug ? getProductBySlug(slug) : undefined;
+  const { product, loading } = useProductBySlug(slug);
+  const { products } = useProducts();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -26,12 +27,19 @@ const ProductDetail = () => {
 
   const suggested = useMemo(() => {
     if (!product) return [];
-    // Same category first, then random others, exclude current
     const sameCategory = products.filter(p => p.id !== product.id && p.category === product.category);
     const others = products.filter(p => p.id !== product.id && p.category !== product.category);
     const shuffled = [...sameCategory.sort(() => Math.random() - 0.5), ...others.sort(() => Math.random() - 0.5)];
     return shuffled.slice(0, 8);
-  }, [product]);
+  }, [product, products]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground text-sm">Carregando...</div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (

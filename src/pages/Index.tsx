@@ -6,7 +6,8 @@ import whatsappIcon from '@/assets/whatsapp-icon.png';
 import HeroBannerCarousel from '@/components/HeroBannerCarousel';
 import promoMaster from '@/assets/promo-master-beauty.png';
 import promoProtagonista from '@/assets/promo-protagonista.png';
-import { products, categories } from '@/data/products';
+import { categories } from '@/data/products';
+import { useProducts } from '@/hooks/useProducts';
 import ProductCard from '@/components/ProductCard';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
@@ -14,6 +15,7 @@ import UrgencyBar from '@/components/UrgencyBar';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { products } = useProducts();
   const featured = products.filter(p => p.featured);
 
   // Track visit once per session

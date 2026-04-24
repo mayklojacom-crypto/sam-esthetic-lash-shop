@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { Search } from 'lucide-react';
-import { products, categories } from '@/data/products';
+import { categories } from '@/data/products';
+import { useProducts } from '@/hooks/useProducts';
 import ProductCard from '@/components/ProductCard';
 import CategoryFilter from '@/components/CategoryFilter';
 import Header from '@/components/Header';
@@ -25,6 +26,7 @@ const Catalog = () => {
   const initialCat = categoria || searchParams.get('cat') || 'todos';
   const [category, setCategory] = useState(initialCat);
   const [search, setSearch] = useState('');
+  const { products } = useProducts();
 
   useEffect(() => {
     if (categoria) {
@@ -49,7 +51,7 @@ const Catalog = () => {
       const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
       return matchCat && matchSearch;
     });
-  }, [category, search]);
+  }, [category, search, products]);
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-8">
