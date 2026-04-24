@@ -11,8 +11,26 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Search, Pencil, Trash2, Upload, Package, ChevronUp, ChevronDown, ImagePlus, X } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, Upload, Package, ImagePlus, X, GripVertical } from 'lucide-react';
 import { categories } from '@/data/products';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface DBProduct {
   id: string;
@@ -45,6 +63,92 @@ const emptyProduct: Omit<DBProduct, 'id'> = {
   sort_order: 0,
 };
 
+interface SortableRowProps {
+  product: DBProduct;
+  catLabel: (id: string) => string;
+  onEdit: () => void;
+  onDelete: () => void;
+  onToggleActive: (active: boolean) => void;
+}
+
+const SortableProductRow = ({ product: p, catLabel, onEdit, onDelete, onToggleActive }: SortableRowProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: p.id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 'auto',
+    opacity: isDragging ? 0.85 : 1,
+  };
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex flex-col md:grid md:grid-cols-[32px_48px_1fr_120px_100px_140px_100px] gap-2 items-center px-3 py-2 rounded-lg border bg-white hover:bg-slate-50 transition-colors ${!p.active ? 'opacity-60 bg-slate-50' : ''} ${isDragging ? 'shadow-lg border-primary' : 'border-slate-100'}`}
+    >
+      {/* Drag handle */}
+      <button
+        {...attributes}
+        {...listeners}
+        className="touch-none cursor-grab active:cursor-grabbing p-1 rounded hover:bg-slate-200 text-slate-400 self-start md:self-center"
+        aria-label="Arrastar"
+      >
+        <GripVertical size={18} />
+      </button>
+
+      {/* Image */}
+      <img
+        src={p.image}
+        alt={p.name}
+        className="w-10 h-10 object-contain rounded border border-slate-200 bg-slate-50 flex-shrink-0"
+        onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
+      />
+
+      {/* Name + mobile info */}
+      <div className="flex-1 min-w-0 w-full">
+        <p className="text-sm font-medium text-slate-900 truncate">{p.name}</p>
+        <div className="flex items-center gap-2 md:hidden mt-0.5">
+          <span className="text-xs text-slate-500">{catLabel(p.category)}</span>
+          <span className="text-xs font-semibold text-slate-800">R$ {Number(p.price).toFixed(2)}</span>
+          {p.featured && <Badge className="bg-primary text-[10px] px-1 py-0 h-4">Destaque</Badge>}
+        </div>
+      </div>
+
+      {/* Category - desktop */}
+      <span className="hidden md:block text-xs text-slate-600 truncate">{catLabel(p.category)}</span>
+
+      {/* Price - desktop */}
+      <span className="hidden md:block text-sm font-semibold text-slate-900">R$ {Number(p.price).toFixed(2)}</span>
+
+      {/* Active toggle (sempre visível) */}
+      <div className="flex items-center gap-2 self-start md:self-center w-full md:w-auto">
+        <Switch
+          checked={p.active}
+          onCheckedChange={onToggleActive}
+        />
+        <span className={`text-xs font-medium ${p.active ? 'text-emerald-600' : 'text-slate-400'}`}>
+          {p.active ? 'Ativo' : 'Inativo'}
+        </span>
+        {p.featured && <Badge className="bg-primary text-[10px] px-1.5 py-0 h-5 hidden md:inline-flex ml-1">Destaque</Badge>}
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-1 justify-end self-start md:self-center">
+        <Button size="icon" variant="ghost" className="h-8 w-8" onClick={onEdit}>
+          <Pencil size={14} />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-8 w-8 text-red-500 hover:text-red-700"
+          onClick={onDelete}
+        >
+          <Trash2 size={14} />
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 const AdminProducts = () => {
   const { token } = useAdminAuth();
   const [products, setProducts] = useState<DBProduct[]>([]);
@@ -56,6 +160,12 @@ const AdminProducts = () => {
   const [seeding, setSeeding] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -116,36 +226,48 @@ const AdminProducts = () => {
     }
   };
 
-  const handleReorder = async (productId: string, direction: 'up' | 'down') => {
-    const idx = products.findIndex(p => p.id === productId);
-    if (idx < 0) return;
-    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
-    if (swapIdx < 0 || swapIdx >= products.length) return;
+  const handleToggleActive = async (product: DBProduct, active: boolean) => {
+    // Optimistic
+    setProducts(prev => prev.map(p => p.id === product.id ? { ...p, active } : p));
+    try {
+      const { error } = await supabase.functions.invoke(`admin-products?action=update`, {
+        headers: { Authorization: `Bearer ${token}` },
+        body: { id: product.id, active },
+      });
+      if (error) throw error;
+      toast({ title: active ? 'Produto ativado' : 'Produto desativado' });
+    } catch {
+      // Revert
+      setProducts(prev => prev.map(p => p.id === product.id ? { ...p, active: !active } : p));
+      toast({ title: 'Erro ao alterar status', variant: 'destructive' });
+    }
+  };
 
-    const current = products[idx];
-    const swap = products[swapIdx];
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIdx = products.findIndex(p => p.id === active.id);
+    const newIdx = products.findIndex(p => p.id === over.id);
+    if (oldIdx < 0 || newIdx < 0) return;
+
+    const reordered = arrayMove(products, oldIdx, newIdx);
+    // Reassign sort_order sequentially
+    const updates = reordered.map((p, i) => ({ ...p, sort_order: i }));
+    setProducts(updates);
 
     try {
-      // Swap sort_order values
-      await Promise.all([
-        supabase.functions.invoke(`admin-products?action=update`, {
-          headers: { Authorization: `Bearer ${token}` },
-          body: { id: current.id, sort_order: swap.sort_order },
-        }),
-        supabase.functions.invoke(`admin-products?action=update`, {
-          headers: { Authorization: `Bearer ${token}` },
-          body: { id: swap.id, sort_order: current.sort_order },
-        }),
-      ]);
-
-      // Optimistic update
-      const updated = [...products];
-      updated[idx] = { ...current, sort_order: swap.sort_order };
-      updated[swapIdx] = { ...swap, sort_order: current.sort_order };
-      updated.sort((a, b) => a.sort_order - b.sort_order);
-      setProducts(updated);
+      await Promise.all(
+        updates.map(p =>
+          supabase.functions.invoke(`admin-products?action=update`, {
+            headers: { Authorization: `Bearer ${token}` },
+            body: { id: p.id, sort_order: p.sort_order },
+          })
+        )
+      );
     } catch {
       toast({ title: 'Erro ao reordenar', variant: 'destructive' });
+      fetchProducts();
     }
   };
 
@@ -282,94 +404,37 @@ const AdminProducts = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-1">
-          {/* Header - hidden on mobile */}
-          <div className="hidden md:grid md:grid-cols-[60px_48px_1fr_120px_120px_100px_120px] gap-2 px-3 py-2 text-xs font-medium text-slate-500 uppercase">
-            <span>Ordem</span>
-            <span>Foto</span>
-            <span>Nome</span>
-            <span>Categoria</span>
-            <span>Preço</span>
-            <span>Status</span>
-            <span className="text-right">Ações</span>
-          </div>
-
-          {products.map((p, idx) => (
-            <div
-              key={p.id}
-              className={`flex flex-col md:grid md:grid-cols-[60px_48px_1fr_120px_120px_100px_120px] gap-2 items-center px-3 py-2 rounded-lg border border-slate-100 bg-white hover:bg-slate-50 transition-colors ${!p.active ? 'opacity-50' : ''}`}
-            >
-              {/* Sort buttons */}
-              <div className="flex md:flex-col items-center gap-0.5 self-start md:self-center">
-                <button
-                  onClick={() => handleReorder(p.id, 'up')}
-                  disabled={idx === 0}
-                  className="p-0.5 rounded hover:bg-slate-200 disabled:opacity-20 disabled:cursor-not-allowed"
-                >
-                  <ChevronUp size={16} className="text-slate-600" />
-                </button>
-                <span className="text-[10px] text-slate-400 w-5 text-center">{p.sort_order}</span>
-                <button
-                  onClick={() => handleReorder(p.id, 'down')}
-                  disabled={idx === products.length - 1}
-                  className="p-0.5 rounded hover:bg-slate-200 disabled:opacity-20 disabled:cursor-not-allowed"
-                >
-                  <ChevronDown size={16} className="text-slate-600" />
-                </button>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={products.map(p => p.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-1">
+              {/* Header - hidden on mobile */}
+              <div className="hidden md:grid md:grid-cols-[32px_48px_1fr_120px_100px_140px_100px] gap-2 px-3 py-2 text-xs font-medium text-slate-500 uppercase">
+                <span></span>
+                <span>Foto</span>
+                <span>Nome</span>
+                <span>Categoria</span>
+                <span>Preço</span>
+                <span>Ativo</span>
+                <span className="text-right">Ações</span>
               </div>
 
-              {/* Image */}
-              <img
-                src={p.image}
-                alt={p.name}
-                className="w-10 h-10 md:w-10 md:h-10 object-contain rounded border border-slate-200 bg-slate-50 flex-shrink-0"
-                onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
-              />
-
-              {/* Name + mobile info */}
-              <div className="flex-1 min-w-0 w-full">
-                <p className="text-sm font-medium text-slate-900 truncate">{p.name}</p>
-                <div className="flex items-center gap-2 md:hidden mt-0.5">
-                  <span className="text-xs text-slate-500">{catLabel(p.category)}</span>
-                  <span className="text-xs font-semibold text-slate-800">R$ {Number(p.price).toFixed(2)}</span>
-                  {p.featured && <Badge className="bg-primary text-[10px] px-1 py-0 h-4">Destaque</Badge>}
-                </div>
-              </div>
-
-              {/* Category - desktop */}
-              <span className="hidden md:block text-xs text-slate-600 truncate">{catLabel(p.category)}</span>
-
-              {/* Price - desktop */}
-              <span className="hidden md:block text-sm font-semibold text-slate-900">R$ {Number(p.price).toFixed(2)}</span>
-
-              {/* Status - desktop */}
-              <div className="hidden md:flex gap-1 flex-wrap">
-                {p.featured && <Badge className="bg-primary text-[10px] px-1.5 py-0 h-5">Destaque</Badge>}
-                {!p.active && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5">Inativo</Badge>}
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-1 justify-end self-start md:self-center">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8"
-                  onClick={() => setEditProduct({ ...p })}
-                >
-                  <Pencil size={14} />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 text-red-500 hover:text-red-700"
-                  onClick={() => handleDelete(p.id)}
-                >
-                  <Trash2 size={14} />
-                </Button>
-              </div>
+              {products.map((p) => (
+                <SortableProductRow
+                  key={p.id}
+                  product={p}
+                  catLabel={catLabel}
+                  onEdit={() => setEditProduct({ ...p })}
+                  onDelete={() => handleDelete(p.id)}
+                  onToggleActive={(v) => handleToggleActive(p, v)}
+                />
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       {/* Edit Dialog */}
