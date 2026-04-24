@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import bannerEntrega from '@/assets/banner-entrega-45min.png';
 import bannerMasterBeauty from '@/assets/banner-master-beauty.jpg';
 import heroBanner from '@/assets/hero-banner.jpg';
 
 const banners = [
+  { src: bannerEntrega, alt: 'Entregamos em até 45 minutos em Goiânia e Aparecida de Goiânia — Peça agora', link: '/catalogo' },
   { src: bannerMasterBeauty, alt: 'Kit Master Beauty Set — Outono Premium Lash Collection', link: '/produto/kit-master-beauty-set' },
   { src: heroBanner, alt: 'Bem-Vinda à SAM Esthetic — Sua Fonte de Materiais Premium', link: '/catalogo' },
 ];
