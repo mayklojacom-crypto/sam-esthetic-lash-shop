@@ -36,12 +36,21 @@
 
     --radius: 0.75rem;
 
+    /* Lash Girly palette add-ons */
+    --peach: 20 90% 88%;
+    --lilac: 285 70% 92%;
+    --cream: 35 60% 97%;
+    --gold-soft: 42 85% 70%;
+    --pink-soft: 340 90% 92%;
+
     --gradient-primary: linear-gradient(135deg, hsl(272 60% 45%), hsl(310 65% 50%));
     --gradient-accent: linear-gradient(135deg, hsl(330 75% 55%), hsl(350 80% 60%));
     --gradient-gold: linear-gradient(135deg, hsl(40 80% 55%), hsl(35 90% 65%));
+    --gradient-girly: linear-gradient(135deg, hsl(var(--pink-soft)), hsl(var(--lilac)) 60%, hsl(var(--peach)));
     --shadow-glow: 0 4px 30px -5px hsl(272 60% 45% / 0.25);
     --shadow-card: 0 2px 20px -4px hsl(270 20% 50% / 0.1);
     --shadow-elevated: 0 8px 40px -8px hsl(270 20% 50% / 0.2);
+    --shadow-pink: 0 8px 30px -8px hsl(330 75% 65% / 0.35);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -163,4 +172,27 @@
   .stagger-4 { animation-delay: 0.2s; }
   .stagger-5 { animation-delay: 0.25s; }
   .stagger-6 { animation-delay: 0.3s; }
+
+  .font-hand { font-family: 'Caveat', cursive; }
+  .gradient-girly { background: var(--gradient-girly); }
+  .shadow-pink { box-shadow: var(--shadow-pink); }
+  .bg-cream { background-color: hsl(var(--cream)); }
+  .bg-lilac { background-color: hsl(var(--lilac)); }
+  .bg-peach { background-color: hsl(var(--peach)); }
+  .bg-pink-soft { background-color: hsl(var(--pink-soft)); }
+
+  /* Sticker "coladinho" — leve rotação + sombra suave */
+  .sticker {
+    filter: drop-shadow(0 3px 6px hsl(330 40% 40% / 0.25));
+    pointer-events: none;
+    user-select: none;
+  }
+  .sticker-tilt-l { transform: rotate(-12deg); }
+  .sticker-tilt-r { transform: rotate(10deg); }
+
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(-6deg); }
+    50% { transform: rotate(6deg); }
+  }
+  .animate-wiggle { animation: wiggle 3s ease-in-out infinite; transform-origin: center; }
 }
