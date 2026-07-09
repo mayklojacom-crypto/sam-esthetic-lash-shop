@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Poppins', 'sans-serif'],
+        hand: ['Caveat', 'cursive'],
       },
       colors: {
         border: "hsl(var(--border))",
