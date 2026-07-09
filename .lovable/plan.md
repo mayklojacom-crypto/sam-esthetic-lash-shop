@@ -1,57 +1,35 @@
+## Objetivo
+Transformar a seção "Destaques" da home num mini-catálogo rico, com muitos produtos organizados e fáceis de navegar — sem quebrar o restante da página.
 
+## O que muda na Home (`src/pages/Index.tsx`)
 
-# Importar Catálogo Completo com 45% de Lucro
+1. **Seção "🔥 Destaques" turbinada**
+   - Mostrar **todos os produtos marcados como `featured`** (hoje o `.slice(0,2)` + `.slice(2)` limita visualmente o fluxo por causa dos kits no meio).
+   - Layout em grid responsivo: 2 colunas mobile, 3 sm, 4 md, 5 lg.
+   - Kits promocionais (Master Beauty + Protagonista) saem do meio do grid e viram uma **faixa própria** logo acima, com destaque visual — não competem mais com os cards de produto.
 
-## Resumo
-Extrair todos os produtos dos dois catálogos Word, aplicar 45% de margem sobre o preço de custo, copiar as imagens dos documentos para o projeto, e atualizar `src/data/products.ts` com ~130 novos produtos.
+2. **Novas seções por categoria (mini-catálogo na home)**
+   Abaixo dos destaques, adicionar carrosséis horizontais por categoria, cada um com título + "Ver todos →":
+   - Cílios
+   - Colas & Removedores
+   - Pinças & Acessórios
+   - Unhas / Nail
+   - (as categorias existentes em `src/data/products.ts` — mostro só as que têm produtos)
+   
+   Cada linha usa scroll horizontal no mobile (padrão que já existe em Categorias) e grid no desktop, com **8 produtos por categoria** e botão "Ver todos" que leva para `/catalogo?cat=<id>`.
 
-## Fórmula de Preço
-`preço de venda = custo × 1.45` (arredondado para .99 ou .50)
+3. **CTA final** "Ver catálogo completo" grande, levando para `/catalogo`.
 
-Exemplo: Cola HS16 custa R$50 → venda R$72.50
+## O que NÃO muda
+- Header, UrgencyBar, HeroBannerCarousel, TrustBar, Categorias, Info Cards, Footer, BottomNav — tudo permanece igual.
+- Página `/catalogo`, ProductCard, hook `useProducts` — sem alterações.
+- Nenhuma mudança no banco / produtos / lógica de negócio.
 
-## Novas Categorias
-Adicionar ao array `categories`:
-- **pincas** — Pinças
-- **sobrancelhas** — Sobrancelhas
-- **lash-lift** — Lash Lift
-- **treino** — Treino
+## Detalhes técnicos
+- Usar `useProducts()` já existente e derivar listas em memória: `featured`, e `byCategory = groupBy(products, 'category')`.
+- Reaproveitar `<ProductCard />` para consistência visual.
+- Novo subcomponente inline `CategoryRow` (título + grid/scroll + link "Ver todos") dentro do próprio `Index.tsx` para manter simples; se crescer, extrair para `src/components/CategoryRow.tsx`.
+- Usar `categories` de `src/data/products.ts` para os rótulos e ordem.
 
-## Produtos Extraídos
-
-### Catálogo Cílios (~40 produtos)
-Marcas: Nagaraku, Fadvan, Decemars, Maria Sasha. Inclui variações Individual/Mix, curvaturas D/C/L/M, cores Preto/Marrom, e modelos Y/W 3D-6D.
-
-### Catálogo Acessórios (~90 produtos)
-Categorias: Colas (Cherry, Sobelle, Macy, Ôxe), Descartáveis (pads, escovinhas, anéis, microbrush), Ferramentas (higrômetro, pisseta, suportes, espelhos, pinças Nagaraku), Líquidos (espumas, primers, removedores, aceleradores, finalizadores), Sobrancelhas (Depil Bella, hennas Glance/Menela/Della&Delle, ceras), Lash Lift (kits, passos, brow lamination), Treino (cabeça boneca, esponja, suporte facial, cílios treino).
-
-## Alterações Técnicas
-
-### 1. Copiar imagens dos documentos
-- Copiar ~130 imagens de `parsed-documents://` para `public/products/`
-- Nomear com slugs consistentes (ex: `nagaraku-volume-russo-individual.jpg`)
-
-### 2. Atualizar `src/data/products.ts`
-- Adicionar 4 novas categorias
-- Atualizar preços dos 10 produtos existentes com base nos custos reais dos catálogos + 45%
-- Adicionar ~120 novos produtos com: id, slug, name, price (custo×1.45), image, category, description, sizes (quando aplicável), weight
-- Marcar os mais populares como `featured: true`
-
-### 3. Atualizar `public/sitemap.xml`
-- Adicionar URLs das novas páginas de produto
-
-## Produtos Existentes que Serão Atualizados
-| Produto | Preço Atual | Custo Catálogo | Novo Preço (×1.45) |
-|---------|------------|----------------|-------------------|
-| Cola HS16 3ml | R$63.99 | R$50 | R$72.50 |
-| Pads Gel 50 pares | R$18.50 | R$10 | R$14.50 |
-| Microbrush 50 uni | R$8.99 | R$3.50 | R$5.08 |
-| Aplicador Gloss 50 uni | R$8.99 | R$3.50 | R$5.08 |
-| Anel Batoque 50 uni | R$13.00 | R$9 | R$13.05 |
-| Fita Transpore | R$4.00 | R$3 | R$4.35 |
-
-**Nota importante:** Alguns preços atuais no site (ex: Microbrush R$8.99) ficariam menores com a fórmula de 45% (R$5.08). Preciso de confirmação se devo manter os preços atuais maiores ou substituir pelo cálculo de 45%.
-
-## Observação sobre Imagens
-As imagens extraídas dos documentos Word são fotos de catálogo. Serão usadas como placeholder. Você pode substituí-las depois por fotos profissionais de melhor qualidade.
-
+## Resultado esperado
+Home vira uma vitrine navegável: destaques cheios, kits em destaque próprio, e uma "prateleira" por categoria — cliente encontra mais produto sem precisar entrar no catálogo.
