@@ -18,7 +18,7 @@ const WelcomeStrip = () => {
   }, []);
 
   return (
-    <div className="md:hidden mx-4 mt-3 rounded-2xl gradient-girly px-4 py-3 flex items-center gap-3 shadow-pink relative overflow-hidden">
+    <div className="mx-4 mt-3 rounded-2xl gradient-girly px-4 py-3 flex items-center gap-3 shadow-pink relative overflow-hidden">
       <img
         src={lashzinha}
         alt=""
