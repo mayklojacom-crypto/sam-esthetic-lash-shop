@@ -1,14 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import bannerEntrega from '@/assets/banner-entrega-45min.png';
-import bannerMasterBeauty from '@/assets/banner-master-beauty.jpg';
-import heroBanner from '@/assets/hero-banner.jpg';
+import bannerAgenda from '@/assets/banner-agenda-continuar.png.asset.json';
+import bannerPedeRecebe from '@/assets/banner-pede-recebe-hoje.png.asset.json';
+import bannerQueridinhas from '@/assets/banner-queridinhas-colas.png.asset.json';
 
 const banners = [
-  { src: bannerEntrega, alt: 'Entregamos em até 45 minutos em Goiânia e Aparecida de Goiânia — Peça agora', link: '/catalogo' },
-  { src: bannerMasterBeauty, alt: 'Kit Master Beauty Set — Outono Premium Lash Collection', link: '/produto/kit-master-beauty-set' },
-  { src: heroBanner, alt: 'Bem-Vinda à SAM Esthetic — Sua Fonte de Materiais Premium', link: '/catalogo' },
+  { src: bannerAgenda.url, alt: 'Tudo para sua agenda continuar — materiais profissionais de cílios com entrega local no mesmo dia em Goiânia', link: '/catalogo' },
+  { src: bannerPedeRecebe.url, alt: 'Pede agora e recebe hoje — cílios, colas e pinças com envio imediato em Goiânia', link: '/catalogo' },
+  { src: bannerQueridinhas.url, alt: 'As queridinhas da lash — colas profissionais com entrega local no mesmo dia', link: '/catalogo?cat=colas' },
 ];
 
 const HeroBannerCarousel = () => {
