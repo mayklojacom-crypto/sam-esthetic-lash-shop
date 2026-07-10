@@ -23,6 +23,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
 import AdminOrders from "./pages/admin/AdminOrders.tsx";
 import AdminOrderDetail from "./pages/admin/AdminOrderDetail.tsx";
 import AdminProducts from "./pages/admin/AdminProducts.tsx";
+import AdminBanners from "./pages/admin/AdminBanners.tsx";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const App = () => (
                 <Route path="pedidos" element={<AdminOrders />} />
                 <Route path="pedidos/:id" element={<AdminOrderDetail />} />
                 <Route path="produtos" element={<AdminProducts />} />
+                <Route path="banners" element={<AdminBanners />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
