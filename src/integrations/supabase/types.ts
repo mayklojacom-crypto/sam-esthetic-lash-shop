@@ -35,6 +35,42 @@ export type Database = {
         }
         Relationships: []
       }
+      banners: {
+        Row: {
+          active: boolean
+          alt: string
+          created_at: string
+          id: string
+          image_url: string
+          link: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          alt?: string
+          created_at?: string
+          id?: string
+          image_url: string
+          link?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          alt?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          link?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       daily_visits: {
         Row: {
           id: string

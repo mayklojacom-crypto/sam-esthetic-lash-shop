@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingBag, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, Image as ImageIcon, LogOut, Menu, X } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -8,6 +8,7 @@ const navItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/admin/pedidos', icon: Package, label: 'Pedidos' },
   { path: '/admin/produtos', icon: ShoppingBag, label: 'Produtos' },
+  { path: '/admin/banners', icon: ImageIcon, label: 'Banners' },
 ];
 
 const AdminSidebar = () => {
