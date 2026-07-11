@@ -24,6 +24,7 @@ import AdminOrders from "./pages/admin/AdminOrders.tsx";
 import AdminOrderDetail from "./pages/admin/AdminOrderDetail.tsx";
 import AdminProducts from "./pages/admin/AdminProducts.tsx";
 import AdminBanners from "./pages/admin/AdminBanners.tsx";
+import VisitorTracker from "./components/VisitorTracker.tsx";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <VisitorTracker />
             <DeliveryTickerBar />
             <Routes>
               <Route path="/" element={<Index />} />

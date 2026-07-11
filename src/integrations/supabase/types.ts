@@ -89,6 +89,24 @@ export type Database = {
         }
         Relationships: []
       }
+      live_visitors: {
+        Row: {
+          created_at: string
+          last_seen: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          last_seen?: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          last_seen?: string
+          session_id?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           created_at: string
@@ -197,6 +215,27 @@ export type Database = {
           sort_order?: number
           updated_at?: string
           weight?: number | null
+        }
+        Relationships: []
+      }
+      visitor_peaks: {
+        Row: {
+          id: string
+          peak_count: number
+          peak_date: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          peak_count?: number
+          peak_date?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          peak_count?: number
+          peak_date?: string
+          updated_at?: string
         }
         Relationships: []
       }
