@@ -1,26 +1,63 @@
-## Trocar os banners do hero pelos 3 novos
+# Dashboard organizado com filtro de período e visitantes ao vivo
 
-Substituir os 3 banners atuais do `HeroBannerCarousel` pelos que você acabou de enviar e ajustar os links de cada um pra levar pro lugar certo.
+## O que vai mudar
 
-### Novos banners e destinos
-1. **`ChatGPT_Image_9_de_jul._de_2026_19_09_58.png`** — "Tudo para sua agenda continuar" → leva pra `/catalogo` (catálogo geral)
-2. **`image-3.png`** — "Pede agora e recebe hoje" → leva pra `/catalogo` (catálogo geral, foco em entrega local)
-3. **`image-4.png`** — "As queridinhas da lash" (colas) → leva pra `/catalogo?cat=colas` (categoria colas)
+### 1. Filtro de período no Dashboard
+Adicionar um seletor no topo do dashboard para controlar o intervalo dos gráficos e cards:
 
-### O que vou fazer
-1. Subir as 3 imagens como assets via `lovable-assets` (CDN, sem inchar o repo) e gerar os `.asset.json` em `src/assets/`.
-2. Editar `src/components/HeroBannerCarousel.tsx`:
-   - Remover os imports antigos (`banner-entrega-45min.png`, `banner-master-beauty.jpg`, `hero-banner.jpg`).
-   - Importar os 3 novos asset pointers e usar `.url` no `<img src>`.
-   - Atualizar `alt` de cada banner (SEO + acessibilidade em PT-BR descrevendo a imagem).
-   - Atualizar os `link` de cada slide conforme a tabela acima.
-3. Manter o comportamento atual: autoplay 5s, setas no hover, dots, click navega pra rota.
-4. Não mexer em nada mais — stickers, WelcomeStrip, Trust Bar, seções, footer permanecem iguais.
+- **Hoje**
+- **Últimos 7 dias** (padrão atual)
+- **Últimos 14 dias**
+- **Últimos 30 dias**
+- **Personalizado** (escolher data inicial e final via calendário)
 
-### Arquivos afetados
-- `src/components/HeroBannerCarousel.tsx` (edição)
-- `src/assets/banner-agenda-continuar.png.asset.json` (novo)
-- `src/assets/banner-pede-recebe-hoje.png.asset.json` (novo)
-- `src/assets/banner-queridinhas-colas.png.asset.json` (novo)
+Ao trocar o período, TODOS os dados reagem:
+- Cards de "Total de Vendas", "Total de Pedidos" passam a refletir o período selecionado (com comparação vs período anterior — ex: "+12% vs período anterior")
+- Gráfico de Pedidos mostra o intervalo escolhido
+- Gráfico de Visitas mostra o intervalo escolhido (não mais fixo em 14 dias)
+- "Últimos Pedidos" continua mostrando os 5 mais recentes (independente do filtro)
 
-Não vou apagar os banners antigos do disco por enquanto (caso queira reaproveitar em outro lugar), mas eles saem do carrossel.
+### 2. Visitantes ao vivo
+Novo card em destaque no topo do dashboard mostrando **quantas pessoas estão no site AGORA** (últimos 2 minutos de atividade), com um indicador verde pulsante.
+
+Detalhes:
+- O site já rastreia visitas diárias. Vou estender para rastrear "presença" em tempo real via heartbeat: cada visitante envia um ping a cada 30s enquanto está com a aba aberta.
+- O dashboard atualiza esse número automaticamente a cada 15 segundos.
+- Mostra também "pico de hoje" (maior número simultâneo registrado no dia).
+
+### 3. Organização visual
+- Reorganizar o topo: **linha 1** = filtro de período + card de visitantes ao vivo em destaque.
+- **Linha 2** = os 4 cards de estatísticas (agora com variação % vs período anterior).
+- **Linha 3** = gráficos (pedidos + visitas).
+- **Linha 4** = últimos pedidos.
+
+Tudo mantendo o visual atual (cards brancos, sombras suaves, cores existentes).
+
+## Detalhes técnicos
+
+**Backend (Lovable Cloud):**
+- Nova tabela `live_visitors` com colunas: `session_id` (uuid), `last_seen` (timestamptz), `created_at`. RLS pública para insert/update via edge function.
+- Edge function `track-visit` estendida para aceitar `session_id` e atualizar `last_seen` (upsert). Continua incrementando `daily_visits` só no primeiro ping da sessão no dia.
+- Nova edge function `live-visitors-count` (pública) que retorna: `{ online: N, peakToday: M }` — contando sessões com `last_seen > now() - 2min`.
+- Edge function `admin-orders?action=dashboard` recebe parâmetros `from` e `to` (ISO date) e retorna:
+  - `totalRevenue`, `totalOrders` no período + variação % vs período anterior de mesmo tamanho
+  - `ordersByDay` e `visitsByDay` no intervalo escolhido
+  - `latestOrders` (sempre os 5 mais recentes, sem filtro)
+
+**Frontend:**
+- `src/pages/admin/AdminDashboard.tsx`: adicionar estado `period` (preset ou custom range), seletor no topo (Shadcn Select + Calendar/DateRangePicker para custom), refetch quando muda.
+- Novo componente `src/components/admin/LiveVisitorsCard.tsx` — faz polling a cada 15s na função `live-visitors-count`.
+- Novo hook `src/hooks/useVisitorHeartbeat.ts` — usado em `App.tsx` ou `Index.tsx` para pingar a cada 30s enquanto a aba está ativa (pausa se `document.hidden`). Gera/persiste `session_id` em `sessionStorage`.
+
+**Arquivos a criar/editar:**
+- Migração: criar tabela `live_visitors` com GRANTs e RLS
+- `supabase/functions/track-visit/index.ts` (editar — aceitar session_id + upsert)
+- `supabase/functions/live-visitors-count/index.ts` (novo)
+- `supabase/functions/admin-orders/index.ts` (editar dashboard action com from/to + comparação)
+- `src/hooks/useVisitorHeartbeat.ts` (novo)
+- `src/components/admin/LiveVisitorsCard.tsx` (novo)
+- `src/pages/admin/AdminDashboard.tsx` (editar — filtro + reorganizar)
+- `src/App.tsx` (editar — plugar o heartbeat globalmente)
+
+## Fora deste escopo
+- Ver **quem** está online (páginas específicas, cidades, etc.) — só o número agregado. Se quiser detalhes por página depois, faço numa segunda etapa.
