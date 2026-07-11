@@ -320,7 +320,7 @@ const Checkout = () => {
     return parts.join(', ');
   };
 
-  const handleWhatsApp = () => {
+  const handleWhatsApp = async () => {
     const data = validate();
     if (!data) return;
 
@@ -347,6 +347,25 @@ const Checkout = () => {
       `\n*Itens:*\n${itemsList}\n\n` +
       `${shippingText}\n` +
       `💰 *Total: R$ ${finalTotal.toFixed(2)}*`;
+
+    // Save lead (fire-and-forget — não bloqueia a ida ao WhatsApp)
+    try {
+      await supabase.functions.invoke('create-lead', {
+        body: {
+          customer_name: data.name,
+          customer_phone: data.phone,
+          items: items.map(i => ({
+            name: i.product.name,
+            quantity: i.quantity,
+            price: i.product.price,
+            size: i.selectedSize || null,
+          })),
+          total: finalTotal,
+        },
+      });
+    } catch {
+      // ignora — não bloqueia o fluxo do cliente
+    }
 
     const encoded = encodeURIComponent(message);
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`, '_blank');
