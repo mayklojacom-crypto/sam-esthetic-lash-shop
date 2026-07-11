@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Package, DollarSign, ShoppingCart, Eye, TrendingUp, TrendingDown, CalendarIcon } from 'lucide-react';
+import { Package, DollarSign, ShoppingCart, Eye, TrendingUp, TrendingDown, CalendarIcon, MessageCircle, Target } from 'lucide-react';
 import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
 } from 'recharts';
@@ -110,6 +110,13 @@ const AdminDashboard = () => {
       }))
     : [];
 
+  const leadsChartData = stats?.leadsByDay
+    ? Object.entries(stats.leadsByDay).map(([date, count]) => ({
+        date: format(new Date(date + 'T12:00:00'), 'dd/MM'),
+        leads: count as number,
+      }))
+    : [];
+
   const formatDelta = (delta: number | undefined) => {
     if (delta === undefined || delta === null || !isFinite(delta)) return null;
     const rounded = Math.round(delta);
@@ -127,7 +134,16 @@ const AdminDashboard = () => {
       delta: formatDelta(stats?.revenueDelta),
     },
     {
-      label: 'Pedidos',
+      label: 'Pedidos iniciados',
+      value: stats?.totalLeads || 0,
+      subtitle: 'Clicaram no WhatsApp',
+      icon: MessageCircle,
+      iconBg: 'bg-emerald-100',
+      iconColor: 'text-emerald-600',
+      delta: formatDelta(stats?.leadsDelta),
+    },
+    {
+      label: 'Pedidos pagos (Pix)',
       value: stats?.totalOrders || 0,
       icon: ShoppingCart,
       iconBg: 'bg-blue-100',
@@ -135,9 +151,10 @@ const AdminDashboard = () => {
       delta: formatDelta(stats?.ordersDelta),
     },
     {
-      label: 'Pedidos hoje',
-      value: stats?.todayOrders || 0,
-      icon: Package,
+      label: 'Taxa de conversão',
+      value: `${(stats?.conversionRate || 0).toFixed(1)}%`,
+      subtitle: 'Pedidos / Visitas',
+      icon: Target,
       iconBg: 'bg-purple-100',
       iconColor: 'text-purple-600',
     },
@@ -149,6 +166,13 @@ const AdminDashboard = () => {
       iconBg: 'bg-orange-100',
       iconColor: 'text-orange-600',
       delta: formatDelta(stats?.visitsDelta),
+    },
+    {
+      label: 'Pedidos hoje',
+      value: stats?.todayOrders || 0,
+      icon: Package,
+      iconBg: 'bg-amber-100',
+      iconColor: 'text-amber-600',
     },
   ];
 
