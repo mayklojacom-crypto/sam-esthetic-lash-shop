@@ -89,6 +89,42 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          created_at: string
+          customer_name: string
+          customer_phone: string
+          id: string
+          items: Json
+          notes: string
+          status: Database["public"]["Enums"]["lead_status_enum"]
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_name: string
+          customer_phone: string
+          id?: string
+          items?: Json
+          notes?: string
+          status?: Database["public"]["Enums"]["lead_status_enum"]
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string
+          customer_phone?: string
+          id?: string
+          items?: Json
+          notes?: string
+          status?: Database["public"]["Enums"]["lead_status_enum"]
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       live_visitors: {
         Row: {
           created_at: string
@@ -282,6 +318,7 @@ export type Database = {
       }
     }
     Enums: {
+      lead_status_enum: "novo" | "respondido" | "fechado" | "perdido"
       order_status_enum:
         | "novo"
         | "processando"
@@ -415,6 +452,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      lead_status_enum: ["novo", "respondido", "fechado", "perdido"],
       order_status_enum: [
         "novo",
         "processando",

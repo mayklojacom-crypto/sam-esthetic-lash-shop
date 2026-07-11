@@ -141,15 +141,41 @@ Deno.serve(async (req) => {
 
       // Orders per day in period
       const ordersByDay: Record<string, number> = {};
+      const leadsByDay: Record<string, number> = {};
       const days = Math.max(1, Math.ceil(spanMs / 86400000) + 1);
       for (let i = 0; i < days; i++) {
         const d = new Date(from.getTime() + i * 86400000).toISOString().split("T")[0];
         ordersByDay[d] = 0;
+        leadsByDay[d] = 0;
       }
       periodOrders?.forEach(o => {
         const d = o.created_at.split("T")[0];
         if (ordersByDay[d] !== undefined) ordersByDay[d]++;
       });
+
+      // Leads in period
+      const { data: periodLeads } = await supabase
+        .from("leads")
+        .select("created_at")
+        .gte("created_at", from.toISOString())
+        .lte("created_at", to.toISOString());
+      const totalLeads = periodLeads?.length || 0;
+      periodLeads?.forEach(l => {
+        const d = (l.created_at as string).split("T")[0];
+        if (leadsByDay[d] !== undefined) leadsByDay[d]++;
+      });
+
+      // Previous leads for delta
+      const { count: prevLeadsCount } = await supabase
+        .from("leads")
+        .select("*", { count: "exact", head: true })
+        .gte("created_at", prevFrom.toISOString())
+        .lte("created_at", prevTo.toISOString());
+      const leadsDelta = pct(totalLeads, prevLeadsCount || 0);
+
+      // Conversion: paidOrders / (leads + paidOrders) (paid via Pix + fechados no WhatsApp)
+      const paidOrders = periodOrders?.filter(o => ["approved", "paid"].includes(o.payment_status || "")).length || 0;
+      const conversionRate = totalVisits > 0 ? ((totalLeads + paidOrders) / totalVisits) * 100 : 0;
 
       const visitsByDay = visitData || [];
 
@@ -157,6 +183,10 @@ Deno.serve(async (req) => {
 
       return new Response(JSON.stringify({
         totalOrders,
+        totalLeads,
+        leadsDelta,
+        leadsByDay,
+        conversionRate,
         totalOrdersLifetime: totalOrdersLifetime || 0,
         todayOrders: todayOrders || 0,
         totalRevenue,

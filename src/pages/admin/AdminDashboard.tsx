@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Package, DollarSign, ShoppingCart, Eye, TrendingUp, TrendingDown, CalendarIcon } from 'lucide-react';
+import { Package, DollarSign, ShoppingCart, Eye, TrendingUp, TrendingDown, CalendarIcon, MessageCircle, Target } from 'lucide-react';
 import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart,
 } from 'recharts';
@@ -110,6 +110,13 @@ const AdminDashboard = () => {
       }))
     : [];
 
+  const leadsChartData = stats?.leadsByDay
+    ? Object.entries(stats.leadsByDay).map(([date, count]) => ({
+        date: format(new Date(date + 'T12:00:00'), 'dd/MM'),
+        leads: count as number,
+      }))
+    : [];
+
   const formatDelta = (delta: number | undefined) => {
     if (delta === undefined || delta === null || !isFinite(delta)) return null;
     const rounded = Math.round(delta);
@@ -127,7 +134,16 @@ const AdminDashboard = () => {
       delta: formatDelta(stats?.revenueDelta),
     },
     {
-      label: 'Pedidos',
+      label: 'Pedidos iniciados',
+      value: stats?.totalLeads || 0,
+      subtitle: 'Clicaram no WhatsApp',
+      icon: MessageCircle,
+      iconBg: 'bg-emerald-100',
+      iconColor: 'text-emerald-600',
+      delta: formatDelta(stats?.leadsDelta),
+    },
+    {
+      label: 'Pedidos pagos (Pix)',
       value: stats?.totalOrders || 0,
       icon: ShoppingCart,
       iconBg: 'bg-blue-100',
@@ -135,9 +151,10 @@ const AdminDashboard = () => {
       delta: formatDelta(stats?.ordersDelta),
     },
     {
-      label: 'Pedidos hoje',
-      value: stats?.todayOrders || 0,
-      icon: Package,
+      label: 'Taxa de conversão',
+      value: `${(stats?.conversionRate || 0).toFixed(1)}%`,
+      subtitle: 'Pedidos / Visitas',
+      icon: Target,
       iconBg: 'bg-purple-100',
       iconColor: 'text-purple-600',
     },
@@ -149,6 +166,13 @@ const AdminDashboard = () => {
       iconBg: 'bg-orange-100',
       iconColor: 'text-orange-600',
       delta: formatDelta(stats?.visitsDelta),
+    },
+    {
+      label: 'Pedidos hoje',
+      value: stats?.todayOrders || 0,
+      icon: Package,
+      iconBg: 'bg-amber-100',
+      iconColor: 'text-amber-600',
     },
   ];
 
@@ -232,7 +256,7 @@ const AdminDashboard = () => {
       ) : (
         <>
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             {statCards.map((card, i) => (
               <Card key={i} className="border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
                 <CardContent className="p-4 md:p-5">
@@ -261,7 +285,7 @@ const AdminDashboard = () => {
           </div>
 
           {/* Charts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
             <Card className="border-slate-200/80 shadow-sm">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
@@ -325,6 +349,40 @@ const AdminDashboard = () => {
                     <Area type="monotone" dataKey="visitas" name="Visitas" stroke="hsl(210, 80%, 55%)" strokeWidth={2.5} fill="url(#visitGradient)"
                       dot={{ r: 3, fill: 'white', stroke: 'hsl(210, 80%, 55%)', strokeWidth: 2 }}
                       activeDot={{ r: 5, fill: 'hsl(210, 80%, 55%)', stroke: 'white', strokeWidth: 2 }} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card className="border-slate-200/80 shadow-sm">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-sm md:text-base font-semibold text-slate-900">Pedidos iniciados (WhatsApp)</CardTitle>
+                    <p className="text-xs text-slate-400 mt-0.5">{periodLabel}</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-full">
+                    <MessageCircle size={14} className="text-emerald-500" />
+                    <span className="text-xs font-medium text-slate-600">{stats?.totalLeads || 0}</span>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <ResponsiveContainer width="100%" height={220}>
+                  <AreaChart data={leadsChartData}>
+                    <defs>
+                      <linearGradient id="leadGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(150, 60%, 45%)" stopOpacity={0.25} />
+                        <stop offset="100%" stopColor="hsl(150, 60%, 45%)" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis dataKey="date" stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} allowDecimals={false} width={30} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Area type="monotone" dataKey="leads" name="Leads" stroke="hsl(150, 60%, 45%)" strokeWidth={2.5} fill="url(#leadGradient)"
+                      dot={{ r: 3, fill: 'white', stroke: 'hsl(150, 60%, 45%)', strokeWidth: 2 }}
+                      activeDot={{ r: 5, fill: 'hsl(150, 60%, 45%)', stroke: 'white', strokeWidth: 2 }} />
                   </AreaChart>
                 </ResponsiveContainer>
               </CardContent>
