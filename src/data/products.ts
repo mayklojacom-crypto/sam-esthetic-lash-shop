@@ -10,6 +10,8 @@ export interface Product {
   featured?: boolean;
   sizes?: string[];
   weight?: number;
+  promoActive?: boolean;
+  promoEndsAt?: string | null;
 }
 
 export const getProductBySlug = (slug: string) => products.find(p => p.slug === slug);

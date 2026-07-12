@@ -9,6 +9,7 @@ import BottomNav from '@/components/BottomNav';
 import ProductCard from '@/components/ProductCard';
 import StarRating from '@/components/StarRating';
 import { getProductRating, getRecentSales, getStockLeft, getViewersNow } from '@/lib/socialProof';
+import { useCountdown, pad } from '@/hooks/useCountdown';
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -160,6 +161,9 @@ const ProductDetail = () => {
                 </p>
               </div>
 
+              {/* Cronômetro de promoção */}
+              <PromoCountdownBanner endsAt={product.promoActive ? product.promoEndsAt : null} />
+
               {/* Provas sociais */}
               <div className="mt-4 space-y-2">
                 <div className="flex items-center gap-2 text-xs">
@@ -181,7 +185,8 @@ const ProductDetail = () => {
 
               <div className="h-px bg-border/60 my-4" />
 
-              <p className="text-sm text-muted-foreground leading-relaxed">{product.description}</p>
+              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{product.description}</p>
+
 
 
               {/* Size selector */}
@@ -286,4 +291,23 @@ const ProductDetail = () => {
   );
 };
 
+const PromoCountdownBanner = ({ endsAt }: { endsAt: string | null | undefined }) => {
+  const cd = useCountdown(endsAt || null);
+  if (!endsAt || !cd || cd.expired) return null;
+  const label =
+    cd.d > 0
+      ? `${cd.d}d ${pad(cd.h)}:${pad(cd.m)}:${pad(cd.s)}`
+      : `${pad(cd.h)}:${pad(cd.m)}:${pad(cd.s)}`;
+  return (
+    <div className="mt-3 rounded-xl bg-gradient-to-r from-red-500 via-orange-500 to-red-500 bg-[length:200%_100%] animate-gradient-x text-white px-3 py-2.5 flex items-center justify-between shadow-md">
+      <div className="flex items-center gap-2">
+        <span className="text-lg animate-pulse">⚡</span>
+        <span className="text-xs font-bold uppercase tracking-wider">Oferta termina em</span>
+      </div>
+      <span className="font-mono font-black text-base tracking-wider">{label}</span>
+    </div>
+  );
+};
+
 export default ProductDetail;
+
