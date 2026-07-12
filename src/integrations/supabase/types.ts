@@ -212,6 +212,8 @@ export type Database = {
           name: string
           original_price: number | null
           price: number
+          promo_active: boolean
+          promo_ends_at: string | null
           sizes: string[] | null
           slug: string
           sort_order: number
@@ -229,6 +231,8 @@ export type Database = {
           name: string
           original_price?: number | null
           price?: number
+          promo_active?: boolean
+          promo_ends_at?: string | null
           sizes?: string[] | null
           slug: string
           sort_order?: number
@@ -246,6 +250,8 @@ export type Database = {
           name?: string
           original_price?: number | null
           price?: number
+          promo_active?: boolean
+          promo_ends_at?: string | null
           sizes?: string[] | null
           slug?: string
           sort_order?: number
