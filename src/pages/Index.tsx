@@ -13,6 +13,7 @@ import ProductCard from '@/components/ProductCard';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import UrgencyBar from '@/components/UrgencyBar';
+import SuperOfferSection from '@/components/SuperOfferSection';
 
 // Stickers (só decorativos, só mobile)
 import stHeart from '@/assets/stickers/heart.png';
@@ -53,6 +54,9 @@ const Index = () => {
             loading="lazy"
           />
         </div>
+
+        {/* Super Ofertas Relâmpago (produtos com cronômetro ativo) */}
+        <SuperOfferSection products={products} />
 
         {/* Trust Bar */}
         <div className="mx-4 mt-6 grid grid-cols-3 gap-3">

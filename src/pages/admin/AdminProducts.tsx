@@ -46,6 +46,8 @@ interface DBProduct {
   weight: number;
   active: boolean;
   sort_order: number;
+  promo_active?: boolean;
+  promo_ends_at?: string | null;
   _priceRaw?: string;
 }
 
@@ -61,6 +63,8 @@ const emptyProduct: Omit<DBProduct, 'id'> = {
   weight: 50,
   active: true,
   sort_order: 0,
+  promo_active: false,
+  promo_ends_at: null,
 };
 
 interface SortableRowProps {
@@ -673,6 +677,61 @@ const AdminProducts = () => {
                   checked={editProduct.featured || false}
                   onCheckedChange={v => setEditProduct(prev => ({ ...prev, featured: v }))}
                 />
+              </div>
+
+              {/* Cronômetro de promoção */}
+              <div className="rounded-lg border border-orange-200 bg-gradient-to-br from-orange-50 to-red-50 p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-sm font-bold text-orange-700">🔥 Cronômetro de Promoção</Label>
+                    <p className="text-[11px] text-slate-500 leading-tight mt-0.5">
+                      Quando ativo, o produto entra na seção Super Ofertas com contador ao vivo.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={editProduct.promo_active || false}
+                    onCheckedChange={v =>
+                      setEditProduct(prev => ({
+                        ...prev,
+                        promo_active: v,
+                        // se ativar e não houver data, sugerir +24h
+                        promo_ends_at:
+                          v && !prev?.promo_ends_at
+                            ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+                            : prev?.promo_ends_at,
+                      }))
+                    }
+                  />
+                </div>
+                {editProduct.promo_active && (
+                  <div>
+                    <Label className="text-xs font-semibold text-slate-600">Termina em</Label>
+                    <Input
+                      type="datetime-local"
+                      value={
+                        editProduct.promo_ends_at
+                          ? (() => {
+                              const d = new Date(editProduct.promo_ends_at);
+                              const off = d.getTimezoneOffset();
+                              const local = new Date(d.getTime() - off * 60000);
+                              return local.toISOString().slice(0, 16);
+                            })()
+                          : ''
+                      }
+                      onChange={e => {
+                        const val = e.target.value;
+                        setEditProduct(prev => ({
+                          ...prev,
+                          promo_ends_at: val ? new Date(val).toISOString() : null,
+                        }));
+                      }}
+                      className="mt-1"
+                    />
+                    <p className="text-[10px] text-slate-500 mt-1">
+                      Após esta data, o produto sai automaticamente da seção de super ofertas.
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-50">
                 <Label className="text-sm">Ativo</Label>

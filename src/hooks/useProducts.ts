@@ -15,6 +15,8 @@ const mapRow = (r: any): Product => ({
   featured: !!r.featured,
   sizes: r.sizes || undefined,
   weight: r.weight ?? undefined,
+  promoActive: !!r.promo_active,
+  promoEndsAt: r.promo_ends_at ?? null,
 });
 
 export function useProducts() {
