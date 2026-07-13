@@ -21,6 +21,14 @@ const ProductDetail = () => {
 
   const { product, loading } = useProductBySlug(slug);
   const { products } = useProducts();
+  const promoEndsAt = product?.promoActive ? product?.promoEndsAt : null;
+  const promoCd = useCountdown(promoEndsAt || null);
+  const isPromo = !!(promoEndsAt && promoCd && !promoCd.expired);
+  const promoLabel = promoCd
+    ? promoCd.d > 0
+      ? `${promoCd.d}d ${pad(promoCd.h)}:${pad(promoCd.m)}`
+      : `${pad(promoCd.h)}:${pad(promoCd.m)}:${pad(promoCd.s)}`
+    : '';
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -185,13 +193,9 @@ const ProductDetail = () => {
 
               <div className="h-px bg-border/60 my-4" />
 
-              <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{product.description}</p>
-
-
-
               {/* Size selector */}
               {product.sizes && product.sizes.length > 0 && (
-                <div className="mt-5">
+                <div>
                   <span className="text-sm font-semibold text-foreground">Tamanho</span>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {product.sizes.map(size => (
@@ -231,27 +235,38 @@ const ProductDetail = () => {
                 </div>
               </div>
 
+              {/* Descrição — depois das opções de compra */}
+              <div className="mt-6 pt-5 border-t border-border/60">
+                <span className="text-sm font-semibold text-foreground">Descrição</span>
+                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line mt-2">{product.description}</p>
+              </div>
+
               {/* Desktop buttons */}
-              <div className="hidden md:grid grid-cols-2 gap-2 mt-6">
+              <div className="hidden md:grid grid-cols-3 gap-2 mt-6">
                 <button
                   onClick={handleAdd}
-                  className="bg-secondary text-foreground py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 hover:bg-secondary/80 text-sm border border-border"
+                  className="col-span-1 bg-secondary text-foreground py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 hover:bg-secondary/80 text-sm border border-border"
                 >
                   <ShoppingBag size={17} strokeWidth={2.5} />
                   Adicionar
                 </button>
                 <button
                   onClick={handleBuyNow}
-                  className="bg-gradient-to-r from-accent to-primary text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 shadow-md hover:shadow-lg text-sm"
+                  className={`col-span-2 py-4 rounded-2xl font-extrabold flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 shadow-elevated hover:shadow-lg text-base text-white uppercase tracking-wide ${
+                    isPromo
+                      ? 'bg-gradient-to-r from-red-500 via-orange-500 to-red-500 bg-[length:200%_100%] animate-gradient-x'
+                      : 'bg-gradient-to-r from-accent to-primary animate-pulse-soft'
+                  }`}
                 >
-                  <Zap size={17} fill="currentColor" />
-                  Comprar Agora
+                  <Zap size={18} fill="currentColor" />
+                  {isPromo ? `🔥 Garantir Oferta · ${promoLabel}` : 'Pedir Agora'}
                 </button>
               </div>
               <p className="hidden md:flex items-center justify-center gap-1.5 text-xs text-muted-foreground mt-3">
                 🔒 Compra 100% segura · 🚚 Enviamos para todo Brasil
               </p>
             </div>
+
           </div>
         </div>
 
@@ -269,22 +284,39 @@ const ProductDetail = () => {
       </div>
 
       {/* Mobile Buttons */}
-      <div className="fixed bottom-[68px] left-0 right-0 p-3 glass-strong border-t border-border/50 md:hidden grid grid-cols-2 gap-2">
-        <button
-          onClick={handleAdd}
-          className="bg-secondary text-foreground py-3.5 rounded-2xl font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all border border-border text-[13px]"
-        >
-          <ShoppingBag size={16} strokeWidth={2.5} />
-          Adicionar
-        </button>
-        <button
-          onClick={handleBuyNow}
-          className="bg-gradient-to-r from-accent to-primary text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all shadow-md text-[13px]"
-        >
-          <Zap size={16} fill="currentColor" />
-          Comprar Agora
-        </button>
+      <div className="fixed bottom-[68px] left-0 right-0 md:hidden glass-strong border-t border-border/50">
+        <p className="text-center text-[11px] font-semibold text-muted-foreground pt-2 pb-0.5">
+          👇 Toque para finalizar seu pedido
+        </p>
+        <div className="p-3 pt-1.5 grid grid-cols-3 gap-2">
+          <button
+            onClick={handleAdd}
+            aria-label="Adicionar ao carrinho"
+            className="col-span-1 bg-secondary text-foreground py-4 rounded-2xl font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all border border-border text-[12px]"
+          >
+            <ShoppingBag size={18} strokeWidth={2.5} />
+          </button>
+          <button
+            onClick={handleBuyNow}
+            className={`col-span-2 text-white py-4 rounded-2xl font-extrabold flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-elevated text-[15px] uppercase tracking-wide ${
+              isPromo
+                ? 'bg-gradient-to-r from-red-500 via-orange-500 to-red-500 bg-[length:200%_100%] animate-gradient-x'
+                : 'bg-gradient-to-r from-accent to-primary animate-pulse-soft'
+            }`}
+          >
+            <Zap size={18} fill="currentColor" />
+            {isPromo ? (
+              <span className="flex flex-col leading-tight items-center">
+                <span>🔥 Garantir Oferta</span>
+                <span className="text-[10px] font-mono opacity-90">{promoLabel}</span>
+              </span>
+            ) : (
+              'Pedir Agora'
+            )}
+          </button>
+        </div>
       </div>
+
 
       <BottomNav />
     </div>
