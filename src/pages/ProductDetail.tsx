@@ -21,6 +21,14 @@ const ProductDetail = () => {
 
   const { product, loading } = useProductBySlug(slug);
   const { products } = useProducts();
+  const promoEndsAt = product?.promoActive ? product?.promoEndsAt : null;
+  const promoCd = useCountdown(promoEndsAt || null);
+  const isPromo = !!(promoEndsAt && promoCd && !promoCd.expired);
+  const promoLabel = promoCd
+    ? promoCd.d > 0
+      ? `${promoCd.d}d ${pad(promoCd.h)}:${pad(promoCd.m)}`
+      : `${pad(promoCd.h)}:${pad(promoCd.m)}:${pad(promoCd.s)}`
+    : '';
 
   useEffect(() => {
     window.scrollTo(0, 0);
