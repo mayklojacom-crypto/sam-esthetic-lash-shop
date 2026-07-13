@@ -255,7 +255,7 @@ const ProductDetail = () => {
                   className={`col-span-2 py-4 rounded-2xl font-extrabold flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 shadow-elevated hover:shadow-lg text-base text-white uppercase tracking-wide ${
                     isPromo
                       ? 'bg-gradient-to-r from-red-500 via-orange-500 to-red-500 bg-[length:200%_100%] animate-gradient-x'
-                      : 'bg-gradient-to-r from-accent to-primary animate-pulse-slow'
+                      : 'bg-gradient-to-r from-accent to-primary animate-pulse-soft'
                   }`}
                 >
                   <Zap size={18} fill="currentColor" />
@@ -301,7 +301,7 @@ const ProductDetail = () => {
             className={`col-span-2 text-white py-4 rounded-2xl font-extrabold flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-elevated text-[15px] uppercase tracking-wide ${
               isPromo
                 ? 'bg-gradient-to-r from-red-500 via-orange-500 to-red-500 bg-[length:200%_100%] animate-gradient-x'
-                : 'bg-gradient-to-r from-accent to-primary animate-pulse-slow'
+                : 'bg-gradient-to-r from-accent to-primary animate-pulse-soft'
             }`}
           >
             <Zap size={18} fill="currentColor" />
