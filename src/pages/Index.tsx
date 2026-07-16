@@ -62,7 +62,7 @@ const Index = () => {
         <div className="mx-4 mt-6 grid grid-cols-3 gap-3">
           {[
             { icon: <ShieldCheck size={18} />, text: 'Segurinha 🔒' },
-            { icon: <Truck size={18} />, text: 'Vai pro Brasil 📦' },
+            { icon: <Truck size={18} />, text: 'Entrega rápida 🛵' },
             { icon: <CreditCard size={18} />, text: 'Pix & Cartão 💳' },
           ].map((item, i) => (
             <div key={i} className="bg-card rounded-xl border border-border p-3 flex flex-col items-center gap-1.5 text-center shadow-sm">
@@ -88,69 +88,6 @@ const Index = () => {
                 <span className="text-sm font-semibold text-foreground whitespace-nowrap">{cat.label}</span>
               </button>
             ))}
-          </div>
-        </section>
-
-        {/* Kits Promocionais */}
-        <section className="mt-8 px-4">
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <Leaf size={16} className="text-primary shrink-0" />
-            <h2 className="font-hand text-3xl md:text-4xl text-primary leading-none">mimos da estação 🍂</h2>
-            <img src={stBow} alt="" aria-hidden="true" className="sticker sticker-tilt-l w-10 h-10 md:w-14 md:h-14 shrink-0" loading="lazy" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-accent">Edição Limitada</span>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {/* Kit 1 */}
-            <div
-              onClick={() => navigate('/produto/kit-master-beauty-set')}
-              className="group bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-pink transition-all duration-300 cursor-pointer active:scale-[0.98] flex flex-col"
-            >
-              <div className="relative aspect-square bg-muted overflow-hidden">
-                <img src={promoMaster} alt="Kit Master Beauty Set" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                <span className="absolute top-2 left-2 bg-primary text-primary-foreground text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow-sm">Kit Premium</span>
-              </div>
-              <div className="p-3 flex flex-col flex-1">
-                <h4 className="text-[13px] font-semibold text-foreground line-clamp-2 leading-snug mb-1">Master Beauty Set 👁️✨</h4>
-                <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">Fios Fadvan, Pinças Nagaraku, Cola Cherry + acessórios.</p>
-                <div className="mt-auto">
-                  <span className="text-[10px] text-muted-foreground line-through">R$ 529,00</span>
-                  <div className="flex items-baseline gap-0.5">
-                    <span className="text-[11px] font-medium text-primary">R$</span>
-                    <span className="text-lg font-extrabold text-foreground leading-none">307</span>
-                    <span className="text-xs font-bold text-muted-foreground">,00</span>
-                  </div>
-                  <button className="mt-2 w-full bg-gradient-to-r from-accent to-primary text-white py-1.5 rounded-lg font-bold text-[11px] active:scale-95 transition-all">
-                    Quero esse 💕
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Kit 2 */}
-            <div
-              onClick={() => navigate('/produto/kit-colecao-protagonista')}
-              className="group bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-pink transition-all duration-300 cursor-pointer active:scale-[0.98] flex flex-col"
-            >
-              <div className="relative aspect-square bg-muted overflow-hidden">
-                <img src={promoProtagonista} alt="Coleção Protagonista" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                <span className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow-sm">Só 50 kits</span>
-              </div>
-              <div className="p-3 flex flex-col flex-1">
-                <h4 className="text-[13px] font-semibold text-foreground line-clamp-2 leading-snug mb-1">Coleção Protagonista 🏆</h4>
-                <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">Cílios YY + 5D, Cola HS 16, Pads, Microbrushes e mais.</p>
-                <div className="mt-auto">
-                  <span className="text-[10px] text-muted-foreground line-through">R$ 489,90</span>
-                  <div className="flex items-baseline gap-0.5">
-                    <span className="text-[11px] font-medium text-primary">R$</span>
-                    <span className="text-lg font-extrabold text-foreground leading-none">297</span>
-                    <span className="text-xs font-bold text-muted-foreground">,00</span>
-                  </div>
-                  <button className="mt-2 w-full bg-gradient-to-r from-accent to-primary text-white py-1.5 rounded-lg font-bold text-[11px] active:scale-95 transition-all">
-                    Quero esse 💕
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -269,8 +206,8 @@ const Index = () => {
                 <Truck size={20} className="text-primary" />
               </div>
               <div>
-                <p className="text-sm font-bold text-foreground">Enviamos pro Brasil todinho 💗</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Frete calculado no checkout</p>
+                <p className="text-sm font-bold text-foreground">⚡ Entrega local rápida 🛵</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Até 30 min via app · Goiânia e Aparecida</p>
               </div>
             </div>
             <div className="bg-card rounded-xl border border-border p-4 shadow-sm flex items-center gap-4">
@@ -292,7 +229,7 @@ const Index = () => {
               <div className="flex flex-col items-center md:items-start gap-3">
                 <img src="/logo.png" alt="Sam Esthetic" className="h-12 w-auto" />
                 <p className="text-xs text-muted-foreground text-center md:text-left leading-relaxed max-w-[320px]">
-                  Especialistas em materiais para Lash Design e Nail Designer. Qualidade premium com os melhores preços do Brasil.
+                  Especialistas em materiais para Lash Design e Nail Designer. Entrega local rápida em Goiânia e Aparecida de Goiânia — receba em até 30 minutos.
                 </p>
                 <p className="font-hand text-xl text-primary">feito com 💗 em Goiânia</p>
               </div>
@@ -306,7 +243,7 @@ const Index = () => {
                   </a>
                 </div>
                 <div className="text-[10px] text-muted-foreground/60 uppercase tracking-widest">
-                  © 2025 Sam Esthetic • Todos os direitos reservados
+                  © 2026 SAM ESTHETIC • TODOS OS DIREITOS RESERVADOS
                 </div>
               </div>
             </div>

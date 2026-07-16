@@ -4,7 +4,7 @@ import { Product } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import StarRating from './StarRating';
-import { getProductRating, getRecentSales } from '@/lib/socialProof';
+import { getProductRating } from '@/lib/socialProof';
 
 interface Props {
   product: Product;
@@ -15,7 +15,6 @@ const ProductCard = ({ product, index = 0 }: Props) => {
   const navigate = useNavigate();
   const { addItem } = useCart();
   const { rating, reviewCount } = getProductRating(product.id);
-  const recentSales = getRecentSales(product.id);
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -60,11 +59,6 @@ const ProductCard = ({ product, index = 0 }: Props) => {
             -{discount}%
           </span>
         )}
-        {recentSales >= 20 && (
-          <span className="absolute top-2 right-2 bg-orange-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md shadow-sm flex items-center gap-0.5">
-            🔥 TOP
-          </span>
-        )}
       </div>
       <div className="p-3 flex flex-col flex-1">
         <h3 className="text-[13px] font-semibold text-foreground line-clamp-2 leading-snug mb-1">
@@ -94,10 +88,6 @@ const ProductCard = ({ product, index = 0 }: Props) => {
             <ShoppingBag size={14} strokeWidth={2.5} />
           </button>
         </div>
-        <p className="text-[10px] text-green-600 font-bold mt-1.5 flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          {recentSales} vendidos hoje
-        </p>
         <button
           onClick={handleBuyNow}
           className="mt-2 w-full bg-gradient-to-r from-accent to-primary text-white py-2 rounded-lg font-bold text-[11px] flex items-center justify-center gap-1 active:scale-95 transition-all hover:shadow-md"

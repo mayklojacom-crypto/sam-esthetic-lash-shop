@@ -8,7 +8,7 @@ import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import ProductCard from '@/components/ProductCard';
 import StarRating from '@/components/StarRating';
-import { getProductRating, getRecentSales, getStockLeft, getViewersNow } from '@/lib/socialProof';
+import { getProductRating, getStockLeft, getViewersNow } from '@/lib/socialProof';
 import { useCountdown, pad } from '@/hooks/useCountdown';
 
 const ProductDetail = () => {
@@ -91,7 +91,7 @@ const ProductDetail = () => {
   };
 
   const { rating, reviewCount } = getProductRating(product.id);
-  const recentSales = getRecentSales(product.id);
+  
   const stockLeft = getStockLeft(product.id);
   const viewersNow = getViewersNow(product.id);
 
@@ -178,10 +178,6 @@ const ProductDetail = () => {
                   <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                   <span className="text-foreground font-semibold">{viewersNow} pessoas vendo agora</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <Flame size={14} className="text-orange-500" />
-                  <span className="text-foreground font-semibold">{recentSales} vendidos nas últimas 24h</span>
-                </div>
                 {stockLeft <= 8 && (
                   <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900 rounded-lg px-3 py-2 flex items-center gap-2">
                     <span className="text-xs font-bold text-orange-700 dark:text-orange-400">
@@ -263,7 +259,7 @@ const ProductDetail = () => {
                 </button>
               </div>
               <p className="hidden md:flex items-center justify-center gap-1.5 text-xs text-muted-foreground mt-3">
-                🔒 Compra 100% segura · 🚚 Enviamos para todo Brasil
+                🔒 Compra 100% segura · 🛵 Entrega local em até 30 min (Goiânia e Aparecida)
               </p>
             </div>
 
