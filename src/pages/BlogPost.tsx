@@ -97,6 +97,8 @@ const BlogPost = () => {
   );
 
   const relatedProducts = products.filter(p => post.related_product_ids?.includes(p.id));
+  const wordCount = post.content.replace(/<[^>]+>/g, '').split(/\s+/).filter(Boolean).length;
+  const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-8">
