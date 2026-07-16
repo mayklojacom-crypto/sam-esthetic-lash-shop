@@ -91,7 +91,7 @@ const ProductDetail = () => {
   };
 
   const { rating, reviewCount } = getProductRating(product.id);
-  const recentSales = getRecentSales(product.id);
+  
   const stockLeft = getStockLeft(product.id);
   const viewersNow = getViewersNow(product.id);
 
