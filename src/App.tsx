@@ -14,6 +14,8 @@ import PaymentStatus from "./pages/PaymentStatus.tsx";
 import ThankYou from "./pages/ThankYou.tsx";
 import OrderTracking from "./pages/OrderTracking.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import Blog from "./pages/Blog.tsx";
+import BlogPost from "./pages/BlogPost.tsx";
 import WhatsAppFloat from "./components/WhatsAppFloat.tsx";
 import ExitIntentPopup from "./components/ExitIntentPopup.tsx";
 import DeliveryTickerBar from "./components/DeliveryTickerBar.tsx";
@@ -24,6 +26,9 @@ import AdminOrders from "./pages/admin/AdminOrders.tsx";
 import AdminOrderDetail from "./pages/admin/AdminOrderDetail.tsx";
 import AdminProducts from "./pages/admin/AdminProducts.tsx";
 import AdminBanners from "./pages/admin/AdminBanners.tsx";
+import AdminBlogPosts from "./pages/admin/AdminBlogPosts.tsx";
+import AdminBlogEditor from "./pages/admin/AdminBlogEditor.tsx";
+import AdminBlogComments from "./pages/admin/AdminBlogComments.tsx";
 import AdminLeads from "./pages/admin/AdminLeads.tsx";
 import VisitorTracker from "./components/VisitorTracker.tsx";
 
