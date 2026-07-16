@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingBag, Image as ImageIcon, MessageCircle, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, Image as ImageIcon, MessageCircle, LogOut, Menu, X, FileText, MessagesSquare } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -10,6 +10,8 @@ const navItems = [
   { path: '/admin/leads', icon: MessageCircle, label: 'Leads (WhatsApp)' },
   { path: '/admin/produtos', icon: ShoppingBag, label: 'Produtos' },
   { path: '/admin/banners', icon: ImageIcon, label: 'Banners' },
+  { path: '/admin/blog', icon: FileText, label: 'Blog' },
+  { path: '/admin/blog-comentarios', icon: MessagesSquare, label: 'Comentários' },
 ];
 
 const AdminSidebar = () => {

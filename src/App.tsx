@@ -54,6 +54,8 @@ const App = () => (
               <Route path="/pagamento/status" element={<PaymentStatus />} />
               <Route path="/obrigado" element={<ThankYou />} />
               <Route path="/meu-pedido" element={<OrderTracking />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
               {/* Admin routes — hidden, no menu link */}
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin" element={<AdminLayout />}>
@@ -62,6 +64,9 @@ const App = () => (
                 <Route path="pedidos/:id" element={<AdminOrderDetail />} />
                 <Route path="produtos" element={<AdminProducts />} />
                 <Route path="banners" element={<AdminBanners />} />
+                <Route path="blog" element={<AdminBlogPosts />} />
+                <Route path="blog/:id" element={<AdminBlogEditor />} />
+                <Route path="blog-comentarios" element={<AdminBlogComments />} />
                 <Route path="leads" element={<AdminLeads />} />
               </Route>
               <Route path="*" element={<NotFound />} />
