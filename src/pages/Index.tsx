@@ -91,69 +91,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Kits Promocionais */}
-        <section className="mt-8 px-4">
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <Leaf size={16} className="text-primary shrink-0" />
-            <h2 className="font-hand text-3xl md:text-4xl text-primary leading-none">mimos da estação 🍂</h2>
-            <img src={stBow} alt="" aria-hidden="true" className="sticker sticker-tilt-l w-10 h-10 md:w-14 md:h-14 shrink-0" loading="lazy" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-accent">Edição Limitada</span>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {/* Kit 1 */}
-            <div
-              onClick={() => navigate('/produto/kit-master-beauty-set')}
-              className="group bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-pink transition-all duration-300 cursor-pointer active:scale-[0.98] flex flex-col"
-            >
-              <div className="relative aspect-square bg-muted overflow-hidden">
-                <img src={promoMaster} alt="Kit Master Beauty Set" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                <span className="absolute top-2 left-2 bg-primary text-primary-foreground text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow-sm">Kit Premium</span>
-              </div>
-              <div className="p-3 flex flex-col flex-1">
-                <h4 className="text-[13px] font-semibold text-foreground line-clamp-2 leading-snug mb-1">Master Beauty Set 👁️✨</h4>
-                <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">Fios Fadvan, Pinças Nagaraku, Cola Cherry + acessórios.</p>
-                <div className="mt-auto">
-                  <span className="text-[10px] text-muted-foreground line-through">R$ 529,00</span>
-                  <div className="flex items-baseline gap-0.5">
-                    <span className="text-[11px] font-medium text-primary">R$</span>
-                    <span className="text-lg font-extrabold text-foreground leading-none">307</span>
-                    <span className="text-xs font-bold text-muted-foreground">,00</span>
-                  </div>
-                  <button className="mt-2 w-full bg-gradient-to-r from-accent to-primary text-white py-1.5 rounded-lg font-bold text-[11px] active:scale-95 transition-all">
-                    Quero esse 💕
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Kit 2 */}
-            <div
-              onClick={() => navigate('/produto/kit-colecao-protagonista')}
-              className="group bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-pink transition-all duration-300 cursor-pointer active:scale-[0.98] flex flex-col"
-            >
-              <div className="relative aspect-square bg-muted overflow-hidden">
-                <img src={promoProtagonista} alt="Coleção Protagonista" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-                <span className="absolute top-2 left-2 bg-destructive text-destructive-foreground text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow-sm">Só 50 kits</span>
-              </div>
-              <div className="p-3 flex flex-col flex-1">
-                <h4 className="text-[13px] font-semibold text-foreground line-clamp-2 leading-snug mb-1">Coleção Protagonista 🏆</h4>
-                <p className="text-[10px] text-muted-foreground line-clamp-2 mb-2">Cílios YY + 5D, Cola HS 16, Pads, Microbrushes e mais.</p>
-                <div className="mt-auto">
-                  <span className="text-[10px] text-muted-foreground line-through">R$ 489,90</span>
-                  <div className="flex items-baseline gap-0.5">
-                    <span className="text-[11px] font-medium text-primary">R$</span>
-                    <span className="text-lg font-extrabold text-foreground leading-none">297</span>
-                    <span className="text-xs font-bold text-muted-foreground">,00</span>
-                  </div>
-                  <button className="mt-2 w-full bg-gradient-to-r from-accent to-primary text-white py-1.5 rounded-lg font-bold text-[11px] active:scale-95 transition-all">
-                    Quero esse 💕
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Queridinhos da casa (destaques) */}
         <section className="mt-8 px-4">
           <div className="flex items-center justify-between mb-4 gap-2">
