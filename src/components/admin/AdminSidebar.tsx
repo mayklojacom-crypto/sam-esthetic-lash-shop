@@ -7,11 +7,11 @@ import { useState } from 'react';
 const navItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/admin/pedidos', icon: Package, label: 'Pedidos' },
+  { path: '/admin/blog', icon: FileText, label: 'Blog' },
+  { path: '/admin/blog-comentarios', icon: MessagesSquare, label: 'Comentários' },
   { path: '/admin/leads', icon: MessageCircle, label: 'Leads (WhatsApp)' },
   { path: '/admin/produtos', icon: ShoppingBag, label: 'Produtos' },
   { path: '/admin/banners', icon: ImageIcon, label: 'Banners' },
-  { path: '/admin/blog', icon: FileText, label: 'Blog' },
-  { path: '/admin/blog-comentarios', icon: MessagesSquare, label: 'Comentários' },
 ];
 
 const AdminSidebar = () => {
