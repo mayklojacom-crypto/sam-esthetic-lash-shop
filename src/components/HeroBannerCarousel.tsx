@@ -47,7 +47,7 @@ const HeroBannerCarousel = () => {
   if (!banners.length) return null;
 
   return (
-    <div className="mx-4 mt-4 rounded-2xl overflow-hidden shadow-sm relative group">
+    <div className="mx-4 mt-4 rounded-2xl overflow-hidden shadow-sm relative group md:max-w-3xl md:mx-auto">
       <div className="relative w-full overflow-hidden">
         <div
           className="flex transition-transform duration-500 ease-in-out"
