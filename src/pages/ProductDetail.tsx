@@ -141,9 +141,6 @@ const ProductDetail = () => {
               </span>
               <h1 className="text-xl md:text-2xl font-extrabold text-foreground mt-1.5 leading-tight">{product.name}</h1>
 
-              <div className="mt-2 flex items-center gap-2">
-                <StarRating rating={rating} reviewCount={reviewCount} size={14} />
-              </div>
 
               <div className="mt-4">
                 {product.originalPrice && (
