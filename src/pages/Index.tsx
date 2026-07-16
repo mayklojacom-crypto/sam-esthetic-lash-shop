@@ -243,7 +243,7 @@ const Index = () => {
                   </a>
                 </div>
                 <div className="text-[10px] text-muted-foreground/60 uppercase tracking-widest">
-                  © 2025 Sam Esthetic • Todos os direitos reservados
+                  © 2026 SAM ESTHETIC • TODOS OS DIREITOS RESERVADOS
                 </div>
               </div>
             </div>
