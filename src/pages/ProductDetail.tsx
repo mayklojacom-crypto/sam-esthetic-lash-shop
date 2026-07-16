@@ -8,7 +8,7 @@ import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import ProductCard from '@/components/ProductCard';
 import StarRating from '@/components/StarRating';
-import { getProductRating, getStockLeft, getViewersNow } from '@/lib/socialProof';
+import { getProductRating } from '@/lib/socialProof';
 import { useCountdown, pad } from '@/hooks/useCountdown';
 
 const ProductDetail = () => {
