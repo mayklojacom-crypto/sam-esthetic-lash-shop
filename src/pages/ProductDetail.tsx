@@ -178,10 +178,6 @@ const ProductDetail = () => {
                   <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                   <span className="text-foreground font-semibold">{viewersNow} pessoas vendo agora</span>
                 </div>
-                <div className="flex items-center gap-2 text-xs">
-                  <Flame size={14} className="text-orange-500" />
-                  <span className="text-foreground font-semibold">{recentSales} vendidos nas últimas 24h</span>
-                </div>
                 {stockLeft <= 8 && (
                   <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900 rounded-lg px-3 py-2 flex items-center gap-2">
                     <span className="text-xs font-bold text-orange-700 dark:text-orange-400">
