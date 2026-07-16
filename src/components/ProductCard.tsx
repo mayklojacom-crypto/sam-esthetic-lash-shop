@@ -59,11 +59,6 @@ const ProductCard = ({ product, index = 0 }: Props) => {
             -{discount}%
           </span>
         )}
-        {recentSales >= 20 && (
-          <span className="absolute top-2 right-2 bg-orange-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md shadow-sm flex items-center gap-0.5">
-            🔥 TOP
-          </span>
-        )}
       </div>
       <div className="p-3 flex flex-col flex-1">
         <h3 className="text-[13px] font-semibold text-foreground line-clamp-2 leading-snug mb-1">
