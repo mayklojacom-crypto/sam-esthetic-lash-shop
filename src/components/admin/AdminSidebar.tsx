@@ -44,8 +44,8 @@ const AdminSidebar = () => {
 
       <nav className="flex-1 p-3 md:p-4 space-y-1">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path || 
-            (item.path !== '/admin' && location.pathname.startsWith(item.path));
+          const isActive = location.pathname === item.path ||
+            (item.path !== '/admin' && location.pathname.startsWith(item.path + '/'));
           return (
             <button
               key={item.path}
