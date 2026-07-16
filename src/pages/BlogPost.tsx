@@ -130,9 +130,15 @@ const BlogPost = () => {
           <ArrowLeft size={14} /> Voltar ao blog
         </Link>
 
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
-          <Calendar size={12} />
-          {new Date(post.published_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mb-3">
+          <span className="inline-flex items-center gap-1.5">
+            <Calendar size={12} />
+            {new Date(post.published_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
+          </span>
+          <span className="inline-flex items-center gap-1.5 bg-lilac/50 text-primary rounded-full px-2.5 py-1">
+            <Clock size={12} />
+            {readingTime} min de leitura
+          </span>
         </div>
 
         <h1 className="text-2xl md:text-4xl font-bold text-foreground leading-tight mb-4">{post.title}</h1>
