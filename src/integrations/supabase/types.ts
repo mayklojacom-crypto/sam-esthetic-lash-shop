@@ -71,6 +71,92 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_comments: {
+        Row: {
+          approved: boolean
+          author_name: string
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+        }
+        Insert: {
+          approved?: boolean
+          author_name: string
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+        }
+        Update: {
+          approved?: boolean
+          author_name?: string
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_posts: {
+        Row: {
+          content: string
+          cover_image: string
+          created_at: string
+          excerpt: string
+          id: string
+          meta_description: string
+          meta_title: string
+          published_at: string | null
+          related_product_ids: string[]
+          slug: string
+          status: string
+          title: string
+          updated_at: string
+          views: number
+        }
+        Insert: {
+          content?: string
+          cover_image?: string
+          created_at?: string
+          excerpt?: string
+          id?: string
+          meta_description?: string
+          meta_title?: string
+          published_at?: string | null
+          related_product_ids?: string[]
+          slug: string
+          status?: string
+          title: string
+          updated_at?: string
+          views?: number
+        }
+        Update: {
+          content?: string
+          cover_image?: string
+          created_at?: string
+          excerpt?: string
+          id?: string
+          meta_description?: string
+          meta_title?: string
+          published_at?: string | null
+          related_product_ids?: string[]
+          slug?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          views?: number
+        }
+        Relationships: []
+      }
       daily_visits: {
         Row: {
           id: string
