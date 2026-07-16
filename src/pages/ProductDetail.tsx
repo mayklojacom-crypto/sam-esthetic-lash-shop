@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import ProductCard from '@/components/ProductCard';
-import { getProductRating } from '@/lib/socialProof';
+
 import { useCountdown, pad } from '@/hooks/useCountdown';
 
 const ProductDetail = () => {
