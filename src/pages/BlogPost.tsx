@@ -141,10 +141,22 @@ const BlogPost = () => {
           <img src={post.cover_image} alt={post.title} className="w-full rounded-2xl mb-8 aspect-[16/9] object-cover" />
         )}
 
-        <div
-          className="prose prose-slate max-w-none prose-headings:text-foreground prose-p:text-foreground prose-a:text-primary prose-img:rounded-lg"
-          dangerouslySetInnerHTML={{ __html: post.content }}
-        />
+        <div className="bg-white/70 backdrop-blur-sm rounded-3xl border border-lilac/40 shadow-pink p-5 md:p-8 my-8">
+          <div
+            className="prose prose-lg md:prose-xl max-w-none
+              prose-headings:text-foreground prose-headings:font-bold prose-headings:tracking-tight
+              prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-lilac/30
+              prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
+              prose-p:text-foreground prose-p:leading-[1.85] prose-p:mb-6
+              prose-a:text-primary prose-a:font-medium prose-a:underline prose-a:decoration-primary/40 prose-a:underline-offset-4 hover:prose-a:decoration-primary
+              prose-blockquote:border-l-4 prose-blockquote:border-primary/40 prose-blockquote:bg-lilac/20 prose-blockquote:rounded-r-2xl prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:italic prose-blockquote:not-italic
+              prose-ul:pl-6 prose-ol:pl-6 prose-li:marker:text-primary prose-li:mb-2
+              prose-img:rounded-2xl prose-img:shadow-pink prose-img:my-8
+              prose-hr:border-border prose-hr:my-10
+              prose-strong:text-foreground prose-strong:font-semibold"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
+        </div>
 
         {relatedProducts.length > 0 && (
           <section className="mt-10 pt-8 border-t border-border">
