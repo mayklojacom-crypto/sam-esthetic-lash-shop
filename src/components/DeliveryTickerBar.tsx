@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
 const messages = [
-  '🛵💨 chega voando em até 45min • Goiânia + Aparecida',
-  '💗 pediu, chegou! motoboy nosso te esperando',
+  '🛵 Entrega por aplicativo em até 30 minutos para regiões atendidas de Goiânia e Aparecida de Goiânia',
+  '💗 pediu, chegou! entrega rápida via app pra Goiânia e Aparecida',
   '✨ mora aqui pertinho? recebe hoje mesmo, amor',
   '☕ pedido até 18h = tá na sua porta ainda hoje',
 ];
