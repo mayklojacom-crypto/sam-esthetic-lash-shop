@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { Truck, ShieldCheck, CreditCard, Leaf } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import whatsappIcon from '@/assets/whatsapp-icon.png';
@@ -27,11 +27,23 @@ const Index = () => {
   const navigate = useNavigate();
   const { products } = useProducts();
   const featured = products.filter(p => p.featured);
+  const [blogPosts, setBlogPosts] = useState<any[]>([]);
 
   useEffect(() => {
     if (sessionStorage.getItem('visit_tracked')) return;
     sessionStorage.setItem('visit_tracked', '1');
     supabase.functions.invoke('track-visit').catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    supabase
+      .from('blog_posts')
+      .select('id, title, slug, excerpt, cover_image, published_at')
+      .eq('status', 'published')
+      .lte('published_at', new Date().toISOString())
+      .order('published_at', { ascending: false })
+      .limit(3)
+      .then(({ data }) => setBlogPosts(data || []));
   }, []);
 
   return (
@@ -221,6 +233,41 @@ const Index = () => {
             </div>
           </div>
         </section>
+
+        {/* Do Blog */}
+        {blogPosts.length > 0 && (
+          <section className="mt-10 px-4">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-hand text-3xl md:text-4xl text-primary leading-none">do blog 💌</h2>
+              <Link to="/blog" className="text-xs font-semibold text-primary hover:underline">ver todos →</Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {blogPosts.map(p => (
+                <Link
+                  key={p.id}
+                  to={`/blog/${p.slug}`}
+                  className="group bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-lg transition-all"
+                >
+                  {p.cover_image && (
+                    <div className="aspect-[16/9] overflow-hidden bg-muted">
+                      <img src={p.cover_image} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                    </div>
+                  )}
+                  <div className="p-3">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                      {new Date(p.published_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}
+                    </p>
+                    <h3 className="text-sm font-bold text-foreground mt-1 group-hover:text-primary transition-colors line-clamp-2 leading-snug">
+                      {p.title}
+                    </h3>
+                    {p.excerpt && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{p.excerpt}</p>}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
 
         {/* Footer */}
         <footer className="mt-10 mb-24 md:mb-0 px-4">

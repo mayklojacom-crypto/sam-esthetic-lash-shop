@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingBag, Image as ImageIcon, MessageCircle, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, Image as ImageIcon, MessageCircle, LogOut, Menu, X, FileText, MessagesSquare } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -7,6 +7,8 @@ import { useState } from 'react';
 const navItems = [
   { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
   { path: '/admin/pedidos', icon: Package, label: 'Pedidos' },
+  { path: '/admin/blog', icon: FileText, label: 'Blog' },
+  { path: '/admin/blog-comentarios', icon: MessagesSquare, label: 'Comentários' },
   { path: '/admin/leads', icon: MessageCircle, label: 'Leads (WhatsApp)' },
   { path: '/admin/produtos', icon: ShoppingBag, label: 'Produtos' },
   { path: '/admin/banners', icon: ImageIcon, label: 'Banners' },
@@ -42,8 +44,8 @@ const AdminSidebar = () => {
 
       <nav className="flex-1 p-3 md:p-4 space-y-1">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path || 
-            (item.path !== '/admin' && location.pathname.startsWith(item.path));
+          const isActive = location.pathname === item.path ||
+            (item.path !== '/admin' && location.pathname.startsWith(item.path + '/'));
           return (
             <button
               key={item.path}
