@@ -24,7 +24,7 @@ const BottomNav = () => {
             <button
               key={path}
               onClick={() => navigate(path)}
-              className={`flex flex-col items-center gap-1 px-5 py-1.5 rounded-2xl transition-all duration-300 relative ${active ? 'gradient-primary shadow-glow' : ''}`}
+            className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-2xl transition-all duration-300 relative ${active ? 'gradient-primary shadow-glow' : ''}`}
             >
               <div className="relative">
                 <Icon
