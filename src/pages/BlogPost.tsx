@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useProducts } from '@/hooks/useProducts';
+import { buildBlogBlocks } from '@/lib/blogInlineProducts';
+import InlineProductPickCard from '@/components/InlineProductPickCard';
 
 interface Post {
   id: string;
@@ -100,6 +102,21 @@ const BlogPost = () => {
   const wordCount = post.content.replace(/<[^>]+>/g, '').split(/\s+/).filter(Boolean).length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
+  const { blocks, usedProductIds } = buildBlogBlocks(post.content, relatedProducts);
+  const leftoverProducts = relatedProducts.filter(p => !usedProductIds.includes(p.id));
+
+  const proseClass = `prose prose-lg md:prose-xl max-w-none
+    prose-headings:text-foreground prose-headings:font-bold prose-headings:tracking-tight
+    prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-lilac/30
+    prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
+    prose-p:text-foreground prose-p:leading-[1.85] prose-p:mb-6
+    prose-a:text-primary prose-a:font-medium prose-a:underline prose-a:decoration-primary/40 prose-a:underline-offset-4 hover:prose-a:decoration-primary
+    prose-blockquote:border-l-4 prose-blockquote:border-primary/40 prose-blockquote:bg-lilac/20 prose-blockquote:rounded-r-2xl prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:italic prose-blockquote:not-italic
+    prose-ul:pl-6 prose-ol:pl-6 prose-li:marker:text-primary prose-li:mb-2
+    prose-img:rounded-2xl prose-img:shadow-pink prose-img:my-8
+    prose-hr:border-border prose-hr:my-10
+    prose-strong:text-foreground prose-strong:font-semibold`;
+
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-8">
       <Helmet>
@@ -150,27 +167,22 @@ const BlogPost = () => {
         )}
 
         <div className="bg-white/70 backdrop-blur-sm rounded-3xl border border-lilac/40 shadow-pink p-5 md:p-8 my-8">
-          <div
-            className="prose prose-lg md:prose-xl max-w-none
-              prose-headings:text-foreground prose-headings:font-bold prose-headings:tracking-tight
-              prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-lilac/30
-              prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
-              prose-p:text-foreground prose-p:leading-[1.85] prose-p:mb-6
-              prose-a:text-primary prose-a:font-medium prose-a:underline prose-a:decoration-primary/40 prose-a:underline-offset-4 hover:prose-a:decoration-primary
-              prose-blockquote:border-l-4 prose-blockquote:border-primary/40 prose-blockquote:bg-lilac/20 prose-blockquote:rounded-r-2xl prose-blockquote:py-4 prose-blockquote:px-6 prose-blockquote:italic prose-blockquote:not-italic
-              prose-ul:pl-6 prose-ol:pl-6 prose-li:marker:text-primary prose-li:mb-2
-              prose-img:rounded-2xl prose-img:shadow-pink prose-img:my-8
-              prose-hr:border-border prose-hr:my-10
-              prose-strong:text-foreground prose-strong:font-semibold"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
+          <div className={proseClass}>
+            {blocks.map((b, i) =>
+              b.type === 'html' ? (
+                <div key={i} dangerouslySetInnerHTML={{ __html: b.html }} />
+              ) : (
+                <InlineProductPickCard key={`p-${i}-${b.product.id}`} product={b.product} />
+              )
+            )}
+          </div>
         </div>
 
-        {relatedProducts.length > 0 && (
+        {leftoverProducts.length > 0 && (
           <section className="mt-10 pt-8 border-t border-border">
             <h2 className="font-hand text-2xl text-primary mb-4">produtos que a gente indica 💗</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {relatedProducts.map(p => <ProductCard key={p.id} product={p} />)}
+              {leftoverProducts.map(p => <ProductCard key={p.id} product={p} />)}
             </div>
           </section>
         )}
