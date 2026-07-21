@@ -15,9 +15,14 @@ const ProductCard = ({ product, index = 0 }: Props) => {
   const navigate = useNavigate();
   const { addItem } = useCart();
   const { rating, reviewCount } = getProductRating(product.id);
+  const outOfStock = (product.stock ?? 999) <= 0;
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (outOfStock) {
+      toast.error('Produto esgotado no momento 💔', { duration: 1500 });
+      return;
+    }
     if (product.sizes && product.sizes.length > 0) {
       // produtos com tamanho exigem ir à página
       navigate(`/produto/${product.slug}`);
@@ -29,6 +34,10 @@ const ProductCard = ({ product, index = 0 }: Props) => {
 
   const handleBuyNow = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (outOfStock) {
+      toast.error('Produto esgotado no momento 💔', { duration: 1500 });
+      return;
+    }
     if (product.sizes && product.sizes.length > 0) {
       navigate(`/produto/${product.slug}`);
       return;
