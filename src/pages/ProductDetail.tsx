@@ -66,7 +66,13 @@ const ProductDetail = () => {
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
 
+  const outOfStock = (product.stock ?? 999) <= 0;
+
   const handleAdd = () => {
+    if (outOfStock) {
+      toast.error('Produto esgotado no momento 💔', { duration: 2000 });
+      return;
+    }
     if (product.sizes && !selectedSize) {
       toast.error('Selecione o tamanho antes de adicionar! 📏', {
         duration: 2000,
@@ -81,6 +87,10 @@ const ProductDetail = () => {
   };
 
   const handleBuyNow = () => {
+    if (outOfStock) {
+      toast.error('Produto esgotado no momento 💔', { duration: 2000 });
+      return;
+    }
     if (product.sizes && !selectedSize) {
       toast.error('Selecione o tamanho antes de comprar! 📏', { duration: 2000 });
       return;
