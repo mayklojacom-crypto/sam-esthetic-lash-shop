@@ -303,6 +303,7 @@ export type Database = {
           sizes: string[] | null
           slug: string
           sort_order: number
+          stock: number
           updated_at: string
           weight: number | null
         }
@@ -322,6 +323,7 @@ export type Database = {
           sizes?: string[] | null
           slug: string
           sort_order?: number
+          stock?: number
           updated_at?: string
           weight?: number | null
         }
@@ -341,6 +343,7 @@ export type Database = {
           sizes?: string[] | null
           slug?: string
           sort_order?: number
+          stock?: number
           updated_at?: string
           weight?: number | null
         }
