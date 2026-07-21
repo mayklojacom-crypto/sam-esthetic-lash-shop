@@ -59,10 +59,7 @@ const formatCEP = (value: string) => {
   return `${digits.slice(0, 5)}-${digits.slice(5)}`;
 };
 
-const VALID_COUPONS: Record<string, number> = {
-  RECUPERA10: 0.10,
-  VOLTA15: 0.15,
-};
+// Cupons agora vêm do banco (tabela public.coupons) — validados em tempo real
 
 const CUSTOMER_KEY = 'sam-customer-data';
 
@@ -118,17 +115,23 @@ const Checkout = () => {
   const discountAmount = appliedCoupon ? totalPrice * appliedCoupon.discount : 0;
   const finalTotal = totalPrice - discountAmount + (selectedShipping?.price || 0);
 
-  const applyCoupon = () => {
+  const applyCoupon = async () => {
     const code = couponInput.trim().toUpperCase();
     if (!code) return;
-    const discount = VALID_COUPONS[code];
-    if (discount) {
-      setAppliedCoupon({ code, discount });
-      toast.success(`Cupom ${code} aplicado! Você economizou ${(discount * 100).toFixed(0)}% 🎉`);
-      setCouponInput('');
-    } else {
+    const { data, error } = await (supabase as any)
+      .from('coupons')
+      .select('code, discount_percent')
+      .eq('code', code)
+      .eq('active', true)
+      .maybeSingle();
+    if (error || !data) {
       toast.error('Cupom inválido ou expirado');
+      return;
     }
+    const discount = Number(data.discount_percent) / 100;
+    setAppliedCoupon({ code: data.code, discount });
+    toast.success(`Cupom ${data.code} aplicado! Você economizou ${(discount * 100).toFixed(0)}% 🎉`);
+    setCouponInput('');
   };
 
 

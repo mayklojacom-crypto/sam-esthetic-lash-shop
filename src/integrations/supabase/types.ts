@@ -157,6 +157,45 @@ export type Database = {
         }
         Relationships: []
       }
+      coupons: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          cta_text: string
+          discount_percent: number
+          id: string
+          show_in_popup: boolean
+          subtitle: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          cta_text?: string
+          discount_percent?: number
+          id?: string
+          show_in_popup?: boolean
+          subtitle?: string
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          cta_text?: string
+          discount_percent?: number
+          id?: string
+          show_in_popup?: boolean
+          subtitle?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       daily_visits: {
         Row: {
           id: string

@@ -30,6 +30,7 @@ import AdminBlogPosts from "./pages/admin/AdminBlogPosts.tsx";
 import AdminBlogEditor from "./pages/admin/AdminBlogEditor.tsx";
 import AdminBlogComments from "./pages/admin/AdminBlogComments.tsx";
 import AdminLeads from "./pages/admin/AdminLeads.tsx";
+import AdminCoupons from "./pages/admin/AdminCoupons.tsx";
 import VisitorTracker from "./components/VisitorTracker.tsx";
 
 const queryClient = new QueryClient();
@@ -68,6 +69,7 @@ const App = () => (
                 <Route path="blog/:id" element={<AdminBlogEditor />} />
                 <Route path="blog-comentarios" element={<AdminBlogComments />} />
                 <Route path="leads" element={<AdminLeads />} />
+                <Route path="cupons" element={<AdminCoupons />} />
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
