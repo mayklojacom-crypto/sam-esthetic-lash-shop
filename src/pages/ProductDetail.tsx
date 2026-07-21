@@ -235,21 +235,31 @@ const ProductDetail = () => {
               <div className="hidden md:grid grid-cols-3 gap-2 mt-6">
                 <button
                   onClick={handleAdd}
-                  className="col-span-1 bg-secondary text-foreground py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 hover:bg-secondary/80 text-sm border border-border"
+                  disabled={outOfStock}
+                  className="col-span-1 bg-secondary text-foreground py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 hover:bg-secondary/80 text-sm border border-border disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ShoppingBag size={17} strokeWidth={2.5} />
                   Adicionar
                 </button>
                 <button
                   onClick={handleBuyNow}
-                  className={`col-span-2 py-4 rounded-2xl font-extrabold flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 shadow-elevated hover:shadow-lg text-base text-white uppercase tracking-wide ${
-                    isPromo
+                  disabled={outOfStock}
+                  className={`col-span-2 py-4 rounded-2xl font-extrabold flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 shadow-elevated hover:shadow-lg text-base text-white uppercase tracking-wide disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none ${
+                    outOfStock
+                      ? 'bg-muted-foreground'
+                      : isPromo
                       ? 'bg-gradient-to-r from-red-500 via-orange-500 to-red-500 bg-[length:200%_100%] animate-gradient-x'
                       : 'bg-gradient-to-r from-accent to-primary animate-pulse-soft'
                   }`}
                 >
-                  <Zap size={18} fill="currentColor" />
-                  {isPromo ? `🔥 Garantir Oferta · ${promoLabel}` : 'Pedir Agora'}
+                  {outOfStock ? (
+                    'Esgotado'
+                  ) : (
+                    <>
+                      <Zap size={18} fill="currentColor" />
+                      {isPromo ? `🔥 Garantir Oferta · ${promoLabel}` : 'Pedir Agora'}
+                    </>
+                  )}
                 </button>
               </div>
               <p className="hidden md:flex items-center justify-center gap-1.5 text-xs text-muted-foreground mt-3">
