@@ -128,10 +128,17 @@ const ProductDetail = () => {
             >
               <Share2 size={20} />
             </button>
-            {discount && (
+            {discount && !outOfStock && (
               <span className="absolute bottom-6 left-4 md:top-4 md:left-4 md:bottom-auto gradient-accent text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-md">
                 -{discount}% OFF
               </span>
+            )}
+            {outOfStock && (
+              <div className="absolute inset-0 flex items-center justify-center md:rounded-3xl bg-black/40 pointer-events-none">
+                <span className="bg-white/95 text-foreground text-sm font-extrabold px-4 py-2 rounded-xl uppercase tracking-wider shadow-lg">
+                  Esgotado
+                </span>
+              </div>
             )}
           </div>
 
