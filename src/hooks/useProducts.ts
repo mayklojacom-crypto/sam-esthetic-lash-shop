@@ -17,6 +17,7 @@ const mapRow = (r: any): Product => ({
   weight: r.weight ?? undefined,
   promoActive: !!r.promo_active,
   promoEndsAt: r.promo_ends_at ?? null,
+  stock: typeof r.stock === 'number' ? r.stock : 999,
 });
 
 export function useProducts() {

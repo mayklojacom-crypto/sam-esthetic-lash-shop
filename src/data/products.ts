@@ -12,6 +12,7 @@ export interface Product {
   weight?: number;
   promoActive?: boolean;
   promoEndsAt?: string | null;
+  stock?: number;
 }
 
 export const getProductBySlug = (slug: string) => products.find(p => p.slug === slug);

@@ -48,6 +48,7 @@ interface DBProduct {
   sort_order: number;
   promo_active?: boolean;
   promo_ends_at?: string | null;
+  stock?: number;
   _priceRaw?: string;
 }
 
@@ -65,6 +66,7 @@ const emptyProduct: Omit<DBProduct, 'id'> = {
   sort_order: 0,
   promo_active: false,
   promo_ends_at: null,
+  stock: 10,
 };
 
 interface SortableRowProps {
@@ -109,10 +111,19 @@ const SortableProductRow = ({ product: p, catLabel, onEdit, onDelete, onToggleAc
 
       {/* Name + mobile info */}
       <div className="flex-1 min-w-0 w-full">
-        <p className="text-sm font-medium text-slate-900 truncate">{p.name}</p>
+        <p className="text-sm font-medium text-slate-900 truncate flex items-center gap-1.5">
+          {p.name}
+          {(p.stock ?? 0) <= 0 && (
+            <span className="text-[9px] font-bold bg-red-100 text-red-700 px-1.5 py-0.5 rounded uppercase">Esgotado</span>
+          )}
+          {(p.stock ?? 0) > 0 && (p.stock ?? 0) <= 3 && (
+            <span className="text-[9px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">Baixo · {p.stock}</span>
+          )}
+        </p>
         <div className="flex items-center gap-2 md:hidden mt-0.5">
           <span className="text-xs text-slate-500">{catLabel(p.category)}</span>
           <span className="text-xs font-semibold text-slate-800">R$ {Number(p.price).toFixed(2)}</span>
+          <span className="text-xs text-slate-500">Est: {p.stock ?? 0}</span>
           {p.featured && <Badge className="bg-primary text-[10px] px-1 py-0 h-4">Destaque</Badge>}
         </div>
       </div>
@@ -648,6 +659,53 @@ const AdminProducts = () => {
                   >
                     <Plus size={14} />
                   </Button>
+                </div>
+              </div>
+
+              {/* Estoque */}
+              <div className="rounded-lg border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-3 space-y-2">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex-1">
+                    <Label className="text-sm font-bold text-emerald-700">📦 Estoque interno</Label>
+                    <p className="text-[11px] text-slate-500 leading-tight mt-0.5">
+                      Quando chegar a 0, o produto fica marcado como <strong>Esgotado</strong> no site e não pode ser comprado (sem precisar desativar).
+                    </p>
+                  </div>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={editProduct.stock ?? 0}
+                    onChange={e =>
+                      setEditProduct(prev => ({
+                        ...prev,
+                        stock: Math.max(0, parseInt(e.target.value) || 0),
+                      }))
+                    }
+                    className="w-24 text-center font-bold bg-white"
+                  />
+                </div>
+                <div className="flex gap-1.5 flex-wrap">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-[11px] bg-white"
+                    onClick={() => setEditProduct(prev => ({ ...prev, stock: 0 }))}
+                  >
+                    Zerar
+                  </Button>
+                  {[5, 10, 50, 999].map(n => (
+                    <Button
+                      key={n}
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-[11px] bg-white"
+                      onClick={() => setEditProduct(prev => ({ ...prev, stock: n }))}
+                    >
+                      +{n}
+                    </Button>
+                  ))}
                 </div>
               </div>
 

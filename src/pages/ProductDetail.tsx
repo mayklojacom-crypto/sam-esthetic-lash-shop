@@ -66,7 +66,13 @@ const ProductDetail = () => {
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
 
+  const outOfStock = (product.stock ?? 999) <= 0;
+
   const handleAdd = () => {
+    if (outOfStock) {
+      toast.error('Produto esgotado no momento 💔', { duration: 2000 });
+      return;
+    }
     if (product.sizes && !selectedSize) {
       toast.error('Selecione o tamanho antes de adicionar! 📏', {
         duration: 2000,
@@ -81,6 +87,10 @@ const ProductDetail = () => {
   };
 
   const handleBuyNow = () => {
+    if (outOfStock) {
+      toast.error('Produto esgotado no momento 💔', { duration: 2000 });
+      return;
+    }
     if (product.sizes && !selectedSize) {
       toast.error('Selecione o tamanho antes de comprar! 📏', { duration: 2000 });
       return;
@@ -118,10 +128,17 @@ const ProductDetail = () => {
             >
               <Share2 size={20} />
             </button>
-            {discount && (
+            {discount && !outOfStock && (
               <span className="absolute bottom-6 left-4 md:top-4 md:left-4 md:bottom-auto gradient-accent text-white text-sm font-bold px-4 py-1.5 rounded-full shadow-md">
                 -{discount}% OFF
               </span>
+            )}
+            {outOfStock && (
+              <div className="absolute inset-0 flex items-center justify-center md:rounded-3xl bg-black/40 pointer-events-none">
+                <span className="bg-white/95 text-foreground text-sm font-extrabold px-4 py-2 rounded-xl uppercase tracking-wider shadow-lg">
+                  Esgotado
+                </span>
+              </div>
             )}
           </div>
 
@@ -218,21 +235,31 @@ const ProductDetail = () => {
               <div className="hidden md:grid grid-cols-3 gap-2 mt-6">
                 <button
                   onClick={handleAdd}
-                  className="col-span-1 bg-secondary text-foreground py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 hover:bg-secondary/80 text-sm border border-border"
+                  disabled={outOfStock}
+                  className="col-span-1 bg-secondary text-foreground py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 hover:bg-secondary/80 text-sm border border-border disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <ShoppingBag size={17} strokeWidth={2.5} />
                   Adicionar
                 </button>
                 <button
                   onClick={handleBuyNow}
-                  className={`col-span-2 py-4 rounded-2xl font-extrabold flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 shadow-elevated hover:shadow-lg text-base text-white uppercase tracking-wide ${
-                    isPromo
+                  disabled={outOfStock}
+                  className={`col-span-2 py-4 rounded-2xl font-extrabold flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 shadow-elevated hover:shadow-lg text-base text-white uppercase tracking-wide disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none ${
+                    outOfStock
+                      ? 'bg-muted-foreground'
+                      : isPromo
                       ? 'bg-gradient-to-r from-red-500 via-orange-500 to-red-500 bg-[length:200%_100%] animate-gradient-x'
                       : 'bg-gradient-to-r from-accent to-primary animate-pulse-soft'
                   }`}
                 >
-                  <Zap size={18} fill="currentColor" />
-                  {isPromo ? `🔥 Garantir Oferta · ${promoLabel}` : 'Pedir Agora'}
+                  {outOfStock ? (
+                    'Esgotado'
+                  ) : (
+                    <>
+                      <Zap size={18} fill="currentColor" />
+                      {isPromo ? `🔥 Garantir Oferta · ${promoLabel}` : 'Pedir Agora'}
+                    </>
+                  )}
                 </button>
               </div>
               <p className="hidden md:flex items-center justify-center gap-1.5 text-xs text-muted-foreground mt-3">
@@ -264,27 +291,37 @@ const ProductDetail = () => {
         <div className="p-3 pt-1.5 grid grid-cols-3 gap-2">
           <button
             onClick={handleAdd}
+            disabled={outOfStock}
             aria-label="Adicionar ao carrinho"
-            className="col-span-1 bg-secondary text-foreground py-4 rounded-2xl font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all border border-border text-[12px]"
+            className="col-span-1 bg-secondary text-foreground py-4 rounded-2xl font-bold flex items-center justify-center gap-1.5 active:scale-[0.98] transition-all border border-border text-[12px] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ShoppingBag size={18} strokeWidth={2.5} />
           </button>
           <button
             onClick={handleBuyNow}
-            className={`col-span-2 text-white py-4 rounded-2xl font-extrabold flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-elevated text-[15px] uppercase tracking-wide ${
-              isPromo
+            disabled={outOfStock}
+            className={`col-span-2 text-white py-4 rounded-2xl font-extrabold flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-elevated text-[15px] uppercase tracking-wide disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none ${
+              outOfStock
+                ? 'bg-muted-foreground'
+                : isPromo
                 ? 'bg-gradient-to-r from-red-500 via-orange-500 to-red-500 bg-[length:200%_100%] animate-gradient-x'
                 : 'bg-gradient-to-r from-accent to-primary animate-pulse-soft'
             }`}
           >
-            <Zap size={18} fill="currentColor" />
-            {isPromo ? (
-              <span className="flex flex-col leading-tight items-center">
-                <span>🔥 Garantir Oferta</span>
-                <span className="text-[10px] font-mono opacity-90">{promoLabel}</span>
-              </span>
+            {outOfStock ? (
+              'Esgotado'
             ) : (
-              'Pedir Agora'
+              <>
+                <Zap size={18} fill="currentColor" />
+                {isPromo ? (
+                  <span className="flex flex-col leading-tight items-center">
+                    <span>🔥 Garantir Oferta</span>
+                    <span className="text-[10px] font-mono opacity-90">{promoLabel}</span>
+                  </span>
+                ) : (
+                  'Pedir Agora'
+                )}
+              </>
             )}
           </button>
         </div>
