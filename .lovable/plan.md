@@ -1,41 +1,70 @@
 ## Objetivo
-Fazer com que os produtos vinculados ao post apareçam **estrategicamente dentro do corpo do texto**, não só no final — de forma automática, sem o admin precisar mexer em nada.
 
-## Como vai funcionar (visão do usuário)
+Sincronizar o catálogo com a planilha `controle_estoque_produtos_site_atualizado.xlsx` **sem excluir nem recriar produtos**. Só atualizações + cadastro dos itens que ainda não existem.
 
-- No editor do blog, você continua marcando os produtos indicados normalmente (nada muda no admin).
-- Ao abrir o post, o site vai **ler o conteúdo**, identificar bons "pontos de respiro" no meio da leitura e **injetar cards de produto ali dentro**, como uma sugestão fofinha estilo: *"Ah, e olha esse aqui que combina com o que a gente tá falando 💗"*.
-- No final do post, continuam aparecendo os demais produtos numa seção "produtos que a gente indica" — mas sem repetir os que já apareceram inline.
+## 1. Atualizar estoque + preço (produtos que já existem)
 
-## Estratégia de inserção (automática)
+Como a planilha tem um SKU por tamanho e o site tem 1 produto com vários tamanhos, o estoque de cada produto é a **soma das linhas** correspondentes.
 
-O componente `BlogPost` vai:
+| Produto no site | Estoque | Preço |
+|---|---|---|
+| Cílios 6D - Dece Mars | 20 | 45 |
+| Cílios 6D - Dece Mars (Mix) | 3 | 45 |
+| Cílios YY Brasileiro - Dece Mars | 16 | 22 |
+| Cílios YY Brasileiro - Fadvan | 2 | 22 |
+| Cílios YY - Fadvan (Mix 8-12) | 3 | 22 |
+| Cílios YY U (Mix) FADVAN | 4 | 22 |
+| Cílios YY Marrom - Fadvan (Mix) | 2 | 32 |
+| Cílios 3D Duplo | 10 | 40 |
+| Cílios 4D Duplo (W 8D) Fadvan | 18 | 45 |
+| Cílios 4D (Mix) | 3 | 40 |
+| Cílios 5D W - Fadvan | 17 | 43 |
+| Cílios 5D W - Fadvan (Mix 8-14) | 4 | 43 |
+| Cílios 5D W Marrom - Fadvan (Mix) | 2 | 47 |
+| Cílios Maria Sasha 5D M | 11 | 45 |
+| Primer Cherry | 2 | 36 |
+| Removedor Fummix | 3 | 19 |
+| Removedor Nagaraku | 1 | 30 |
+| Pisseta | 1 | 14 |
+| Pump | 2 | 13 |
+| Fita Micropore Branca | 5 | 3 |
+| Fita Transpore Transparente | 7 | 4 |
+| Fita Japonesa Branca | 1 | 5 |
+| Batoque para Flor | 5 | 12 |
+| Pads (Pacote) | 4 | 17 |
+| Microbrush (Pacote) | 7 | 9 |
+| Lip Gloss (Pacote) | 4 | 9 |
+| Escovinhas (Pacote) | 3 | 9 |
+| Anel com 50 un (Pacote) | 15 | 13 |
+| Tesourinha | 1 | 9 |
+| Pinça Reta (NH12 Nagaraku) | 4 | 30 |
+| Pinça Curvada | 3 | 30 |
+| Espelho de Dentista | 2 | 9 |
+| Cola Oxe | 4 | 65 |
+| Cola Adesivo Elite Premium Hs-16 | 6 | 64 |
+| Cola Cherry One 3g | 4 | 62 |
 
-1. Fazer o parse do HTML do post em blocos (parágrafos, headings, listas, etc.).
-2. Escolher pontos de inserção usando estas regras:
-   - Nunca antes do 2º parágrafo (deixa o leitor engajar primeiro).
-   - Preferir inserir **logo após um `<h2>`** ou depois de parágrafos longos (>350 caracteres).
-   - Espaçar as inserções (mínimo 3 blocos entre uma e outra).
-   - Máx. 1 produto inline a cada ~4 parágrafos, limite total = nº de produtos vinculados ou 3, o que for menor.
-3. Distribuir os produtos vinculados nesses pontos, em ordem.
-4. Renderizar cada produto inline como um **"card de indicação"** compacto e temático (não o `ProductCard` padrão, pra não parecer banner de anúncio):
-   - Fundo lilás suave + borda tracejada rosinha
-   - Miniatura + nome + preço + botão "ver produto"
-   - Rótulo fofo tipo *"a queridinha pra isso 💗"* / *"dica da Sam"*
+## 2. Cadastrar como novos produtos
 
-## Onde muda o código
+Categoria seguindo o padrão atual do site (`cilios`, `liquidos`, `ferramentas`, `pincas`, `colas`, `descartaveis`). Entram **ativos**, com imagem placeholder até você subir a foto no painel.
 
-- **`src/pages/BlogPost.tsx`** — trocar o `dangerouslySetInnerHTML` único por uma renderização em blocos que intercala os cards inline. A seção "produtos que a gente indica" no final passa a mostrar só os que **não** foram usados inline (se sobrarem).
-- **Novo `src/components/InlineProductPickCard.tsx`** — card compacto de indicação usado dentro do artigo.
-- **Nova util `src/lib/blogInlineProducts.ts`** — função pura que recebe o HTML + lista de produtos e devolve um array `[{ type: 'html', html } | { type: 'product', product }]` já intercalado, aplicando as regras acima. Fácil de ajustar depois.
+- Cílios 5D Mix Curvatura M — Dece Mars · 2 un · R$ 46 (`cilios`)
+- Cílios LU(M) Mix 8-14 · 2 un · R$ 13 (`cilios`)
+- Bruma Cherry · 3 un · R$ 38 (`liquidos`)
+- Finalizador Cherry · 1 un · R$ 46 (`liquidos`)
+- Espuma Soft Snow Cherry · 1 un · R$ 59 (`liquidos`)
+- Nano Mister · 3 un · R$ 20 (`ferramentas`)
+- Espelho de Mão Preto · 3 un · R$ 17 (`ferramentas`)
+- Ventilador · 2 un · R$ 24 (`ferramentas`)
+- Pinça ST-15 Semi Curva — Nagaraku · 2 un · R$ 30 (`pincas`)
+- Cola Infinity Cherry · 4 un · R$ 62 (`colas`)
 
-Nada muda no banco, no editor do admin, nem em outras páginas.
+## 3. Produtos ativos fora da planilha
 
-## Ponto de decisão (rápido)
+Ficam visíveis, mas com estoque **0** (selo "Esgotado"): **Pinça Nagaraku N-07 Acoplar**. Os produtos já desativados (importações antigas Decemars/Fadvan) não serão tocados.
 
-Rótulo dos cards inline — qual prefere?
-- **A)** *"a queridinha pra isso 💗"* (mais girly, combina com o tom do site)
-- **B)** *"dica da Sam"* (mais pessoal/autoridade)
-- **C)** *"produto que combina"* (mais neutro)
+## Detalhes técnicos
 
-Se não responder, sigo com **A**.
+- Tudo feito com comandos de atualização/inserção no banco (`UPDATE` por `slug` e `INSERT` para os novos) — nenhum `DELETE`, nenhum produto recriado, IDs preservados.
+- Nenhuma mudança de código é necessária: o site e o painel já leem `price` e `stock` do banco.
+- Os novos produtos entram com `image = '/placeholder.svg'`, `weight = 50` e ordenação no fim da categoria; você ajusta foto e descrição pelo painel de Produtos.
