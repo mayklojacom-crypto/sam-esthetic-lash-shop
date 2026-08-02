@@ -192,7 +192,11 @@ const AdminProducts = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (error) throw error;
-      setProducts(data || []);
+      const sorted = [...(data || [])].sort((a: DBProduct, b: DBProduct) => {
+        if (a.active !== b.active) return a.active ? -1 : 1;
+        return (a.name || '').localeCompare(b.name || '', 'pt-BR', { sensitivity: 'base' });
+      });
+      setProducts(sorted);
     } catch {
       toast({ title: 'Erro ao carregar produtos', variant: 'destructive' });
     } finally {
