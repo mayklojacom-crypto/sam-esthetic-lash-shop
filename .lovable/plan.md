@@ -1,70 +1,29 @@
-## Objetivo
+# Controle de Estoque (modo planilha)
 
-Sincronizar o catálogo com a planilha `controle_estoque_produtos_site_atualizado.xlsx` **sem excluir nem recriar produtos**. Só atualizações + cadastro dos itens que ainda não existem.
+Nova página no painel: **Estoque**, logo abaixo de Produtos no menu lateral. É uma tabela editável estilo Excel, ligada aos mesmos produtos da loja — o que for alterado ali aparece no produto, e o que for alterado no produto aparece ali.
 
-## 1. Atualizar estoque + preço (produtos que já existem)
+## O que a página faz
 
-Como a planilha tem um SKU por tamanho e o site tem 1 produto com vários tamanhos, o estoque de cada produto é a **soma das linhas** correspondentes.
+- **Tabela de todos os produtos** (ativos primeiro, depois inativos, em ordem alfabética), com colunas: Produto, Categoria, Preço, Estoque, Status (ativo/inativo).
+- **Edição direta na célula**: clica no número do estoque ou no preço, digita e salva ao sair do campo (ou Enter). Salvamento automático com aviso "salvo" discreto.
+- **Botões rápidos de entrada/saída**: `-1` / `+1` ao lado do estoque e um campo "ajustar" para somar ou subtrair uma quantidade (ex.: chegou 12 unidades → digita +12).
+- **Adicionar produto direto na planilha**: linha nova no topo pedindo só nome, categoria, preço e estoque. Entra ativo, com imagem placeholder; foto e descrição podem ser completadas depois na tela de Produtos.
+- **Remover**: desativa o produto (some da loja, continua no banco e na planilha na seção de inativos, com botão para reativar).
+- **Busca e filtro por categoria**, mais filtros rápidos: "Sem estoque", "Estoque baixo (≤3)", "Só ativos".
+- **Resumo no topo**: total de itens ativos, quantos sem estoque, quantos com estoque baixo e valor total do estoque (preço × quantidade).
+- **Exportar CSV** da planilha, para conferência offline no Excel.
 
-| Produto no site | Estoque | Preço |
-|---|---|---|
-| Cílios 6D - Dece Mars | 20 | 45 |
-| Cílios 6D - Dece Mars (Mix) | 3 | 45 |
-| Cílios YY Brasileiro - Dece Mars | 16 | 22 |
-| Cílios YY Brasileiro - Fadvan | 2 | 22 |
-| Cílios YY - Fadvan (Mix 8-12) | 3 | 22 |
-| Cílios YY U (Mix) FADVAN | 4 | 22 |
-| Cílios YY Marrom - Fadvan (Mix) | 2 | 32 |
-| Cílios 3D Duplo | 10 | 40 |
-| Cílios 4D Duplo (W 8D) Fadvan | 18 | 45 |
-| Cílios 4D (Mix) | 3 | 40 |
-| Cílios 5D W - Fadvan | 17 | 43 |
-| Cílios 5D W - Fadvan (Mix 8-14) | 4 | 43 |
-| Cílios 5D W Marrom - Fadvan (Mix) | 2 | 47 |
-| Cílios Maria Sasha 5D M | 11 | 45 |
-| Primer Cherry | 2 | 36 |
-| Removedor Fummix | 3 | 19 |
-| Removedor Nagaraku | 1 | 30 |
-| Pisseta | 1 | 14 |
-| Pump | 2 | 13 |
-| Fita Micropore Branca | 5 | 3 |
-| Fita Transpore Transparente | 7 | 4 |
-| Fita Japonesa Branca | 1 | 5 |
-| Batoque para Flor | 5 | 12 |
-| Pads (Pacote) | 4 | 17 |
-| Microbrush (Pacote) | 7 | 9 |
-| Lip Gloss (Pacote) | 4 | 9 |
-| Escovinhas (Pacote) | 3 | 9 |
-| Anel com 50 un (Pacote) | 15 | 13 |
-| Tesourinha | 1 | 9 |
-| Pinça Reta (NH12 Nagaraku) | 4 | 30 |
-| Pinça Curvada | 3 | 30 |
-| Espelho de Dentista | 2 | 9 |
-| Cola Oxe | 4 | 65 |
-| Cola Adesivo Elite Premium Hs-16 | 6 | 64 |
-| Cola Cherry One 3g | 4 | 62 |
+## Sem histórico de movimentações
 
-## 2. Cadastrar como novos produtos
+Conforme escolhido, a planilha mostra só o estoque atual — não haverá registro de quem alterou nem log de entradas/saídas. Se um dia quiser esse histórico, dá para adicionar depois sem refazer nada.
 
-Categoria seguindo o padrão atual do site (`cilios`, `liquidos`, `ferramentas`, `pincas`, `colas`, `descartaveis`). Entram **ativos**, com imagem placeholder até você subir a foto no painel.
+## Acesso
 
-- Cílios 5D Mix Curvatura M — Dece Mars · 2 un · R$ 46 (`cilios`)
-- Cílios LU(M) Mix 8-14 · 2 un · R$ 13 (`cilios`)
-- Bruma Cherry · 3 un · R$ 38 (`liquidos`)
-- Finalizador Cherry · 1 un · R$ 46 (`liquidos`)
-- Espuma Soft Snow Cherry · 1 un · R$ 59 (`liquidos`)
-- Nano Mister · 3 un · R$ 20 (`ferramentas`)
-- Espelho de Mão Preto · 3 un · R$ 17 (`ferramentas`)
-- Ventilador · 2 un · R$ 24 (`ferramentas`)
-- Pinça ST-15 Semi Curva — Nagaraku · 2 un · R$ 30 (`pincas`)
-- Cola Infinity Cherry · 4 un · R$ 62 (`colas`)
-
-## 3. Produtos ativos fora da planilha
-
-Ficam visíveis, mas com estoque **0** (selo "Esgotado"): **Pinça Nagaraku N-07 Acoplar**. Os produtos já desativados (importações antigas Decemars/Fadvan) não serão tocados.
+Sua funcionária usa o mesmo login de admin que você — nada muda no acesso.
 
 ## Detalhes técnicos
 
-- Tudo feito com comandos de atualização/inserção no banco (`UPDATE` por `slug` e `INSERT` para os novos) — nenhum `DELETE`, nenhum produto recriado, IDs preservados.
-- Nenhuma mudança de código é necessária: o site e o painel já leem `price` e `stock` do banco.
-- Os novos produtos entram com `image = '/placeholder.svg'`, `weight = 50` e ordenação no fim da categoria; você ajusta foto e descrição pelo painel de Produtos.
+- Nova rota `/admin/estoque` (`src/pages/admin/AdminStock.tsx`) + item no `AdminSidebar`.
+- Usa a função de backend `admin-products` já existente (`list`, `create`, `update`, `delete` = desativar). Nenhuma mudança de schema no banco: `stock`, `price` e `active` já existem na tabela de produtos.
+- Salvamento otimista por célula com rollback e toast em caso de erro; slug gerado automaticamente a partir do nome nas novas linhas (sem espaços/acentos).
+- Tabela com rolagem horizontal no mobile e cabeçalho fixo, para funcionar bem no celular.
