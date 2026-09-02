@@ -25,6 +25,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
 import AdminOrders from "./pages/admin/AdminOrders.tsx";
 import AdminOrderDetail from "./pages/admin/AdminOrderDetail.tsx";
 import AdminProducts from "./pages/admin/AdminProducts.tsx";
+import AdminStock from "./pages/admin/AdminStock.tsx";
 import AdminBanners from "./pages/admin/AdminBanners.tsx";
 import AdminBlogPosts from "./pages/admin/AdminBlogPosts.tsx";
 import AdminBlogEditor from "./pages/admin/AdminBlogEditor.tsx";
@@ -64,6 +65,7 @@ const App = () => (
                 <Route path="pedidos" element={<AdminOrders />} />
                 <Route path="pedidos/:id" element={<AdminOrderDetail />} />
                 <Route path="produtos" element={<AdminProducts />} />
+                <Route path="estoque" element={<AdminStock />} />
                 <Route path="banners" element={<AdminBanners />} />
                 <Route path="blog" element={<AdminBlogPosts />} />
                 <Route path="blog/:id" element={<AdminBlogEditor />} />
