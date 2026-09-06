@@ -296,9 +296,18 @@ const AdminProducts = () => {
 
     setUploading(true);
     try {
-      const ext = file.name.split('.').pop();
-      const slug = editProduct?.slug || 'produto';
+      const sanitize = (s: string) =>
+        s
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+
+      const ext = sanitize(file.name.split('.').pop() || 'jpg') || 'jpg';
+      const slug = sanitize(editProduct?.slug || '') || 'produto';
       const fileName = `${slug}-${Date.now()}.${ext}`;
+
 
       const { error: uploadError } = await supabase.storage
         .from('product-images')
