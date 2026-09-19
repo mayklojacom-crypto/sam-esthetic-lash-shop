@@ -29,6 +29,7 @@ const HeroBannerCarousel = () => {
       const { data } = await supabase
         .from('banners')
         .select('id, image_url, link, alt')
+        .eq('placement', 'hero')
         .eq('active', true)
         .order('sort_order', { ascending: true });
       if (data && data.length) setBanners(data as Banner[]);
