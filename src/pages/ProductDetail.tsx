@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import ProductCard from '@/components/ProductCard';
+import { Button } from '@/components/ui/button';
 
 import { useCountdown, pad } from '@/hooks/useCountdown';
 
@@ -16,6 +17,7 @@ const ProductDetail = () => {
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState('');
   
 
   const { product, loading } = useProductBySlug(slug);
@@ -31,6 +33,7 @@ const ProductDetail = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    setSelectedImage('');
   }, [slug]);
 
   const suggested = useMemo(() => {
@@ -67,6 +70,8 @@ const ProductDetail = () => {
     : null;
 
   const outOfStock = (product.stock ?? 999) <= 0;
+  const galleryImages = Array.from(new Set([...(product.images || []), product.image].filter(Boolean))).slice(0, 3);
+  const activeImage = selectedImage || galleryImages[0] || product.image;
 
   const handleAdd = () => {
     if (outOfStock) {
@@ -110,8 +115,8 @@ const ProductDetail = () => {
         <div className="md:grid md:grid-cols-2 md:gap-8 md:px-4 md:mt-6">
           {/* Image */}
           <div className="relative animate-fade-in">
-            <div className="aspect-square bg-muted overflow-hidden md:rounded-3xl">
-              <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+            <div className="aspect-square bg-card overflow-hidden md:rounded-3xl p-3">
+              <img src={activeImage} alt={product.name} className="w-full h-full object-contain" />
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent md:hidden" />
             <button
@@ -138,6 +143,23 @@ const ProductDetail = () => {
                 <span className="bg-white/95 text-foreground text-sm font-extrabold px-4 py-2 rounded-xl uppercase tracking-wider shadow-lg">
                   Esgotado
                 </span>
+              </div>
+            )}
+            {galleryImages.length > 1 && (
+              <div className="absolute left-1/2 bottom-4 -translate-x-1/2 flex gap-2 rounded-lg bg-card/90 backdrop-blur-md p-1.5 shadow-elevated">
+                {galleryImages.map((image, imageIndex) => (
+                  <Button
+                    key={image}
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    aria-label={`Ver foto ${imageIndex + 1}`}
+                    onClick={() => setSelectedImage(image)}
+                    className={`h-12 w-12 overflow-hidden rounded-md border-2 p-0 ${activeImage === image ? 'border-primary' : 'border-transparent'}`}
+                  >
+                    <img src={image} alt="" className="h-full w-full object-contain" />
+                  </Button>
+                ))}
               </div>
             )}
           </div>

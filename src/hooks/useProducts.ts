@@ -10,6 +10,9 @@ const mapRow = (r: any): Product => ({
   price: Number(r.price) || 0,
   originalPrice: r.original_price != null ? Number(r.original_price) : undefined,
   image: r.image || '/placeholder.svg',
+  images: Array.isArray(r.images) && r.images.length > 0
+    ? r.images.filter((url: unknown): url is string => typeof url === 'string' && url.length > 0).slice(0, 3)
+    : [r.image || '/placeholder.svg'],
   category: r.category,
   description: r.description || '',
   featured: !!r.featured,
