@@ -39,6 +39,7 @@ interface DBProduct {
   price: number;
   original_price?: number;
   image: string;
+  images?: string[];
   category: string;
   description: string;
   featured: boolean;
@@ -57,6 +58,7 @@ const emptyProduct: Omit<DBProduct, 'id'> = {
   name: '',
   price: 0,
   image: '/placeholder.svg',
+  images: [],
   category: 'cilios',
   description: '',
   featured: false,
@@ -216,9 +218,15 @@ const AdminProducts = () => {
     setSaving(true);
     try {
       const action = editProduct.id ? 'update' : 'create';
+      const images = Array.from(new Set((editProduct.images || []).filter(Boolean))).slice(0, 3);
+      const productToSave = {
+        ...editProduct,
+        images,
+        image: images[0] || editProduct.image || '/placeholder.svg',
+      };
       const { error } = await supabase.functions.invoke(`admin-products?action=${action}`, {
         headers: { Authorization: `Bearer ${token}` },
-        body: editProduct,
+        body: productToSave,
       });
       if (error) throw error;
       toast({ title: editProduct.id ? 'Produto atualizado!' : 'Produto criado!' });
@@ -291,8 +299,13 @@ const AdminProducts = () => {
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const existingImages = editProduct?.images?.length
+      ? editProduct.images
+      : editProduct?.image && editProduct.image !== '/placeholder.svg'
+        ? [editProduct.image]
+        : [];
+    const files = Array.from(e.target.files || []).slice(0, Math.max(0, 3 - existingImages.length));
+    if (files.length === 0) return;
 
     setUploading(true);
     try {
@@ -304,23 +317,23 @@ const AdminProducts = () => {
           .replace(/[^a-z0-9]+/g, '-')
           .replace(/^-+|-+$/g, '');
 
-      const ext = sanitize(file.name.split('.').pop() || 'jpg') || 'jpg';
       const slug = sanitize(editProduct?.slug || '') || 'produto';
-      const fileName = `${slug}-${Date.now()}.${ext}`;
+      const uploadedUrls: string[] = [];
 
+      for (const [fileIndex, file] of files.entries()) {
+        const ext = sanitize(file.name.split('.').pop() || 'jpg') || 'jpg';
+        const fileName = `${slug}-${Date.now()}-${fileIndex + 1}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from('product-images')
+          .upload(fileName, file, { upsert: true });
+        if (uploadError) throw uploadError;
+        const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
+        uploadedUrls.push(urlData.publicUrl);
+      }
 
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(fileName, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(fileName);
-
-      setEditProduct(prev => ({ ...prev, image: urlData.publicUrl }));
-      toast({ title: 'Imagem enviada!' });
+      const nextImages = [...existingImages, ...uploadedUrls].slice(0, 3);
+      setEditProduct(prev => ({ ...prev, images: nextImages, image: nextImages[0] || '/placeholder.svg' }));
+      toast({ title: `${uploadedUrls.length} foto${uploadedUrls.length > 1 ? 's' : ''} enviada${uploadedUrls.length > 1 ? 's' : ''}!` });
     } catch (err: any) {
       toast({ title: 'Erro ao enviar imagem', description: err.message, variant: 'destructive' });
     } finally {
@@ -329,8 +342,16 @@ const AdminProducts = () => {
     }
   };
 
-  const handleRemoveImage = () => {
-    setEditProduct(prev => ({ ...prev, image: '/placeholder.svg' }));
+  const handleRemoveImage = (imageIndex: number) => {
+    setEditProduct(prev => {
+      const currentImages = prev?.images?.length
+        ? prev.images
+        : prev?.image && prev.image !== '/placeholder.svg'
+          ? [prev.image]
+          : [];
+      const nextImages = currentImages.filter((_, index) => index !== imageIndex);
+      return { ...prev, images: nextImages, image: nextImages[0] || '/placeholder.svg' };
+    });
   };
 
   const handleSeedFromStatic = async () => {
@@ -344,6 +365,7 @@ const AdminProducts = () => {
         price: p.price,
         original_price: p.originalPrice || null,
         image: p.image,
+        images: p.images || [p.image],
         category: p.category,
         description: p.description,
         featured: p.featured || false,
@@ -455,7 +477,7 @@ const AdminProducts = () => {
                   key={p.id}
                   product={p}
                   catLabel={catLabel}
-                  onEdit={() => setEditProduct({ ...p })}
+                  onEdit={() => setEditProduct({ ...p, images: p.images?.length ? p.images.slice(0, 3) : (p.image && p.image !== '/placeholder.svg' ? [p.image] : []) })}
                   onDelete={() => handleDelete(p.id)}
                   onToggleActive={(v) => handleToggleActive(p, v)}
                 />
@@ -546,29 +568,43 @@ const AdminProducts = () => {
 
               {/* Image section */}
               <div>
-                <Label className="text-xs font-semibold text-slate-600">Imagem do Produto</Label>
-                <div className="mt-1 flex items-start gap-3">
-                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-lg border border-slate-200 bg-slate-50 overflow-hidden flex-shrink-0">
-                    <img
-                      src={editProduct.image || '/placeholder.svg'}
-                      alt="Preview"
-                      className="w-full h-full object-contain"
-                      onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
-                    />
-                    {editProduct.image && editProduct.image !== '/placeholder.svg' && (
-                      <button
-                        onClick={handleRemoveImage}
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 hover:bg-red-600"
-                      >
-                        <X size={12} />
-                      </button>
-                    )}
+                <Label className="text-xs font-semibold text-slate-600">Fotos do Produto (até 3)</Label>
+                <p className="mt-0.5 text-[11px] text-slate-400">A primeira foto será a capa exibida no catálogo.</p>
+                <div className="mt-2 space-y-2">
+                  <div className="grid grid-cols-3 gap-2">
+                    {[0, 1, 2].map(imageIndex => {
+                      const currentImages = editProduct.images?.length
+                        ? editProduct.images
+                        : editProduct.image && editProduct.image !== '/placeholder.svg'
+                          ? [editProduct.image]
+                          : [];
+                      const imageUrl = currentImages[imageIndex];
+                      return (
+                        <div key={imageIndex} className="relative aspect-square rounded-lg border border-dashed border-slate-300 bg-slate-50 overflow-hidden">
+                          {imageUrl ? (
+                            <>
+                              <img src={imageUrl} alt={`Foto ${imageIndex + 1}`} className="w-full h-full object-contain" onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }} />
+                              <Button type="button" size="icon" variant="destructive" onClick={() => handleRemoveImage(imageIndex)} className="absolute top-1 right-1 h-6 w-6 rounded-full">
+                                <X size={12} />
+                              </Button>
+                              {imageIndex === 0 && <span className="absolute left-1 bottom-1 rounded bg-primary px-1.5 py-0.5 text-[9px] font-semibold text-primary-foreground">Capa</span>}
+                            </>
+                          ) : (
+                            <div className="h-full flex flex-col items-center justify-center gap-1 text-slate-400">
+                              <ImagePlus size={20} />
+                              <span className="text-[10px]">Foto {imageIndex + 1}</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                  <div className="flex-1 space-y-2">
+                  <div className="space-y-2">
                     <input
                       ref={fileInputRef}
                       type="file"
                       accept="image/*"
+                      multiple
                       onChange={handleImageUpload}
                       className="hidden"
                     />
@@ -577,18 +613,12 @@ const AdminProducts = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading}
+                      disabled={uploading || (editProduct.images?.length || (editProduct.image !== '/placeholder.svg' ? 1 : 0)) >= 3}
                       className="w-full"
                     >
                       <ImagePlus size={14} className="mr-1" />
-                      {uploading ? 'Enviando...' : 'Enviar Imagem'}
+                      {uploading ? 'Enviando...' : 'Adicionar fotos'}
                     </Button>
-                    <Input
-                      value={editProduct.image || ''}
-                      onChange={e => setEditProduct(prev => ({ ...prev, image: e.target.value }))}
-                      placeholder="Ou cole a URL"
-                      className="text-xs"
-                    />
                   </div>
                 </div>
               </div>

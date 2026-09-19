@@ -43,6 +43,7 @@ export type Database = {
           id: string
           image_url: string
           link: string
+          placement: string
           sort_order: number
           title: string
           updated_at: string
@@ -54,6 +55,7 @@ export type Database = {
           id?: string
           image_url: string
           link?: string
+          placement?: string
           sort_order?: number
           title?: string
           updated_at?: string
@@ -65,6 +67,7 @@ export type Database = {
           id?: string
           image_url?: string
           link?: string
+          placement?: string
           sort_order?: number
           title?: string
           updated_at?: string
@@ -334,6 +337,7 @@ export type Database = {
           featured: boolean
           id: string
           image: string
+          images: string[]
           name: string
           original_price: number | null
           price: number
@@ -354,6 +358,7 @@ export type Database = {
           featured?: boolean
           id?: string
           image?: string
+          images?: string[]
           name: string
           original_price?: number | null
           price?: number
@@ -374,6 +379,7 @@ export type Database = {
           featured?: boolean
           id?: string
           image?: string
+          images?: string[]
           name?: string
           original_price?: number | null
           price?: number

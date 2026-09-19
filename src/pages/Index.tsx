@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Truck, ShieldCheck, CreditCard, Leaf } from 'lucide-react';
+import { Truck, ShieldCheck, CreditCard, Leaf, Search, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import whatsappIcon from '@/assets/whatsapp-icon.png';
 import HeroBannerCarousel from '@/components/HeroBannerCarousel';
@@ -14,6 +14,7 @@ import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import UrgencyBar from '@/components/UrgencyBar';
 import SuperOfferSection from '@/components/SuperOfferSection';
+import FeaturedPromoStrip from '@/components/FeaturedPromoStrip';
 
 // Stickers (só decorativos, só mobile)
 import stHeart from '@/assets/stickers/heart.png';
@@ -28,6 +29,7 @@ const Index = () => {
   const { products } = useProducts();
   const featured = products.filter(p => p.featured);
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     if (sessionStorage.getItem('visit_tracked')) return;
@@ -90,6 +92,38 @@ const Index = () => {
             <h2 className="font-hand text-3xl md:text-4xl text-primary leading-none">o que você tá procurando, amor?</h2>
             <img src={stCoffee} alt="" aria-hidden="true" className="sticker sticker-tilt-r w-10 h-10 md:w-14 md:h-14 shrink-0" loading="lazy" />
           </div>
+
+          {/* Busca */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (search.trim()) navigate(`/catalogo?q=${encodeURIComponent(search.trim())}`);
+              else navigate('/catalogo');
+            }}
+            className="px-4 mb-4"
+          >
+            <div className="flex items-center gap-3 bg-card rounded-2xl px-4 py-3.5 border border-border/60 shadow-card focus-within:shadow-elevated focus-within:border-primary/40 transition-all duration-300">
+              <Search size={18} className="text-primary flex-shrink-0" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="busca aqui, amor: cola, pinça, cílios... 💗"
+                className="bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none w-full font-medium"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  aria-label="Limpar busca"
+                  className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+          </form>
+
           <div className="flex gap-2.5 overflow-x-auto px-4 pb-2 scrollbar-hide md:flex-wrap">
             {categories.filter(c => c.id !== 'todos').map((cat) => (
               <button
@@ -120,6 +154,9 @@ const Index = () => {
             ))}
           </div>
         </section>
+
+        {/* Faixa promocional administrável */}
+        <FeaturedPromoStrip />
 
         {/* Prateleiras por categoria */}
         {categories
