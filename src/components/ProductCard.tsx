@@ -99,18 +99,18 @@ const ProductCard = ({ product, index = 0 }: Props) => {
           <button
             onClick={handleAdd}
             disabled={outOfStock}
-            className="bg-primary text-primary-foreground p-2 rounded-lg shadow-sm hover:bg-primary/90 transition-all duration-200 active:scale-90 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
+            className="bg-pink-soft text-accent p-2.5 rounded-2xl shadow-sm hover:brightness-95 transition-all duration-200 active:scale-90 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed"
             aria-label="Adicionar ao carrinho"
           >
-            <ShoppingBag size={14} strokeWidth={2.5} />
+            <ShoppingBag size={16} strokeWidth={2.5} />
           </button>
         </div>
         <button
           onClick={handleBuyNow}
           disabled={outOfStock}
-          className="mt-2 w-full bg-gradient-to-r from-accent to-primary text-white py-2 rounded-lg font-bold text-[11px] flex items-center justify-center gap-1 active:scale-95 transition-all hover:shadow-md disabled:from-muted disabled:to-muted disabled:text-muted-foreground disabled:cursor-not-allowed disabled:hover:shadow-none"
+          className="mt-2 w-full bg-satin text-primary-foreground py-2.5 rounded-2xl font-semibold text-[11px] tracking-wide uppercase flex items-center justify-center gap-1.5 active:scale-[0.97] transition-all duration-200 hover:shadow-satin hover:brightness-110 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:brightness-100"
         >
-          {outOfStock ? 'ESGOTADO' : (<><Zap size={12} fill="currentColor" /> COMPRAR AGORA</>)}
+          {outOfStock ? 'ESGOTADO' : (<><Zap size={13} fill="currentColor" /> COMPRAR AGORA</>)}
         </button>
       </div>
     </div>
