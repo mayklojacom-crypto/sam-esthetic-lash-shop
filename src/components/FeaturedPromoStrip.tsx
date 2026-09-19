@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface PromoStrip {
   id: string;
   image_url: string;
+  image_mobile_url: string | null;
   link: string;
   alt: string;
 }
@@ -16,7 +17,7 @@ const FeaturedPromoStrip = () => {
   useEffect(() => {
     supabase
       .from('banners')
-      .select('id, image_url, link, alt')
+      .select('id, image_url, image_mobile_url, link, alt')
       .eq('placement', 'featured_strip')
       .eq('active', true)
       .order('sort_order', { ascending: true })
@@ -55,12 +56,15 @@ const FeaturedPromoStrip = () => {
         role={clickable ? 'link' : undefined}
         tabIndex={clickable ? 0 : undefined}
       >
-        <img
-          src={strip.image_url}
-          alt={strip.alt}
-          className="block h-auto min-h-[82px] max-h-[220px] w-full object-cover md:min-h-0"
-          loading="lazy"
-        />
+        <picture>
+          {strip.image_mobile_url && <source media="(max-width: 767px)" srcSet={strip.image_mobile_url} />}
+          <img
+            src={strip.image_url}
+            alt={strip.alt}
+            className="block h-auto min-h-[82px] max-h-[220px] w-full object-cover md:min-h-0"
+            loading="lazy"
+          />
+        </picture>
       </div>
     </section>
   );

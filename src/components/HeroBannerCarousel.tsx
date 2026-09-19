@@ -9,6 +9,7 @@ import bannerQueridinhas from '@/assets/banner-queridinhas-colas.png.asset.json'
 interface Banner {
   id: string;
   image_url: string;
+  image_mobile_url?: string | null;
   link: string;
   alt: string;
 }
@@ -28,7 +29,7 @@ const HeroBannerCarousel = () => {
     (async () => {
       const { data } = await supabase
         .from('banners')
-        .select('id, image_url, link, alt')
+        .select('id, image_url, image_mobile_url, link, alt')
         .eq('placement', 'hero')
         .eq('active', true)
         .order('sort_order', { ascending: true });
@@ -55,14 +56,15 @@ const HeroBannerCarousel = () => {
           style={{ transform: `translateX(-${current * 100}%)` }}
         >
           {banners.map((b) => (
-            <img
-              key={b.id}
-              src={b.image_url}
-              alt={b.alt}
-              className="w-full h-auto object-cover flex-shrink-0 cursor-pointer rounded-2xl"
-              onClick={() => navigate(b.link)}
-              style={{ minWidth: '100%' }}
-            />
+            <picture key={b.id} className="block min-w-full">
+              {b.image_mobile_url && <source media="(max-width: 767px)" srcSet={b.image_mobile_url} />}
+              <img
+                src={b.image_url}
+                alt={b.alt}
+                className="w-full h-auto object-cover cursor-pointer rounded-2xl"
+                onClick={() => navigate(b.link)}
+              />
+            </picture>
           ))}
         </div>
       </div>

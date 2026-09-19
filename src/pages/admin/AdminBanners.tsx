@@ -15,6 +15,7 @@ interface Banner {
   id: string;
   title: string;
   image_url: string;
+  image_mobile_url: string | null;
   link: string;
   alt: string;
   sort_order: number;
@@ -25,6 +26,7 @@ interface Banner {
 const empty: Omit<Banner, 'id'> = {
   title: '',
   image_url: '',
+  image_mobile_url: null,
   link: '/catalogo',
   alt: '',
   sort_order: 0,
@@ -38,8 +40,9 @@ const AdminBanners = () => {
   const [loading, setLoading] = useState(true);
   const [edit, setEdit] = useState<Partial<Banner> | null>(null);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState<'desktop' | 'mobile' | null>(null);
+  const desktopFileRef = useRef<HTMLInputElement>(null);
+  const mobileFileRef = useRef<HTMLInputElement>(null);
   const heroBanners = banners.filter(b => b.placement === 'hero');
   const stripBanners = banners.filter(b => b.placement === 'featured_strip');
 
@@ -132,25 +135,25 @@ const AdminBanners = () => {
     }
   };
 
-  const upload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const upload = async (e: React.ChangeEvent<HTMLInputElement>, target: 'desktop' | 'mobile') => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true);
+    setUploading(target);
     try {
       const ext = file.name.split('.').pop();
-      const fileName = `banner-${Date.now()}.${ext}`;
+      const fileName = `banner-${target}-${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
         .from('product-images')
         .upload(fileName, file, { upsert: true });
       if (upErr) throw upErr;
       const { data } = supabase.storage.from('product-images').getPublicUrl(fileName);
-      setEdit(prev => ({ ...prev, image_url: data.publicUrl }));
+      setEdit(prev => ({ ...prev, [target === 'desktop' ? 'image_url' : 'image_mobile_url']: data.publicUrl }));
       toast({ title: 'Imagem enviada!' });
     } catch (err: any) {
       toast({ title: 'Erro no upload', description: err.message, variant: 'destructive' });
     } finally {
-      setUploading(false);
-      if (fileRef.current) fileRef.current.value = '';
+      setUploading(null);
+      e.target.value = '';
     }
   };
 
