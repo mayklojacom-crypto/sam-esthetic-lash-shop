@@ -254,24 +254,28 @@ const ProductDetail = () => {
               </div>
 
               {/* Desktop buttons */}
-              <div className="hidden md:grid grid-cols-3 gap-2 mt-6">
-                <button
+              <div className="hidden md:grid grid-cols-[56px_1fr] gap-3 mt-6">
+                <Button
+                  type="button"
                   onClick={handleAdd}
                   disabled={outOfStock}
-                  className="col-span-1 bg-secondary text-foreground py-4 rounded-2xl font-bold flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 hover:bg-secondary/80 text-sm border border-border disabled:opacity-50 disabled:cursor-not-allowed"
+                  variant="secondary"
+                  size="icon"
+                  aria-label="Adicionar ao carrinho"
+                  className="h-14 w-14 rounded-xl border border-primary/20 bg-primary/10 text-primary shadow-none active:scale-[0.96]"
                 >
-                  <ShoppingBag size={17} strokeWidth={2.5} />
-                  Adicionar
-                </button>
-                <button
+                  <ShoppingBag size={21} strokeWidth={2.5} />
+                </Button>
+                <Button
+                  type="button"
                   onClick={handleBuyNow}
                   disabled={outOfStock}
-                  className={`col-span-2 py-4 rounded-2xl font-extrabold flex items-center justify-center gap-2 active:scale-[0.98] transition-all duration-200 shadow-elevated hover:shadow-lg text-base text-white uppercase tracking-wide disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none ${
+                  className={`h-14 w-full rounded-xl font-extrabold text-base uppercase shadow-elevated active:scale-[0.98] disabled:opacity-60 disabled:shadow-none ${
                     outOfStock
                       ? 'bg-muted-foreground'
                       : isPromo
-                      ? 'bg-gradient-to-r from-red-500 via-orange-500 to-red-500 bg-[length:200%_100%] animate-gradient-x'
-                      : 'bg-gradient-to-r from-accent to-primary animate-pulse-soft'
+                      ? 'gradient-accent text-accent-foreground'
+                      : 'bg-accent text-accent-foreground hover:bg-accent/90'
                   }`}
                 >
                   {outOfStock ? (
@@ -282,7 +286,7 @@ const ProductDetail = () => {
                       {isPromo ? `🔥 Garantir Oferta · ${promoLabel}` : 'Pedir Agora'}
                     </>
                   )}
-                </button>
+                </Button>
               </div>
               <p className="hidden md:flex items-center justify-center gap-1.5 text-xs text-muted-foreground mt-3">
                 🔒 Compra 100% segura · 🛵 Entrega local em até 30 min (Goiânia e Aparecida)
