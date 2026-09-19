@@ -25,8 +25,12 @@ const Catalog = () => {
   const [searchParams] = useSearchParams();
   const initialCat = categoria || searchParams.get('cat') || 'todos';
   const [category, setCategory] = useState(initialCat);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(searchParams.get('q') || '');
   const { products } = useProducts();
+
+  useEffect(() => {
+    setSearch(searchParams.get('q') || '');
+  }, [searchParams]);
 
   useEffect(() => {
     if (categoria) {
@@ -77,6 +81,16 @@ const Catalog = () => {
               onChange={e => setSearch(e.target.value)}
               className="bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none w-full font-medium"
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                aria-label="Limpar busca"
+                className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
         </div>
 

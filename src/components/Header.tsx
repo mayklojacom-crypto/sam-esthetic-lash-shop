@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingBag, Menu, X } from 'lucide-react';
+import { ShoppingBag, Menu, X, Search } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useState } from 'react';
 
@@ -56,18 +56,27 @@ const Header = () => {
           ))}
         </nav>
 
-        {/* Cart (right) */}
-        <button
-          onClick={() => navigate('/carrinho')}
-          className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary transition-colors"
-        >
-          <ShoppingBag size={20} className="text-foreground" />
-          {totalItems > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center animate-scale-in">
-              {totalItems}
-            </span>
-          )}
-        </button>
+        {/* Search + Cart (right) */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => navigate('/catalogo')}
+            aria-label="Buscar produtos"
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary transition-colors"
+          >
+            <Search size={20} className="text-foreground" />
+          </button>
+          <button
+            onClick={() => navigate('/carrinho')}
+            className="relative w-10 h-10 flex items-center justify-center rounded-full hover:bg-secondary transition-colors"
+          >
+            <ShoppingBag size={20} className="text-foreground" />
+            {totalItems > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center animate-scale-in">
+                {totalItems}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Mobile dropdown menu */}
