@@ -43,6 +43,7 @@ export type Database = {
           id: string
           image_url: string
           link: string
+          placement: string
           sort_order: number
           title: string
           updated_at: string
@@ -54,6 +55,7 @@ export type Database = {
           id?: string
           image_url: string
           link?: string
+          placement?: string
           sort_order?: number
           title?: string
           updated_at?: string
@@ -65,6 +67,7 @@ export type Database = {
           id?: string
           image_url?: string
           link?: string
+          placement?: string
           sort_order?: number
           title?: string
           updated_at?: string

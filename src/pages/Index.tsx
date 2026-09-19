@@ -14,6 +14,7 @@ import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import UrgencyBar from '@/components/UrgencyBar';
 import SuperOfferSection from '@/components/SuperOfferSection';
+import FeaturedPromoStrip from '@/components/FeaturedPromoStrip';
 
 // Stickers (só decorativos, só mobile)
 import stHeart from '@/assets/stickers/heart.png';
@@ -153,6 +154,9 @@ const Index = () => {
             ))}
           </div>
         </section>
+
+        {/* Faixa promocional administrável */}
+        <FeaturedPromoStrip />
 
         {/* Prateleiras por categoria */}
         {categories

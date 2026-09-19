@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Upload, ImageIcon, ArrowUp, ArrowDown, X } from 'lucide-react';
 
@@ -18,6 +19,7 @@ interface Banner {
   alt: string;
   sort_order: number;
   active: boolean;
+  placement: 'hero' | 'featured_strip';
 }
 
 const empty: Omit<Banner, 'id'> = {
@@ -27,6 +29,7 @@ const empty: Omit<Banner, 'id'> = {
   alt: '',
   sort_order: 0,
   active: true,
+  placement: 'hero',
 };
 
 const AdminBanners = () => {
@@ -37,6 +40,8 @@ const AdminBanners = () => {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const heroBanners = banners.filter(b => b.placement === 'hero');
+  const stripBanners = banners.filter(b => b.placement === 'featured_strip');
 
   const fetchBanners = useCallback(async () => {
     try {
@@ -105,13 +110,15 @@ const AdminBanners = () => {
     }
   };
 
-  const move = async (idx: number, dir: -1 | 1) => {
+  const move = async (banner: Banner, dir: -1 | 1) => {
+    const group = banners.filter(b => b.placement === banner.placement);
+    const idx = group.findIndex(b => b.id === banner.id);
     const newIdx = idx + dir;
-    if (newIdx < 0 || newIdx >= banners.length) return;
-    const arr = [...banners];
-    [arr[idx], arr[newIdx]] = [arr[newIdx], arr[idx]];
-    const updates = arr.map((b, i) => ({ ...b, sort_order: i }));
-    setBanners(updates);
+    if (newIdx < 0 || newIdx >= group.length) return;
+    const reordered = [...group];
+    [reordered[idx], reordered[newIdx]] = [reordered[newIdx], reordered[idx]];
+    const updates = reordered.map((b, i) => ({ ...b, sort_order: i }));
+    setBanners(prev => prev.map(b => updates.find(item => item.id === b.id) || b));
     try {
       await Promise.all(updates.map(b =>
         supabase.functions.invoke('admin-banners?action=update', {
@@ -152,7 +159,7 @@ const AdminBanners = () => {
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-slate-900">Banners do Site</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Gerencie o carrossel da página inicial</p>
+          <p className="text-sm text-slate-500 mt-0.5">Gerencie o carrossel e a faixa promocional da página inicial</p>
         </div>
         <Button size="sm" onClick={() => setEdit({ ...empty })}>
           <Plus size={16} className="mr-1" /> Novo Banner
@@ -169,8 +176,22 @@ const AdminBanners = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
-          {banners.map((b, i) => (
+        <div className="space-y-7">
+          {[
+            { title: 'Carrossel principal', description: 'Banners grandes exibidos no topo do site.', items: heroBanners },
+            { title: 'Faixa após os queridinhos', description: 'Faixa fina exibida logo após os produtos em destaque. Use 1600 × 320 px.', items: stripBanners },
+          ].map(section => (
+            <section key={section.title} className="space-y-3">
+              <div>
+                <h2 className="text-base font-bold text-slate-900">{section.title}</h2>
+                <p className="text-xs text-slate-500 mt-0.5">{section.description}</p>
+              </div>
+              {section.items.length === 0 && (
+                <Card className="border-dashed border-slate-200">
+                  <CardContent className="py-6 text-center text-sm text-slate-400">Nenhuma imagem cadastrada nesta área.</CardContent>
+                </Card>
+              )}
+              {section.items.map((b, i) => (
             <Card key={b.id} className={`border-slate-200 ${!b.active ? 'opacity-60' : ''}`}>
               <CardContent className="p-3 flex flex-col md:flex-row gap-3 items-start md:items-center">
                 <img
@@ -191,10 +212,10 @@ const AdminBanners = () => {
                   </div>
                 </div>
                 <div className="flex md:flex-col gap-1 self-end md:self-center">
-                  <Button size="icon" variant="ghost" className="h-8 w-8" disabled={i === 0} onClick={() => move(i, -1)}>
+                  <Button size="icon" variant="ghost" className="h-8 w-8" disabled={i === 0} onClick={() => move(b, -1)}>
                     <ArrowUp size={14} />
                   </Button>
-                  <Button size="icon" variant="ghost" className="h-8 w-8" disabled={i === banners.length - 1} onClick={() => move(i, 1)}>
+                  <Button size="icon" variant="ghost" className="h-8 w-8" disabled={i === section.items.length - 1} onClick={() => move(b, 1)}>
                     <ArrowDown size={14} />
                   </Button>
                 </div>
@@ -208,6 +229,8 @@ const AdminBanners = () => {
                 </div>
               </CardContent>
             </Card>
+              ))}
+            </section>
           ))}
         </div>
       )}
@@ -239,10 +262,28 @@ const AdminBanners = () => {
                   >
                     <Upload size={24} />
                     <span className="text-sm mt-2">{uploading ? 'Enviando...' : 'Clique para enviar imagem'}</span>
-                    <span className="text-xs mt-1">Recomendado: 1200x600px</span>
+                    <span className="text-xs mt-1">
+                      {edit.placement === 'featured_strip' ? 'Recomendado: 1600 × 320 px' : 'Recomendado: 1200 × 600 px'}
+                    </span>
                   </button>
                 )}
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={upload} />
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold text-slate-600">Onde aparece</Label>
+                <Select
+                  value={edit.placement || 'hero'}
+                  onValueChange={(value: 'hero' | 'featured_strip') => setEdit(prev => ({ ...prev, placement: value }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="hero">Carrossel principal</SelectItem>
+                    <SelectItem value="featured_strip">Faixa após os queridinhos</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
