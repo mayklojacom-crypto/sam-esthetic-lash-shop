@@ -63,7 +63,7 @@ const ProductCard = ({ product, index = 0 }: Props) => {
         )}
       </div>
       <div className="px-2.5 pb-2.5 pt-1 flex flex-col flex-1 text-center">
-        <h3 className="text-[12px] sm:text-[13px] font-medium text-foreground line-clamp-2 leading-snug min-h-[2.5rem] flex items-center justify-center">
+        <h3 className="text-[12px] sm:text-[13px] font-medium text-foreground line-clamp-2 leading-snug min-h-[2.5rem]">
           {product.name}
         </h3>
         <div className="mt-1.5 min-h-[4.6rem]">
