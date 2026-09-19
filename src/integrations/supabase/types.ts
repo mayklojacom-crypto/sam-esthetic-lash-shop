@@ -41,6 +41,7 @@ export type Database = {
           alt: string
           created_at: string
           id: string
+          image_mobile_url: string | null
           image_url: string
           link: string
           placement: string
@@ -53,6 +54,7 @@ export type Database = {
           alt?: string
           created_at?: string
           id?: string
+          image_mobile_url?: string | null
           image_url: string
           link?: string
           placement?: string
@@ -65,6 +67,7 @@ export type Database = {
           alt?: string
           created_at?: string
           id?: string
+          image_mobile_url?: string | null
           image_url?: string
           link?: string
           placement?: string
