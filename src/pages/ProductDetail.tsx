@@ -247,13 +247,7 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              {/* Descrição — depois das opções de compra */}
-              <div className="mt-6 pt-5 border-t border-border/60">
-                <span className="text-sm font-semibold text-foreground">Descrição</span>
-                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line mt-2">{product.description}</p>
-              </div>
-
-              {/* Desktop buttons */}
+              {/* Desktop buttons — logo abaixo da quantidade */}
               <div className="hidden md:grid grid-cols-[56px_1fr] gap-3 mt-6">
                 <Button
                   type="button"
@@ -291,6 +285,12 @@ const ProductDetail = () => {
               <p className="hidden md:flex items-center justify-center gap-1.5 text-xs text-muted-foreground mt-3">
                 🔒 Compra 100% segura · 🛵 Entrega local em até 30 min (Goiânia e Aparecida)
               </p>
+
+              {/* Descrição — depois das opções de compra */}
+              <div className="mt-6 pt-5 border-t border-border/60">
+                <span className="text-sm font-semibold text-foreground">Descrição</span>
+                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line mt-2">{product.description}</p>
+              </div>
             </div>
 
           </div>
