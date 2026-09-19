@@ -2,10 +2,15 @@ import { useState } from 'react';
 import whatsappIcon from '@/assets/whatsapp-icon.png';
 import WhatsAppLeadModal from './WhatsAppLeadModal';
 import { useCart } from '@/contexts/CartContext';
+import { useLocation } from 'react-router-dom';
 
 const WhatsAppFloat = () => {
   const [open, setOpen] = useState(false);
   const { items } = useCart();
+  const location = useLocation();
+
+  if (location.pathname.startsWith('/produto/')) return null;
+
   return (
     <>
       <button
