@@ -197,12 +197,15 @@ const AdminBanners = () => {
               {section.items.map((b, i) => (
             <Card key={b.id} className={`border-slate-200 ${!b.active ? 'opacity-60' : ''}`}>
               <CardContent className="p-3 flex flex-col md:flex-row gap-3 items-start md:items-center">
-                <img
-                  src={b.image_url}
-                  alt={b.alt}
-                  className="w-full md:w-40 h-24 object-cover rounded-lg border border-slate-200 bg-slate-50"
-                  onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
-                />
+                <picture className="block w-full md:w-40">
+                  {b.image_mobile_url && <source media="(max-width: 767px)" srcSet={b.image_mobile_url} />}
+                  <img
+                    src={b.image_url}
+                    alt={b.alt}
+                    className="w-full h-24 object-cover rounded-lg border border-slate-200 bg-slate-50"
+                    onError={e => { (e.target as HTMLImageElement).src = '/placeholder.svg'; }}
+                  />
+                </picture>
                 <div className="flex-1 min-w-0 w-full">
                   <p className="text-sm font-semibold text-slate-900 truncate">{b.title || '(sem título)'}</p>
                   <p className="text-xs text-slate-500 truncate mt-0.5">→ {b.link}</p>
@@ -246,31 +249,72 @@ const AdminBanners = () => {
           {edit && (
             <div className="space-y-3">
               <div>
-                <Label className="text-xs font-semibold text-slate-600">Imagem</Label>
+                <Label className="text-xs font-semibold text-slate-600">Imagem desktop</Label>
                 {edit.image_url ? (
                   <div className="mt-1 relative">
                     <img src={edit.image_url} alt="" className="w-full h-40 object-cover rounded-lg border border-slate-200" />
-                    <button
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="secondary"
                       onClick={() => setEdit(prev => ({ ...prev, image_url: '' }))}
-                      className="absolute top-2 right-2 bg-white/90 rounded-full p-1 shadow"
+                      className="absolute top-2 right-2 h-8 w-8 rounded-full"
+                      aria-label="Remover imagem desktop"
                     >
                       <X size={14} />
-                    </button>
+                    </Button>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => fileRef.current?.click()}
-                    disabled={uploading}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => desktopFileRef.current?.click()}
+                    disabled={uploading !== null}
                     className="mt-1 w-full h-40 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center text-slate-400 hover:border-primary hover:text-primary transition-colors"
                   >
                     <Upload size={24} />
-                    <span className="text-sm mt-2">{uploading ? 'Enviando...' : 'Clique para enviar imagem'}</span>
+                    <span className="text-sm mt-2">{uploading === 'desktop' ? 'Enviando...' : 'Enviar imagem desktop'}</span>
                     <span className="text-xs mt-1">
                       {edit.placement === 'featured_strip' ? 'Recomendado: 1600 × 320 px' : 'Recomendado: 1200 × 600 px'}
                     </span>
-                  </button>
+                  </Button>
                 )}
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={upload} />
+                <input ref={desktopFileRef} type="file" accept="image/*" className="hidden" onChange={event => upload(event, 'desktop')} />
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold text-slate-600">Imagem mobile (opcional)</Label>
+                {edit.image_mobile_url ? (
+                  <div className="mt-1 relative">
+                    <img src={edit.image_mobile_url} alt="" className="w-full h-40 object-cover rounded-lg border border-slate-200" />
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="secondary"
+                      onClick={() => setEdit(prev => ({ ...prev, image_mobile_url: null }))}
+                      className="absolute top-2 right-2 h-8 w-8 rounded-full"
+                      aria-label="Remover imagem mobile"
+                    >
+                      <X size={14} />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => mobileFileRef.current?.click()}
+                    disabled={uploading !== null}
+                    className="mt-1 w-full h-40 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center text-slate-400 hover:border-primary hover:text-primary transition-colors"
+                  >
+                    <Upload size={24} />
+                    <span className="text-sm mt-2">{uploading === 'mobile' ? 'Enviando...' : 'Enviar imagem mobile'}</span>
+                    <span className="text-xs mt-1">
+                      {edit.placement === 'featured_strip' ? 'Recomendado: 1080 × 240 px' : 'Recomendado: 750 × 900 px'}
+                    </span>
+                  </Button>
+                )}
+                <input ref={mobileFileRef} type="file" accept="image/*" className="hidden" onChange={event => upload(event, 'mobile')} />
+                <p className="text-[10px] text-slate-400 mt-1">Sem imagem mobile, o site usa automaticamente a imagem desktop.</p>
               </div>
 
               <div>
