@@ -42,6 +42,9 @@
     --cream: 35 60% 97%;
     --gold-soft: 42 85% 70%;
     --pink-soft: 340 90% 92%;
+    --satin: 258 50% 63%;
+    --satin-deep: 258 40% 56%;
+    --satin-glow: 258 50% 63%;
 
     --gradient-primary: linear-gradient(135deg, hsl(272 60% 45%), hsl(310 65% 50%));
     --gradient-accent: linear-gradient(135deg, hsl(330 75% 55%), hsl(350 80% 60%));
@@ -180,6 +183,9 @@
   .bg-lilac { background-color: hsl(var(--lilac)); }
   .bg-peach { background-color: hsl(var(--peach)); }
   .bg-pink-soft { background-color: hsl(var(--pink-soft)); }
+  .bg-satin { background-color: hsl(var(--satin)); }
+  .text-satin { color: hsl(var(--satin)); }
+  .shadow-satin { box-shadow: 0 6px 20px -5px hsl(var(--satin) / 0.4); }
 
   /* Sticker "coladinho" — leve rotação + sombra suave */
   .sticker {
