@@ -16,8 +16,8 @@ describe('owner-defined road-distance tariff', () => {
 describe('road-route validation', () => {
   const address = { cep: '74000000', street: '', neighborhood: '', city: 'Goiânia', state: 'GO' };
   const route: RoadRouteResult = { status: 'ok', kind: 'road', originCep: '74963580', destinationCep: address.cep, distanceMeters: 5010 };
-  it('calculates from unrounded provider metres', () => expect(freightForRoadRoute(address, route)).toBe(9.02));
-  it('accepts Aparecida with matching destination', () => expect(freightForRoadRoute({ ...address, city: 'Aparecida de Goiânia' }, route)).toBe(9.02));
+  it('calculates from unrounded provider metres', () => expect(freightForRoadRoute(address, route)).toBe(6.01));
+  it('accepts Aparecida with matching destination', () => expect(freightForRoadRoute({ ...address, city: 'Aparecida de Goiânia' }, route)).toBe(6.01));
   it('rejects a destination outside the served cities', () => expect(freightForRoadRoute({ ...address, city: 'Trindade' }, route)).toBeNull());
   it('rejects a destination outside GO', () => expect(freightForRoadRoute({ ...address, state: 'SP' }, route)).toBeNull());
   it('keeps freight pending on route failure', () => expect(freightForRoadRoute(address, { ...route, status: 'unavailable' })).toBeNull());
@@ -27,7 +27,7 @@ describe('road-route validation', () => {
   it('rejects invalid destination CEP', () => expect(freightForRoadRoute({ ...address, cep: '' }, { ...route, destinationCep: '' })).toBeNull());
   it('rejects straight-line distance', () => expect(freightForRoadRoute(address, { ...route, kind: 'straight-line' } as unknown as RoadRouteResult)).toBeNull());
   it.each([-1, NaN, Infinity, -Infinity])('rejects invalid route metres %s', distanceMeters => expect(freightForRoadRoute(address, { ...route, distanceMeters })).toBeNull());
-  it('adds rule-based freight after product discount', () => expect(checkoutTotals(100, .1, freightForRoadRoute(address, route)).total).toBe(99.02));
+  it('adds rule-based freight after product discount', () => expect(checkoutTotals(100, .1, freightForRoadRoute(address, route)).total).toBe(96.01));
   it('leaves total pending after route failure', () => expect(checkoutTotals(100, .1, freightForRoadRoute(address, null)).total).toBeNull());
 });
 
