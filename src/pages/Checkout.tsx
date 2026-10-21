@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, ShieldCheck, CreditCard, Loader2, Lock, MapPin, User, Phone, FileText, ChevronRight, Truck, Package, Copy, Check, QrCode } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, CreditCard, Loader2, Lock, MapPin, User, Phone, FileText, ChevronRight, Copy, Check, QrCode } from 'lucide-react';
 import whatsappIcon from '@/assets/whatsapp-icon.png';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
@@ -30,11 +30,6 @@ const checkoutSchema = z.object({
 });
 
 const WHATSAPP_NUMBER = '5562998755213';
-
-const STATES = [
-  'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA',
-  'PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'
-];
 
 const formatCPF = (value: string) => {
   const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -395,7 +390,7 @@ const Checkout = () => {
       <Header />
 
       <div className="max-w-5xl mx-auto px-4 mt-4">
-        <Button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4 font-medium hover:text-foreground transition-colors">
+        <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4 font-medium hover:text-foreground transition-colors">
           <ArrowLeft size={16} /> Voltar
         </Button>
 

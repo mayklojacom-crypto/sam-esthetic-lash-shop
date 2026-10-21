@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, ShoppingBag, MessageCircle, ArrowLeft, Package, Heart } from 'lucide-react';
 import Header from '@/components/Header';

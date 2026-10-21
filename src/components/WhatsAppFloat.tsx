@@ -9,7 +9,7 @@ const WhatsAppFloat = () => {
   const { items } = useCart();
   const location = useLocation();
 
-  if (location.pathname.startsWith('/produto/')) return null;
+  if (location.pathname.startsWith('/produto/') || ['/carrinho', '/checkout'].includes(location.pathname)) return null;
 
   return (
     <>
