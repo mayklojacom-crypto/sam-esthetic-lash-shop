@@ -7,6 +7,8 @@ import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import whatsappIcon from '@/assets/whatsapp-icon.png';
 import { Loader2, MessageCircle } from 'lucide-react';
+import { formatBRL } from '@/lib/checkoutRules';
+import { useDelivery } from '@/contexts/DeliveryContext';
 
 const WHATSAPP_NUMBER = '5562998755213';
 
@@ -26,6 +28,7 @@ const formatPhone = (v: string) => {
 
 export const WhatsAppLeadModal = ({ open, onOpenChange, mode = 'order' }: Props) => {
   const { items, totalPrice, clearCart } = useCart();
+  const { delivery } = useDelivery();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
@@ -65,12 +68,14 @@ export const WhatsAppLeadModal = ({ open, onOpenChange, mode = 'order' }: Props)
       const itemsList = items
         .map(({ product, quantity, selectedSize }) => {
           const sizeText = selectedSize ? ` (${selectedSize})` : '';
-          return `▪️ ${quantity}x ${product.name}${sizeText} — R$ ${(product.price * quantity).toFixed(2)}`;
+          return `▪️ ${quantity}x ${product.name}${sizeText} — ${formatBRL(product.price * quantity)}`;
         })
         .join('\n');
       message =
         `🛍️ *Olá Sam Esthetic!*\n\n*Cliente:* ${trimmedName}\n*WhatsApp:* ${phone}\n\nQuero finalizar este pedido:\n\n${itemsList}\n\n` +
-        `💰 *Subtotal: R$ ${totalPrice.toFixed(2)}*\n\nAguardo retorno para combinar entrega e pagamento. Obrigado!`;
+        `💰 *Subtotal: ${formatBRL(totalPrice)}*\n*Frete:* a combinar por aplicativo\n*Total com frete:* a confirmar\n` +
+        `${delivery ? `*Entrega:* CEP ${delivery.address.cep}, ${delivery.address.city} / GO\n` : ''}` +
+        `\nAguardo retorno para combinar entrega e pagamento. Obrigado!`;
     } else {
       message = `Olá Sam Esthetic! 💜\n\n*Meu nome:* ${trimmedName}\n*WhatsApp:* ${phone}\n\nGostaria de tirar uma dúvida.`;
     }
@@ -123,7 +128,7 @@ export const WhatsAppLeadModal = ({ open, onOpenChange, mode = 'order' }: Props)
 
           {isOrder && (
             <div className="bg-muted/60 rounded-xl p-2.5 text-xs text-muted-foreground">
-              {items.length} item(ns) · <span className="font-bold text-foreground">R$ {totalPrice.toFixed(2)}</span>
+              {items.length} item(ns) · <span className="font-bold text-foreground">{formatBRL(totalPrice)} + frete a combinar</span>
             </div>
           )}
 

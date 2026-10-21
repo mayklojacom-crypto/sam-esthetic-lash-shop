@@ -8,6 +8,7 @@ import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import ProductCard from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
+import { formatBRL } from '@/lib/checkoutRules';
 
 import { useCountdown, pad } from '@/hooks/useCountdown';
 
@@ -183,20 +184,16 @@ const ProductDetail = () => {
               <div className="mt-4">
                 {product.originalPrice && (
                   <span className="text-xs text-muted-foreground line-through">
-                    R$ {product.originalPrice.toFixed(2)}
+                    {formatBRL(product.originalPrice)}
                   </span>
                 )}
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-sm font-semibold text-primary">R$</span>
                   <span className="text-4xl font-extrabold text-foreground leading-none tracking-tight">
-                    {product.price.toFixed(2).split('.')[0]}
-                  </span>
-                  <span className="text-lg font-bold text-foreground/70">
-                    ,{product.price.toFixed(2).split('.')[1]}
+                    {formatBRL(product.price)}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  ou em até <span className="font-bold text-foreground">3x de R$ {(product.price / 3).toFixed(2)}</span> sem juros
+                  Frete local a combinar, sem desconto exclusivo por forma de pagamento.
                 </p>
               </div>
 
