@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useDelivery } from '@/contexts/DeliveryContext';
 import { supabase } from '@/integrations/supabase/client';
-import { formatBRL, isServedCity, LOCAL_FREIGHT_RULE, type LocalDelivery } from '@/lib/checkoutRules';
+import { formatBRL, isServedCity, type LocalDelivery } from '@/lib/checkoutRules';
 
 export default function DeliveryConsultation() {
   const { delivery, selectDelivery } = useDelivery();
@@ -55,13 +55,7 @@ export default function DeliveryConsultation() {
   return (
     <section aria-label="Consulta de entrega" className="border-y border-border py-5 space-y-3">
       <h2 className="font-bold flex items-center gap-2"><Truck className="w-5 h-5 text-primary" /> Sua entrega</h2>
-      <p className="text-sm text-muted-foreground">Exclusiva para Goiânia e Aparecida de Goiânia. Prazo sujeito ao endereço e à disponibilidade.</p>
-      <div className="space-y-1 text-sm" aria-label="Regra de frete local">
-        <p className="font-semibold">Frete por distância da rota rodoviária</p>
-        <p className="text-muted-foreground">Saída: CEP {LOCAL_FREIGHT_RULE.originCep.slice(0, 5)}-{LOCAL_FREIGHT_RULE.originCep.slice(5)}.</p>
-        <p>Menos de {LOCAL_FREIGHT_RULE.thresholdKm} km: {formatBRL(LOCAL_FREIGHT_RULE.belowThresholdPrice)}.</p>
-        <p>A partir de {LOCAL_FREIGHT_RULE.thresholdKm} km: {formatBRL(LOCAL_FREIGHT_RULE.pricePerKm)} por km da distância total.</p>
-      </div>
+      <p className="text-sm text-muted-foreground">Exclusiva para Goiânia e Aparecida de Goiânia. Entrega em até 30 minutos. Prazo sujeito ao endereço e à disponibilidade.</p>
       {delivery ? (
         <div className="space-y-3">
           <div className="flex items-start justify-between gap-2">
@@ -80,7 +74,7 @@ export default function DeliveryConsultation() {
           ) : (
             <>
               <p className="text-sm font-semibold text-primary">Frete pendente · Confirmar pelo WhatsApp</p>
-              <p className="text-xs text-muted-foreground">Não conseguimos calcular a rota agora. O valor segue a regra acima e será confirmado no atendimento. Não é frete grátis.</p>
+              <p className="text-xs text-muted-foreground">Não conseguimos calcular a rota agora. O frete será confirmado no atendimento pelo WhatsApp. Não é frete grátis.</p>
             </>
           )}
         </div>
