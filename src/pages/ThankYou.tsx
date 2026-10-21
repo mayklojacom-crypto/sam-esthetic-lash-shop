@@ -1,8 +1,10 @@
-import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, ShoppingBag, MessageCircle, ArrowLeft, Package, Heart } from 'lucide-react';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
+import { useVerifiedOrder } from '@/hooks/useVerifiedOrder';
+import { Button } from '@/components/ui/button';
+import { formatBRL } from '@/lib/checkoutRules';
 
 declare global {
   interface Window {
@@ -14,12 +16,21 @@ const ThankYou = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get('pedido') || '';
+  const { purchase, loading, error, retry } = useVerifiedOrder(orderId);
 
-  useEffect(() => {
-    if (window.fbq) {
-      window.fbq('track', 'Purchase');
-    }
-  }, []);
+  // Do not emit Purchase on a page visit. No configured consent gate or GA4 purchase destination exists.
+  if (!purchase) return (
+    <div className="min-h-screen bg-background pb-24">
+      <Header />
+      <main className="max-w-xl mx-auto px-4 py-10 space-y-5 text-center">
+        <h1 className="text-2xl font-bold">{loading ? 'Consultando pagamento…' : 'Pagamento ainda não confirmado'}</h1>
+        <p className="text-muted-foreground">{error || 'A confirmação da compra depende do pagamento aprovado. Abrir esta página não confirma um pedido.'}</p>
+        {orderId && <Button disabled={loading} onClick={retry}>Consultar novamente</Button>}
+        <Button variant="outline" onClick={() => navigate('/meu-pedido')}>Consultar meu pedido</Button>
+      </main>
+      <BottomNav />
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-8">
@@ -41,7 +52,7 @@ const ThankYou = () => {
             Obrigada pela sua compra! 🎉
           </h1>
           <p className="text-sm text-muted-foreground mt-3 max-w-sm animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            Seu pedido foi recebido com sucesso! Estamos preparando tudo com muito carinho para você.
+            Pagamento de {formatBRL(purchase.value)} confirmado. A entrega local será combinada no atendimento.
           </p>
         </div>
 
@@ -68,7 +79,7 @@ const ThankYou = () => {
             {[
               { step: '1', text: 'Vamos confirmar seu pedido via WhatsApp' },
               { step: '2', text: 'Preparamos seus produtos com cuidado' },
-              { step: '3', text: 'Você receberá o código de rastreio' },
+              { step: '3', text: 'Combinamos o valor e o prazo da entrega por aplicativo' },
             ].map((item) => (
               <div key={item.step} className="flex items-start gap-3">
                 <span className="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">

@@ -6,11 +6,17 @@ import { useCart } from '@/contexts/CartContext';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import WhatsAppLeadModal from '@/components/WhatsAppLeadModal';
+import { Button } from '@/components/ui/button';
+import DeliveryConsultation from '@/components/DeliveryConsultation';
+import CheckoutTotals from '@/components/CheckoutTotals';
+import { useDelivery } from '@/contexts/DeliveryContext';
+import { formatBRL } from '@/lib/checkoutRules';
 
 const Cart = () => {
   const navigate = useNavigate();
   const { items, updateQuantity, removeItem, totalPrice } = useCart();
   const [waOpen, setWaOpen] = useState(false);
+  const { delivery } = useDelivery();
 
   const sendToWhatsApp = () => setWaOpen(true);
 
@@ -26,12 +32,12 @@ const Cart = () => {
           <p className="text-sm text-muted-foreground mt-2 text-center max-w-[250px]">
             Que tal explorar nosso catálogo e adicionar alguns produtos?
           </p>
-          <button
+          <Button
             onClick={() => navigate('/catalogo')}
             className="mt-7 bg-primary text-primary-foreground px-8 py-3.5 rounded-2xl font-bold active:scale-[0.97] transition-all duration-200 shadow-md hover:shadow-lg hover:bg-primary/90 flex items-center gap-2.5 text-sm tracking-wide"
           >
             Ver Produtos <ArrowRight size={16} strokeWidth={2.5} />
-          </button>
+          </Button>
         </div>
         <BottomNav />
       </div>
@@ -68,30 +74,30 @@ const Cart = () => {
                     {selectedSize && (
                       <span className="text-xs text-muted-foreground">Tamanho: {selectedSize}</span>
                     )}
-                    <p className="text-base font-extrabold text-primary mt-1">R$ {product.price.toFixed(2)}</p>
+                    <p className="text-base font-extrabold text-primary mt-1">{formatBRL(product.price)}</p>
                   </div>
                   <div className="flex items-center justify-between mt-2">
                     <div className="flex items-center gap-0.5 bg-secondary rounded-xl p-0.5 ring-1 ring-border/40">
-                      <button
+                      <Button
                         onClick={() => updateQuantity(cartKey, quantity - 1)}
                         className="w-8 h-8 rounded-lg flex items-center justify-center active:scale-90 transition-all hover:bg-muted"
                       >
                         <Minus size={13} strokeWidth={2.5} />
-                      </button>
+                      </Button>
                       <span className="text-sm font-bold w-6 text-center">{quantity}</span>
-                      <button
+                      <Button
                         onClick={() => updateQuantity(cartKey, quantity + 1)}
                         className="w-8 h-8 rounded-lg flex items-center justify-center active:scale-90 transition-all hover:bg-muted"
                       >
                         <Plus size={13} strokeWidth={2.5} />
-                      </button>
+                      </Button>
                     </div>
-                    <button
+                    <Button
                       onClick={() => removeItem(cartKey)}
                       className="text-muted-foreground hover:text-destructive transition-colors p-2 rounded-full hover:bg-destructive/10"
                     >
                       <Trash2 size={15} />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -99,29 +105,35 @@ const Cart = () => {
           })}
         </div>
 
+        <div className="px-4 mt-5">
+          <DeliveryConsultation />
+          <CheckoutTotals subtotal={totalPrice} freight={delivery?.price ?? null} />
+        </div>
+
         {/* Footer - fixed on mobile */}
         <div className="fixed bottom-[68px] left-0 right-0 bg-card/95 backdrop-blur-2xl border-t border-border/30 p-4 space-y-3 md:hidden">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground font-medium">Total</span>
-            <span className="text-2xl font-extrabold text-primary">R$ {totalPrice.toFixed(2)}</span>
+            <span className="text-sm text-muted-foreground font-medium">Produtos · + frete a combinar</span>
+            <span className="text-2xl font-extrabold text-primary">{formatBRL(totalPrice)}</span>
           </div>
           <div className="grid grid-cols-2 gap-2">
-            <button
+            <Button
+              disabled={!delivery}
               onClick={sendToWhatsApp}
-              className="bg-[#25D366] text-white py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-1.5 text-[13px]"
+              className="bg-accent text-accent-foreground py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-1.5 text-[13px]"
             >
               <img src={whatsappIcon} alt="" className="w-4 h-4" />
               WhatsApp
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => navigate('/checkout')}
               className="bg-primary text-primary-foreground py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-1.5 text-[13px]"
             >
-              Pagar Online <ArrowRight size={15} strokeWidth={2.5} />
-            </button>
+              Continuar <ArrowRight size={15} strokeWidth={2.5} />
+            </Button>
           </div>
           <p className="text-[10px] text-center text-muted-foreground flex items-center justify-center gap-1">
-            <ShieldCheck size={11} /> Pix, Cartão ou WhatsApp · 100% seguro
+            <ShieldCheck size={11} /> Entrega local · Valor e prazo a confirmar
           </p>
         </div>
 
@@ -129,26 +141,27 @@ const Cart = () => {
         <div className="hidden md:block px-4 mt-6">
           <div className="bg-card rounded-2xl border border-border/60 p-5 shadow-card space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground font-medium">Total</span>
-              <span className="text-2xl font-extrabold text-primary">R$ {totalPrice.toFixed(2)}</span>
+              <span className="text-sm text-muted-foreground font-medium">Produtos · + frete a combinar</span>
+              <span className="text-2xl font-extrabold text-primary">{formatBRL(totalPrice)}</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={sendToWhatsApp}
-                className="bg-[#25D366] text-white py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2 text-sm"
+              <Button
+                disabled={!delivery}
+              onClick={sendToWhatsApp}
+                className="bg-accent text-accent-foreground py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2 text-sm"
               >
                 <img src={whatsappIcon} alt="" className="w-4 h-4" />
-                Comprar via WhatsApp
-              </button>
-              <button
+                Confirmar frete
+              </Button>
+              <Button
                 onClick={() => navigate('/checkout')}
                 className="bg-primary text-primary-foreground py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2 text-sm"
               >
-                Pagamento Online <ArrowRight size={15} strokeWidth={2.5} />
-              </button>
+                Continuar pedido <ArrowRight size={15} strokeWidth={2.5} />
+              </Button>
             </div>
             <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1.5 pt-1">
-              <ShieldCheck size={13} className="text-green-600" /> Compra 100% segura · Pix, Cartão ou WhatsApp
+              <ShieldCheck size={13} className="text-primary" /> Entrega exclusiva em Goiânia e Aparecida de Goiânia
             </p>
           </div>
         </div>

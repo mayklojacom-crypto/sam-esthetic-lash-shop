@@ -5,6 +5,7 @@ import { Product } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { formatBRL } from '@/lib/checkoutRules';
 
 interface Props {
   product: Product;
@@ -68,18 +69,17 @@ const ProductCard = ({ product, index = 0 }: Props) => {
         </h3>
         <div className="mt-1.5 min-h-[4.6rem]">
           <div className="flex items-baseline justify-center gap-1 text-accent">
-            <span className="text-xl font-extrabold">R$ {product.price.toFixed(2).replace('.', ',')}</span>
-            <span className="text-[10px]">no pix</span>
+            <span className="text-xl font-extrabold">{formatBRL(product.price)}</span>
           </div>
           {discount && product.originalPrice ? (
             <p className="text-[10px] text-muted-foreground">
-              <span className="line-through">R$ {product.originalPrice.toFixed(2).replace('.', ',')}</span> · {discount}% de desconto
+              <span className="line-through">{formatBRL(product.originalPrice)}</span> · {discount}% de desconto
             </p>
           ) : (
             <p className="text-[10px] text-muted-foreground">pagamento rápido e seguro</p>
           )}
           <p className="mt-1 text-[10px] text-foreground">
-            até <strong>3x de R$ {(product.price / 3).toFixed(2).replace('.', ',')}</strong>
+            Frete local a combinar
           </p>
         </div>
         <div className="mt-auto grid grid-cols-[68px_1fr] gap-1.5" onClick={event => event.stopPropagation()}>

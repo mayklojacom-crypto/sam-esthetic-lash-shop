@@ -1,31 +1,32 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, Clock, ArrowLeft } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
+import { useVerifiedOrder } from '@/hooks/useVerifiedOrder';
+import { Button } from '@/components/ui/button';
 
 const PaymentStatus = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { clearCart } = useCart();
-  const [loading, setLoading] = useState(true);
-
-  const status = searchParams.get('status') || searchParams.get('collection_status') || 'unknown';
+  const reference = searchParams.get('ref') || searchParams.get('external_reference') || '';
+  const { purchase, loading, error, retry, order } = useVerifiedOrder(reference);
+  const status = purchase ? 'approved' : order?.payment_status === 'pending' ? 'pending' : 'unknown';
   const paymentId = searchParams.get('payment_id') || searchParams.get('collection_id') || '';
 
   useEffect(() => {
-    if (status === 'approved') {
+    if (purchase) {
       clearCart();
     }
-    setLoading(false);
-  }, [status]);
+  }, [purchase?.transaction_id]);
 
   const statusConfig: Record<string, { icon: React.ReactNode; title: string; description: string }> = {
     approved: {
       icon: <CheckCircle size={64} className="text-green-500" />,
       title: 'Pagamento Aprovado! 🎉',
-      description: 'Seu pedido foi confirmado com sucesso. O PDF do pedido será enviado automaticamente para o nosso WhatsApp.',
+      description: 'O pagamento deste pedido foi confirmado. A entrega local será combinada no atendimento.',
     },
     pending: {
       icon: <Clock size={64} className="text-yellow-500" />,
@@ -40,7 +41,7 @@ const PaymentStatus = () => {
     unknown: {
       icon: <Clock size={64} className="text-muted-foreground" />,
       title: 'Status desconhecido',
-      description: 'Não foi possível identificar o status do pagamento.',
+      description: error || 'Não há confirmação de pagamento para este retorno. O status informado no endereço da página não comprova uma compra.',
     },
   };
 
@@ -79,6 +80,7 @@ const PaymentStatus = () => {
               )}
 
               <div className="flex gap-3 mt-8 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                {reference && !purchase && <Button variant="outline" onClick={retry}>Consultar novamente</Button>}
                 <button
                   onClick={() => navigate('/')}
                   className="bg-card border border-border/60 text-foreground px-6 py-3 rounded-2xl font-semibold text-sm hover:bg-accent transition-all"

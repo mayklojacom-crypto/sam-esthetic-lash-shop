@@ -12,7 +12,6 @@ import { useProducts } from '@/hooks/useProducts';
 import ProductCard from '@/components/ProductCard';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
-import UrgencyBar from '@/components/UrgencyBar';
 import SuperOfferSection from '@/components/SuperOfferSection';
 import FeaturedPromoStrip from '@/components/FeaturedPromoStrip';
 
@@ -50,8 +49,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
-      <UrgencyBar />
       <Header />
+
 
       <div className="max-w-6xl mx-auto">
         {/* Boas-vindas afetiva (só mobile) */}
@@ -256,7 +255,7 @@ const Index = () => {
               </div>
               <div>
                 <p className="text-sm font-bold text-foreground">⚡ Entrega local rápida 🛵</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Até 30 min via app · Goiânia e Aparecida</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Entrega em Goiânia e Aparecida • Consulte frete e prazo</p>
               </div>
             </div>
             <div className="bg-card rounded-xl border border-border p-4 shadow-sm flex items-center gap-4">
@@ -313,7 +312,7 @@ const Index = () => {
               <div className="flex flex-col items-center md:items-start gap-3">
                 <img src="/logo.png" alt="Sam Esthetic" className="h-12 w-auto" />
                 <p className="text-xs text-muted-foreground text-center md:text-left leading-relaxed max-w-[320px]">
-                  Especialistas em materiais para Lash Design e Nail Designer. Entrega local rápida em Goiânia e Aparecida de Goiânia — receba em até 30 minutos.
+                  Especialistas em materiais para Lash Design e Nail Designer. Entrega exclusiva em Goiânia e Aparecida de Goiânia, com prazo sujeito ao endereço e à disponibilidade.
                 </p>
                 <p className="font-hand text-xl text-primary">feito com 💗 em Goiânia</p>
               </div>
