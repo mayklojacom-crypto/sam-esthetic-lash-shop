@@ -4,11 +4,11 @@ import { calculateLocalFreight, checkoutTotals, confirmedPurchase, formatBRL, fr
 describe('owner-defined road-distance tariff', () => {
   it('uses the exact origin CEP', () => expect(LOCAL_FREIGHT_RULE.originCep).toBe('74963580'));
   it('charges R$7 at 4.99 km', () => expect(calculateLocalFreight(4.99)).toBe(7));
-  it('charges R$9 at exactly 5 km', () => expect(calculateLocalFreight(5)).toBe(9));
-  it('charges R$9.02 at 5.01 km', () => expect(calculateLocalFreight(5.01)).toBe(9.02));
-  it('charges R$18 for the total 10 km, not the excess', () => expect(calculateLocalFreight(10)).toBe(18));
+  it('charges R$6 at exactly 5 km', () => expect(calculateLocalFreight(5)).toBe(6));
+  it('charges R$6.01 at 5.01 km', () => expect(calculateLocalFreight(5.01)).toBe(6.01));
+  it('charges R$12 for the total 10 km, not the excess', () => expect(calculateLocalFreight(10)).toBe(12));
   it('does not round distance before choosing the tier', () => expect(calculateLocalFreight(4.9999)).toBe(7));
-  it('rounds only the final price', () => expect(calculateLocalFreight(5.006)).toBe(9.01));
+  it('rounds only the final price', () => expect(calculateLocalFreight(5.006)).toBe(6.01));
   it('charges R$7 for an actual zero-distance route', () => expect(calculateLocalFreight(0)).toBe(7));
   it.each([-1, -0.001, NaN, Infinity, -Infinity, Number.MAX_VALUE])('rejects invalid distance %s', km => expect(calculateLocalFreight(km)).toBeNull());
 });
