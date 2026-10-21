@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "@/contexts/CartContext";
+import { DeliveryProvider } from "@/contexts/DeliveryContext";
 import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
 import Index from "./pages/Index.tsx";
 import Catalog from "./pages/Catalog.tsx";
@@ -40,6 +41,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <CartProvider>
+        <DeliveryProvider>
         <AdminAuthProvider>
           <Toaster />
           <Sonner />
@@ -79,6 +81,7 @@ const App = () => (
             <ExitIntentPopup />
           </BrowserRouter>
         </AdminAuthProvider>
+        </DeliveryProvider>
       </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>
