@@ -9,7 +9,7 @@ const json = (body: unknown, status = 200) =>
 const norm = (v: string) => v.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const served = (city: string, uf: string) => uf.toUpperCase() === 'GO' && ['goiania', 'aparecida de goiania'].includes(norm(city));
 // Same owner tariff as src/lib/checkoutRules.ts.
-const tariff = (km: number) => Math.round(((km < 5 ? 7 : km * 1.8) + Number.EPSILON) * 100) / 100;
+const tariff = (km: number) => Math.round(((km < 5 ? 7 : km * 1.2) + Number.EPSILON) * 100) / 100;
 const cache = new Map<string, { distanceKm: number; price: number; at: number }>();
 
 Deno.serve(async (req) => {
