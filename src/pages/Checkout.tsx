@@ -8,6 +8,11 @@ import { z } from 'zod';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import DeliveryConsultation from '@/components/DeliveryConsultation';
+import CheckoutTotals from '@/components/CheckoutTotals';
+import { useDelivery } from '@/contexts/DeliveryContext';
+import { checkoutTotals, formatBRL, isServedCity } from '@/lib/checkoutRules';
 
 const checkoutSchema = z.object({
   name: z.string().trim().min(2, 'Nome é obrigatório').max(100),
@@ -30,13 +35,6 @@ const STATES = [
   'AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA',
   'PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'
 ];
-
-interface ShippingOption {
-  service: string;
-  code: string;
-  price: number;
-  days: number;
-}
 
 const formatCPF = (value: string) => {
   const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -79,19 +77,13 @@ const Checkout = () => {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loadingMP, setLoadingMP] = useState(false);
-  const [loadingCEP, setLoadingCEP] = useState(false);
-  const [step, setStep] = useState<1 | 2>(1);
+  const loadingCEP = false;
+  const { delivery } = useDelivery();
+  const [step, setStep] = useState<0 | 1 | 2>(0);
 
   // Coupon state
   const [couponInput, setCouponInput] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discount: number } | null>(null);
-
-  // Shipping state
-  const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
-  const [selectedShipping, setSelectedShipping] = useState<ShippingOption | null>(null);
-  const [loadingShipping, setLoadingShipping] = useState(false);
-  const [shippingError, setShippingError] = useState('');
-  const [isLocalDelivery, setIsLocalDelivery] = useState(false);
 
   // Pix payment state
   const [pixData, setPixData] = useState<{
@@ -112,8 +104,13 @@ const Checkout = () => {
     } catch { /* ignore */ }
   }, [form]);
 
-  const discountAmount = appliedCoupon ? totalPrice * appliedCoupon.discount : 0;
-  const finalTotal = totalPrice - discountAmount + (selectedShipping?.price || 0);
+  const totals = checkoutTotals(totalPrice, appliedCoupon?.discount || 0, delivery?.price ?? null);
+  const finalTotal = totals.productsTotal;
+
+  useEffect(() => {
+    if (delivery) setForm(prev => ({ ...prev, ...delivery.address }));
+    else setStep(0);
+  }, [delivery]);
 
   const applyCoupon = async () => {
     const code = couponInput.trim().toUpperCase();
@@ -233,89 +230,6 @@ const Checkout = () => {
     return true;
   };
 
-  const LOCAL_CITIES = ['goiânia', 'goiania', 'aparecida de goiânia', 'aparecida de goiania'];
-
-  const calculateShipping = async (cep: string) => {
-    const digits = cep.replace(/\D/g, '');
-    if (digits.length !== 8) return;
-
-    // Don't calculate if local delivery was detected
-    if (isLocalDelivery) return;
-
-    setLoadingShipping(true);
-    setShippingError('');
-    setShippingOptions([]);
-    setSelectedShipping(null);
-
-    try {
-      const totalWeight = items.reduce((sum, i) => sum + (i.product.weight || 100) * i.quantity, 0);
-
-      const { data, error } = await supabase.functions.invoke('calculate-shipping', {
-        body: { cepDestino: digits, pesoGramas: totalWeight },
-      });
-
-      if (error) throw error;
-
-      if (data?.options && data.options.length > 0) {
-        setShippingOptions(data.options);
-        const cheapest = data.options.reduce((a: ShippingOption, b: ShippingOption) => a.price < b.price ? a : b);
-        setSelectedShipping(cheapest);
-      } else {
-        setShippingError(data?.error || 'Não foi possível calcular o frete para este CEP');
-      }
-    } catch (err) {
-      console.error('Shipping error:', err);
-      setShippingError('Erro ao calcular frete. Você pode continuar e combinar o frete depois.');
-    } finally {
-      setLoadingShipping(false);
-    }
-  };
-
-  const fetchCEP = async (cep: string) => {
-    const digits = cep.replace(/\D/g, '');
-    if (digits.length !== 8) return;
-    setLoadingCEP(true);
-    setIsLocalDelivery(false);
-    try {
-      const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
-      const data = await res.json();
-      if (!data.erro) {
-        setForm(prev => ({
-          ...prev,
-          street: data.logradouro || prev.street,
-          neighborhood: data.bairro || prev.neighborhood,
-          city: data.localidade || prev.city,
-          state: data.uf || prev.state,
-        }));
-        setErrors(prev => {
-          const cleaned = { ...prev };
-          delete cleaned.street;
-          delete cleaned.neighborhood;
-          delete cleaned.city;
-          delete cleaned.state;
-          return cleaned;
-        });
-
-        // Check if local delivery region
-        const city = (data.localidade || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        const isLocal = LOCAL_CITIES.some(c => c.normalize('NFD').replace(/[\u0300-\u036f]/g, '') === city);
-        
-        if (isLocal && data.uf === 'GO') {
-          setIsLocalDelivery(true);
-          setShippingOptions([]);
-          setSelectedShipping(null);
-          setShippingError('');
-          setLoadingCEP(false);
-          return;
-        }
-      }
-    } catch { /* ignore */ }
-    setLoadingCEP(false);
-
-    // Calculate shipping after CEP lookup (only for non-local)
-    calculateShipping(cep);
-  };
-
   const buildAddress = () => {
     const parts = [form.street, form.number];
     if (form.complement) parts.push(form.complement);
@@ -324,19 +238,20 @@ const Checkout = () => {
   };
 
   const handleWhatsApp = async () => {
+    if (!delivery || !isServedCity(form.city, form.state) || form.cep.replace(/\D/g, '') !== delivery.address.cep) {
+      setStep(0);
+      toast.error('Consulte um endereço na nossa área de entrega antes de continuar.');
+      return;
+    }
     const data = validate();
     if (!data) return;
 
-    const shippingText = isLocalDelivery
-      ? '*Frete:* Entrega local (Goiânia/Aparecida) — combinar via app (Uber/99Pop)'
-      : selectedShipping
-        ? `*Frete:* ${selectedShipping.service} — R$ ${selectedShipping.price.toFixed(2)} (${selectedShipping.days} dias úteis)`
-        : '*Frete:* A combinar';
+    const shippingText = '*Frete:* Entrega local por aplicativo (Uber/99Pop) — valor e prazo a confirmar; não incluído no subtotal';
 
     const itemsList = items
       .map(i => {
         const sizeText = i.selectedSize ? ` (${i.selectedSize})` : '';
-        return `▪️ ${i.quantity}x ${i.product.name}${sizeText} — R$ ${(i.product.price * i.quantity).toFixed(2)}`;
+        return `▪️ ${i.quantity}x ${i.product.name}${sizeText} — ${formatBRL(i.product.price * i.quantity)}`;
       })
       .join('\n');
 
@@ -349,7 +264,7 @@ const Checkout = () => {
       `${data.notes ? `*Obs:* ${data.notes}\n` : ''}` +
       `\n*Itens:*\n${itemsList}\n\n` +
       `${shippingText}\n` +
-      `💰 *Total: R$ ${finalTotal.toFixed(2)}*`;
+      `💰 *Subtotal dos produtos: ${formatBRL(finalTotal)}*\n*Total com frete:* a confirmar`;
 
     // Save lead (fire-and-forget — não bloqueia a ida ao WhatsApp)
     try {
@@ -373,11 +288,15 @@ const Checkout = () => {
     const encoded = encodeURIComponent(message);
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`, '_blank');
     clearCart();
-    toast.success('Pedido enviado pelo WhatsApp! 🎉');
+    toast.success('Conversa aberta no WhatsApp. O pedido ainda depende de confirmação.');
     navigate('/');
   };
 
   const handlePixPayment = async () => {
+    if (!delivery || totals.total === null) {
+      toast.error('O frete precisa ser confirmado antes do pagamento online.');
+      return;
+    }
     const data = validate();
     if (!data) return;
 
@@ -388,15 +307,6 @@ const Checkout = () => {
         quantity: i.quantity,
         price: i.product.price,
       }));
-
-      // Add shipping as an item if selected
-      if (selectedShipping) {
-        mpItems.push({
-          name: `Frete ${selectedShipping.service}`,
-          quantity: 1,
-          price: selectedShipping.price,
-        });
-      }
 
       const { data: response, error } = await supabase.functions.invoke('create-pix-payment', {
         body: {
@@ -448,15 +358,16 @@ const Checkout = () => {
     if (field === 'phone') formatted = formatPhone(value);
     if (field === 'cep') {
       formatted = formatCEP(value);
-      if (formatted.replace(/\D/g, '').length === 8) fetchCEP(formatted);
+
     }
+    if (['cep', 'city', 'state'].includes(field)) return;
     setForm(prev => ({ ...prev, [field]: formatted }));
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
   };
 
   const renderInput = (field: string, label: string, placeholder: string, icon: React.ReactNode, type = 'text', className = '', disabled = false) => (
     <div className={className} key={field}>
-      <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">
+      <label htmlFor={`checkout-${field}`} className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">
         {label}
       </label>
       <div className="relative">
@@ -464,6 +375,7 @@ const Checkout = () => {
           {icon}
         </div>
         <input
+          id={`checkout-${field}`}
           type={type}
           placeholder={placeholder}
           value={form[field as keyof typeof form]}
@@ -483,26 +395,24 @@ const Checkout = () => {
       <Header />
 
       <div className="max-w-5xl mx-auto px-4 mt-4">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4 font-medium hover:text-foreground transition-colors">
+        <Button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4 font-medium hover:text-foreground transition-colors">
           <ArrowLeft size={16} /> Voltar
-        </button>
+        </Button>
 
-        {/* Progress Steps */}
-        <div className="flex items-center gap-2 mb-6">
-          <div className={`flex items-center gap-2 text-sm font-semibold ${step >= 1 ? 'text-primary' : 'text-muted-foreground'}`}>
-            <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>1</span>
-            Dados Pessoais
-          </div>
-          <div className="flex-1 h-px bg-border" />
-          <div className={`flex items-center gap-2 text-sm font-semibold ${step >= 2 ? 'text-primary' : 'text-muted-foreground'}`}>
-            <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>2</span>
-            Entrega & Pagamento
-          </div>
+        <div className="flex flex-wrap gap-3 mb-6 text-sm font-semibold text-muted-foreground" aria-label="Etapas do checkout">
+          <span className={step === 0 ? 'text-primary' : ''}>1 · Entrega e valores</span>
+          <span className={step === 1 ? 'text-primary' : ''}>2 · Seus dados</span>
+          <span className={step === 2 ? 'text-primary' : ''}>3 · Finalização</span>
         </div>
 
         <div className="md:grid md:grid-cols-[1fr_380px] md:gap-6">
           {/* Left Column - Form */}
           <div className="space-y-5">
+            <DeliveryConsultation />
+            {step === 0 && <>
+              <CheckoutTotals subtotal={totalPrice} discountRate={appliedCoupon?.discount || 0} />
+              <Button className="w-full" disabled={!delivery} onClick={() => setStep(1)}>Continuar com meus dados <ChevronRight /></Button>
+            </>}
             {step === 1 && (
               <div className="bg-card rounded-2xl border border-border p-5 md:p-6 shadow-sm animate-fade-in">
                 <h2 className="text-base font-bold text-foreground flex items-center gap-2 mb-5">
@@ -521,14 +431,14 @@ const Checkout = () => {
                   {renderInput('email', 'E-mail', 'seu@email.com', <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>, 'email')}
                 </div>
 
-                <button
+                <Button
                   onClick={() => {
                     if (validateStep1()) setStep(2);
                   }}
                   className="w-full mt-6 bg-primary text-primary-foreground py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-all text-sm"
                 >
                   Continuar <ChevronRight size={16} />
-                </button>
+                </Button>
               </div>
             )}
 
@@ -546,9 +456,9 @@ const Checkout = () => {
                         <p className="text-xs text-muted-foreground">{form.email} • {form.phone}</p>
                       </div>
                     </div>
-                    <button onClick={() => setStep(1)} className="text-xs text-primary font-semibold hover:underline">
+                    <Button onClick={() => setStep(1)} className="text-xs text-primary font-semibold hover:underline">
                       Editar
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -560,20 +470,7 @@ const Checkout = () => {
                   </h2>
 
                   <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4">
-                      <div className="relative">
-                        {renderInput('cep', 'CEP', '00000-000', <MapPin size={16} />)}
-                        {loadingCEP && (
-                          <Loader2 size={14} className="absolute right-3 top-9 animate-spin text-primary" />
-                        )}
-                      </div>
-                      <div className="flex items-end">
-                        <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener noreferrer"
-                          className="text-xs text-primary font-medium hover:underline whitespace-nowrap pb-3">
-                          Não sei meu CEP
-                        </a>
-                      </div>
-                    </div>
+                    <p className="text-sm text-muted-foreground">{delivery?.address.city} / GO · CEP {delivery?.address.cep}</p>
 
                     {renderInput('street', 'Rua / Avenida', 'Nome da rua', <MapPin size={16} />, 'text', '', loadingCEP)}
 
@@ -584,111 +481,7 @@ const Checkout = () => {
 
                     {renderInput('neighborhood', 'Bairro', 'Seu bairro', <MapPin size={16} />, 'text', '', loadingCEP)}
 
-                    <div className="grid grid-cols-[1fr_100px] gap-4">
-                      {renderInput('city', 'Cidade', 'Sua cidade', <MapPin size={16} />, 'text', '', loadingCEP)}
-                      <div>
-                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5 block">
-                          UF
-                        </label>
-                        <select
-                          value={form.state}
-                          onChange={e => updateField('state', e.target.value)}
-                          disabled={loadingCEP}
-                          className="w-full bg-background rounded-xl px-3 py-3 text-sm text-foreground outline-none border border-border focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all duration-200 font-medium disabled:opacity-60"
-                        >
-                          <option value="">UF</option>
-                          {STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                        {errors.state && <p className="text-xs text-destructive mt-1 font-medium">{errors.state}</p>}
-                      </div>
-                    </div>
                   </div>
-                </div>
-
-                {/* Shipping Options */}
-                <div className="bg-card rounded-2xl border border-border p-5 md:p-6 shadow-sm animate-fade-in">
-                  <h2 className="text-base font-bold text-foreground flex items-center gap-2 mb-4">
-                    <Truck size={18} className="text-primary" />
-                    Frete
-                  </h2>
-
-                  {isLocalDelivery && (
-                    <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-500 rounded-xl p-4">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
-                          <MapPin size={16} className="text-green-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-foreground">📍 Entrega Local Disponível!</p>
-                          <p className="text-xs text-muted-foreground">Goiânia / Aparecida de Goiânia</p>
-                        </div>
-                      </div>
-                      <p className="text-xs text-muted-foreground mb-3">
-                        Entregas nessa região são feitas via <strong>Uber</strong> ou <strong>99Pop</strong>. 
-                        Finalize seu pedido pelo WhatsApp para combinar a entrega.
-                      </p>
-                      <button
-                        onClick={handleWhatsApp}
-                        className="w-full bg-[#25D366] text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:brightness-110 transition-all text-sm"
-                      >
-                        <img src={whatsappIcon} alt="WhatsApp" className="w-5 h-5" />
-                        Finalizar pelo WhatsApp
-                      </button>
-                    </div>
-                  )}
-
-                  {!isLocalDelivery && loadingShipping && (
-                    <div className="flex items-center gap-3 py-4 justify-center text-muted-foreground">
-                      <Loader2 size={18} className="animate-spin text-primary" />
-                      <span className="text-sm font-medium">Calculando frete...</span>
-                    </div>
-                  )}
-
-                  {!isLocalDelivery && !loadingShipping && shippingOptions.length > 0 && (
-                    <div className="space-y-2.5">
-                      {shippingOptions.map(opt => (
-                        <button
-                          key={opt.code}
-                          onClick={() => setSelectedShipping(opt)}
-                          className={`w-full flex items-center gap-3 p-3.5 rounded-xl border-2 transition-all duration-200 text-left ${
-                            selectedShipping?.code === opt.code
-                              ? 'border-primary bg-primary/5'
-                              : 'border-border hover:border-primary/30'
-                          }`}
-                        >
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                            selectedShipping?.code === opt.code ? 'border-primary' : 'border-muted-foreground/30'
-                          }`}>
-                            {selectedShipping?.code === opt.code && (
-                              <div className="w-2.5 h-2.5 rounded-full bg-primary" />
-                            )}
-                          </div>
-                          <Package size={18} className="text-muted-foreground flex-shrink-0" />
-                          <div className="flex-1">
-                            <p className="text-sm font-semibold text-foreground">{opt.service}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {opt.days} {opt.days === 1 ? 'dia útil' : 'dias úteis'}
-                            </p>
-                          </div>
-                          <span className="text-sm font-bold text-foreground">
-                            R$ {opt.price.toFixed(2)}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {!isLocalDelivery && !loadingShipping && shippingOptions.length === 0 && !shippingError && (
-                    <p className="text-sm text-muted-foreground py-2">
-                      Preencha o CEP acima para calcular o frete.
-                    </p>
-                  )}
-
-                  {!isLocalDelivery && shippingError && (
-                    <div className="bg-destructive/5 border border-destructive/20 rounded-xl p-3">
-                      <p className="text-xs text-destructive font-medium">{shippingError}</p>
-                    </div>
-                  )}
                 </div>
 
                 {/* Notes */}
@@ -738,13 +531,13 @@ const Checkout = () => {
                             readOnly
                             className="flex-1 bg-background rounded-lg px-3 py-2 text-xs text-foreground border border-border truncate font-mono"
                           />
-                          <button
+                          <Button
                             onClick={handleCopyPix}
                             className="flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary/90 transition-all whitespace-nowrap"
                           >
                             {pixCopied ? <Check size={14} /> : <Copy size={14} />}
                             {pixCopied ? 'Copiado!' : 'Copiar'}
-                          </button>
+                          </Button>
                         </div>
 
                         <p className="text-[10px] text-muted-foreground mt-3">
@@ -752,7 +545,7 @@ const Checkout = () => {
                         </p>
                       </div>
 
-                      <button
+                      <Button
                         onClick={() => {
                           if (pollingRef.current) clearInterval(pollingRef.current);
                           setPixData(null);
@@ -761,21 +554,21 @@ const Checkout = () => {
                         className="w-full text-sm text-muted-foreground font-medium hover:text-foreground transition-colors py-2"
                       >
                         ← Cancelar e escolher outro método
-                      </button>
+                      </Button>
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      <button
+                      <Button
                         onClick={handlePixPayment}
-                        disabled={loadingMP}
-                        className="w-full bg-[#009ee3] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:brightness-110 transition-all text-sm disabled:opacity-60"
+                        disabled={loadingMP || totals.total === null}
+                        className="w-full bg-primary text-primary-foreground py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:brightness-110 transition-all text-sm disabled:opacity-60"
                       >
                         {loadingMP ? <Loader2 size={18} className="animate-spin" /> : <QrCode size={18} />}
                         {loadingMP ? 'Gerando QR Code...' : 'Pagar com Pix'}
-                      </button>
+                      </Button>
 
                       <p className="text-[11px] text-muted-foreground text-center">
-                        Pagamento instantâneo via Pix — aprovação imediata
+                        Pix disponível após confirmação do frete. Não há cotação automática para a entrega por aplicativo.
                       </p>
 
                       <div className="flex items-center gap-3">
@@ -784,13 +577,13 @@ const Checkout = () => {
                         <div className="flex-1 h-px bg-border" />
                       </div>
 
-                      <button
+                      <Button
                         onClick={handleWhatsApp}
-                        className="w-full bg-[#25D366] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:brightness-110 transition-all text-sm"
+                        className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:brightness-110 transition-all text-sm"
                       >
                         <img src={whatsappIcon} alt="WhatsApp" className="w-5 h-5" />
-                        Enviar Pedido via WhatsApp
-                      </button>
+                        Combinar entrega pelo WhatsApp
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -817,7 +610,7 @@ const Checkout = () => {
                         <p className="text-xs text-muted-foreground">Qtd: {i.quantity}</p>
                       </div>
                       <span className="text-sm font-bold text-foreground whitespace-nowrap">
-                        R$ {(i.product.price * i.quantity).toFixed(2)}
+                        {formatBRL(i.product.price * i.quantity)}
                       </span>
                     </div>
                   );
@@ -832,12 +625,12 @@ const Checkout = () => {
                       <p className="text-xs font-bold text-green-700 dark:text-green-400">✓ {appliedCoupon.code}</p>
                       <p className="text-[10px] text-muted-foreground">{(appliedCoupon.discount * 100).toFixed(0)}% de desconto aplicado</p>
                     </div>
-                    <button
+                    <Button
                       onClick={() => setAppliedCoupon(null)}
                       className="text-xs text-destructive font-semibold hover:underline"
                     >
                       Remover
-                    </button>
+                    </Button>
                   </div>
                 ) : (
                   <div className="flex gap-2">
@@ -849,46 +642,17 @@ const Checkout = () => {
                       onKeyDown={e => e.key === 'Enter' && applyCoupon()}
                       className="flex-1 bg-background rounded-lg px-3 py-2 text-xs text-foreground border border-border outline-none focus:border-primary uppercase font-bold tracking-wider"
                     />
-                    <button
+                    <Button
                       onClick={applyCoupon}
                       className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-xs font-bold hover:bg-primary/90 transition-all"
                     >
                       Aplicar
-                    </button>
+                    </Button>
                   </div>
                 )}
               </div>
 
-              <div className="border-t border-border mt-4 pt-4 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium text-foreground">R$ {totalPrice.toFixed(2)}</span>
-                </div>
-                {appliedCoupon && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-green-600 font-semibold">Desconto ({appliedCoupon.code})</span>
-                    <span className="font-bold text-green-600">- R$ {discountAmount.toFixed(2)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Frete</span>
-                  {selectedShipping ? (
-                    <span className="font-medium text-foreground">
-                      R$ {selectedShipping.price.toFixed(2)}
-                      <span className="text-[10px] text-muted-foreground ml-1">({selectedShipping.service})</span>
-                    </span>
-                  ) : (
-                    <span className="text-xs text-primary font-medium">A calcular</span>
-                  )}
-                </div>
-                <div className="border-t border-border pt-3 flex justify-between items-center">
-                  <span className="text-sm font-bold text-foreground">Total</span>
-                  <span className="text-xl font-extrabold text-primary">R$ {finalTotal.toFixed(2)}</span>
-                </div>
-                <p className="text-[10px] text-muted-foreground text-center pt-1">
-                  ou em até 3x de R$ {(finalTotal / 3).toFixed(2)} sem juros
-                </p>
-              </div>
+              <CheckoutTotals subtotal={totalPrice} discountRate={appliedCoupon?.discount || 0} />
 
               {/* Trust badges */}
               <div className="mt-4 pt-4 border-t border-border space-y-2">
