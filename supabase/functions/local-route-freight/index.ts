@@ -1,7 +1,5 @@
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
-};
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { FREIGHT_VERSION, routePrice, signQuote, type FreightQuote } from '../_shared/freight-quote.ts';
 const GATEWAY_URL = 'https://connector-gateway.lovable.dev/google_maps';
 const ORIGIN = '74963-580, Aparecida de Goiânia - GO, Brasil';
 const json = (body: unknown, status = 200) =>
@@ -9,8 +7,12 @@ const json = (body: unknown, status = 200) =>
 const norm = (v: string) => v.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const served = (city: string, uf: string) => uf.toUpperCase() === 'GO' && ['goiania', 'aparecida de goiania'].includes(norm(city));
 // Same owner tariff as src/lib/checkoutRules.ts.
-const tariff = (km: number) => Math.round(((km < 5 ? 7 : km * 1.2) + Number.EPSILON) * 100) / 100;
-const cache = new Map<string, { distanceKm: number; price: number; at: number }>();
+const cache = new Map<string, { quote: FreightQuote; at: number }>();
+async function quoteResponse(quote: FreightQuote, secret: string) {
+  const current = { ...quote, expiresAt: Date.now() + 6 * 3600_000 };
+  return json({ distanceKm: current.distanceMeters / 1000, price: routePrice(current.distanceMeters),
+    quoteToken: await signQuote(current, secret), expiresAt: current.expiresAt });
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
@@ -18,6 +20,8 @@ Deno.serve(async (req) => {
   try {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     const GOOGLE_MAPS_API_KEY = Deno.env.get('GOOGLE_MAPS_API_KEY');
+    const signingSecret = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!signingSecret) return json({ error: 'Confirmação de frete indisponível' }, 503);
     if (!LOVABLE_API_KEY || !GOOGLE_MAPS_API_KEY) return json({ error: 'Cálculo de rota não configurado' }, 500);
     const body = await req.json().catch(() => ({}));
     const cep = String(body.cep ?? '').replace(/\D/g, '');
@@ -25,7 +29,7 @@ Deno.serve(async (req) => {
     if (cep.length !== 8) return json({ error: 'CEP inválido' }, 400);
     const key = `${cep}|${number}`;
     const hit = cache.get(key);
-    if (hit && Date.now() - hit.at < 6 * 3600_000) return json({ distanceKm: hit.distanceKm, price: hit.price });
+    if (hit && Date.now() - hit.at < 6 * 3600_000) return quoteResponse(hit.quote, signingSecret);
 
     const viaRes = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
     const addr = viaRes.ok ? await viaRes.json() : null;
@@ -44,17 +48,24 @@ Deno.serve(async (req) => {
     if (!res.ok) {
       const details = await res.text();
       console.error(`Routes failed [${res.status}]: ${details}`);
-      return json({ error: 'Rota indisponível', status: res.status }, 502);
+      let message = 'Rota indisponível';
+      if (res.status === 403) {
+        const reason = JSON.parse(details)?.error?.details?.find((d: { reason?: string }) => d.reason)?.reason;
+        message = reason === 'API_KEY_HTTP_REFERRER_BLOCKED' ? 'A chave de servidor do Google Maps precisa permitir requisições do servidor (restrição None ou IP addresses no Google Cloud).'
+          : reason === 'API_KEY_SERVICE_BLOCKED' ? 'Ative e permita a Routes API na chave de servidor no Google Cloud.' : 'Google Maps negou a rota. Confira as restrições da chave de servidor no Google Cloud.';
+      }
+      return json({ error: message, status: res.status, details }, 502);
     }
     const data = await res.json();
     const route = data?.routes?.[0];
     if (!route) return json({ error: 'Rota não encontrada' }, 404);
     const meters = Number(route.distanceMeters ?? 0);
     if (!Number.isFinite(meters) || meters < 0 || meters > 100_000) return json({ error: 'Rota inválida' }, 422);
-    const distanceKm = meters / 1000;
-    const result = { distanceKm: Math.round(distanceKm * 100) / 100, price: tariff(distanceKm) };
-    cache.set(key, { ...result, at: Date.now() });
-    return json(result);
+    const quote: FreightQuote = { version: FREIGHT_VERSION, expiresAt: Date.now() + 6 * 3600_000,
+      cep, number, street: addr.logradouro || '', neighborhood: addr.bairro || '', city: addr.localidade, state: addr.uf, distanceMeters: meters };
+    if (cache.size >= 500) cache.clear();
+    cache.set(key, { quote, at: Date.now() });
+    return quoteResponse(quote, signingSecret);
   } catch (e) {
     console.error('local-route-freight error', e);
     return json({ error: 'Erro ao calcular a rota' }, 500);
