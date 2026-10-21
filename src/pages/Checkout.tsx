@@ -241,7 +241,7 @@ const Checkout = () => {
     const data = validate();
     if (!data) return;
 
-    const shippingText = '*Frete:* Entrega local por aplicativo (Uber/99Pop) — valor e prazo a confirmar; não incluído no subtotal';
+    const shippingText = '*Frete:* confirmar rota rodoviária e valor conforme a regra da loja; não incluído no subtotal';
 
     const itemsList = items
       .map(i => {
@@ -405,7 +405,7 @@ const Checkout = () => {
           <div className="space-y-5">
             <DeliveryConsultation />
             {step === 0 && <>
-              <CheckoutTotals subtotal={totalPrice} discountRate={appliedCoupon?.discount || 0} />
+              <CheckoutTotals subtotal={totalPrice} discountRate={appliedCoupon?.discount || 0} freight={delivery?.price ?? null} />
               <Button className="w-full" disabled={!delivery} onClick={() => setStep(1)}>Continuar com meus dados <ChevronRight /></Button>
             </>}
             {step === 1 && (
@@ -563,7 +563,7 @@ const Checkout = () => {
                       </Button>
 
                       <p className="text-[11px] text-muted-foreground text-center">
-                        Pix disponível após confirmação do frete. Não há cotação automática para a entrega por aplicativo.
+                        Pix indisponível sem cotação de rota válida e revalidada pela loja. Confirme o frete e o pagamento no atendimento.
                       </p>
 
                       <div className="flex items-center gap-3">
@@ -577,7 +577,7 @@ const Checkout = () => {
                         className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:brightness-110 transition-all text-sm"
                       >
                         <img src={whatsappIcon} alt="WhatsApp" className="w-5 h-5" />
-                        Combinar entrega pelo WhatsApp
+                        Confirmar frete pelo WhatsApp
                       </Button>
                     </div>
                   )}
@@ -647,7 +647,7 @@ const Checkout = () => {
                 )}
               </div>
 
-              <CheckoutTotals subtotal={totalPrice} discountRate={appliedCoupon?.discount || 0} />
+              <CheckoutTotals subtotal={totalPrice} discountRate={appliedCoupon?.discount || 0} freight={delivery?.price ?? null} />
 
               {/* Trust badges */}
               <div className="mt-4 pt-4 border-t border-border space-y-2">
