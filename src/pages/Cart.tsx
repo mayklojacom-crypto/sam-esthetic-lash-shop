@@ -107,7 +107,7 @@ const Cart = () => {
 
         <div className="px-4 mt-5">
           <DeliveryConsultation />
-          <CheckoutTotals subtotal={totalPrice} />
+          <CheckoutTotals subtotal={totalPrice} freight={delivery?.price ?? null} />
         </div>
 
         {/* Footer - fixed on mobile */}
@@ -151,7 +151,7 @@ const Cart = () => {
                 className="bg-accent text-accent-foreground py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2 text-sm"
               >
                 <img src={whatsappIcon} alt="" className="w-4 h-4" />
-                Combinar entrega
+                Confirmar frete
               </Button>
               <Button
                 onClick={() => navigate('/checkout')}

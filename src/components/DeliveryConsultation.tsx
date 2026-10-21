@@ -3,7 +3,7 @@ import { Loader2, MapPin, Pencil, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useDelivery } from '@/contexts/DeliveryContext';
-import { isServedCity } from '@/lib/checkoutRules';
+import { formatBRL, isServedCity, LOCAL_FREIGHT_RULE } from '@/lib/checkoutRules';
 
 export default function DeliveryConsultation() {
   const { delivery, selectDelivery } = useDelivery();
@@ -46,6 +46,14 @@ export default function DeliveryConsultation() {
     <section aria-label="Consulta de entrega" className="border-y border-border py-5 space-y-3">
       <h2 className="font-bold flex items-center gap-2"><Truck className="w-5 h-5 text-primary" /> Sua entrega</h2>
       <p className="text-sm text-muted-foreground">Exclusiva para Goiânia e Aparecida de Goiânia. Prazo sujeito ao endereço e à disponibilidade.</p>
+      <div className="space-y-1 text-sm" aria-label="Regra de frete local">
+        <p className="font-semibold">Frete por distância da rota rodoviária</p>
+        <p className="text-muted-foreground">Saída: CEP {LOCAL_FREIGHT_RULE.originCep.slice(0, 5)}-{LOCAL_FREIGHT_RULE.originCep.slice(5)}.</p>
+        <p>Menos de {LOCAL_FREIGHT_RULE.thresholdKm} km: {formatBRL(LOCAL_FREIGHT_RULE.belowThresholdPrice)}.</p>
+        <p>A partir de {LOCAL_FREIGHT_RULE.thresholdKm} km: {formatBRL(LOCAL_FREIGHT_RULE.pricePerKm)} por km da distância total.</p>
+        <p className="text-muted-foreground">5 km = R$ 9,00 · 10 km = R$ 18,00. Apenas o preço final é arredondado a centavos.</p>
+      </div>
+      <p className="text-sm text-muted-foreground">O CEP confirma a região atendida, não a distância da rota. Confirme o frete pelo WhatsApp antes de pagar. Sem cotação válida, o pagamento online fica indisponível.</p>
       {delivery ? (
         <div className="space-y-3">
           <div className="flex items-start justify-between gap-2">
@@ -55,8 +63,8 @@ export default function DeliveryConsultation() {
             </p>
             <Button variant="ghost" size="sm" onClick={() => { selectDelivery(null); setError(''); }}><Pencil /> Editar</Button>
           </div>
-          <p className="text-sm font-semibold text-primary">Entrega por aplicativo · Frete a combinar</p>
-          <p className="text-xs text-muted-foreground">Uber ou 99Pop: valor e prazo confirmados no atendimento antes de fechar a entrega. Não é frete grátis.</p>
+          <p className="text-sm font-semibold text-primary">Frete pendente · Confirmar pelo WhatsApp</p>
+          <p className="text-xs text-muted-foreground">A rota rodoviária até seu endereço completo precisa ser confirmada no atendimento. O valor segue a regra acima; prazo sujeito à disponibilidade. Não é frete grátis.</p>
         </div>
       ) : (
         <form onSubmit={e => { e.preventDefault(); void consult(); }} className="space-y-3">
