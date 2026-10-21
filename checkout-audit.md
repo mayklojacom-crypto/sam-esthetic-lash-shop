@@ -26,10 +26,11 @@
 
 ## Verification
 - 16 unit tests in src/test/checkoutRules.test.ts: served cities, state checks, pending vs explicitly free freight, totals/coupon rounding, BRL formatting, and approved-only exact-reference transaction validation.
+- 4 hook tests in src/test/useVerifiedOrder.test.tsx: empty reference, exact-reference approved read, pending order and lookup error. All 20 tests passed.
 - Live browser: real catalog item added, real Goiânia and Aparecida CEP lookup, cart-to-checkout delivery reuse, data deferred, pending freight, disabled Pix, São Paulo address rejected, simulated network outage/retry, mobile/desktop layout and unvalidated payment return retaining cart.
 - Direct thank-you without a reference does not display success or emit Purchase.
 - No real order/payment creation, no WhatsApp send, no customer record/stock/credential/RLS changes, no publishing.
-- Approved confirmation UI can be exercised using a synthetic mocked lookup; a real paid transaction is intentionally not created or claimed tested.
+- Approved confirmation UI was exercised using a synthetic mocked lookup; a real paid transaction was intentionally not created or claimed tested.
 
 ## Changed files
 - src/App.tsx
@@ -49,4 +50,5 @@
 - src/pages/ProductDetail.tsx
 - src/pages/Index.tsx
 - src/test/checkoutRules.test.ts
+- src/test/useVerifiedOrder.test.tsx
 - AGENTS.md, roadmap.md, checkout-audit.md

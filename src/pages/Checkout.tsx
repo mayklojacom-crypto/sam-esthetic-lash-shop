@@ -451,7 +451,7 @@ const Checkout = () => {
                         <p className="text-xs text-muted-foreground">{form.email} • {form.phone}</p>
                       </div>
                     </div>
-                    <Button onClick={() => setStep(1)} className="text-xs text-primary font-semibold hover:underline">
+                    <Button variant="ghost" onClick={() => setStep(1)} className="text-xs text-primary font-semibold hover:underline">
                       Editar
                     </Button>
                   </div>
