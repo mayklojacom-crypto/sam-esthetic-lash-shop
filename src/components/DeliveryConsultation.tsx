@@ -37,10 +37,11 @@ export default function DeliveryConsultation() {
         service: 'Entrega por aplicativo', price: null,
         address: { cep: digits, street: address.logradouro || '', neighborhood: address.bairro || '', city: address.localidade, state: address.uf },
       };
-      const { data } = await supabase.functions.invoke('local-route-freight', { body: { cep: digits, number: number.trim() } });
+      const { data, error: routeError } = await supabase.functions.invoke('local-route-freight', { body: { cep: digits, number: number.trim() } });
       if (id !== request.current) return;
-      if (data && Number.isFinite(data.distanceKm) && Number.isFinite(data.price)) {
-        next.quote = { distanceKm: data.distanceKm, price: data.price, number: number.trim() || undefined };
+      if (!routeError && data && Number.isFinite(data.distanceKm) && data.distanceKm >= 0 && Number.isFinite(data.price) && data.price >= 0) {
+        next.quote = { distanceKm: data.distanceKm, price: data.price, number: number.trim() || undefined,
+          quoteToken: data.quoteToken, expiresAt: data.expiresAt };
       }
       selectDelivery(next);
     } catch {
@@ -69,7 +70,7 @@ export default function DeliveryConsultation() {
             <div className="rounded-lg bg-secondary p-3">
               <p className="text-sm">Distância pela rota: <strong>{km(delivery.quote.distanceKm)} km</strong></p>
               <p className="text-base font-bold text-primary">Frete: {formatBRL(delivery.quote.price)}</p>
-              <p className="text-xs text-muted-foreground mt-1">Calculado pela rota de carro a partir da loja. O valor é confirmado no atendimento.</p>
+              <p className="text-xs text-muted-foreground mt-1">{delivery.quote.quoteToken ? 'Frete incluído no total e conferido antes do pagamento.' : 'Calcule o frete novamente para pagar com Pix.'}</p>
             </div>
           ) : (
             <>

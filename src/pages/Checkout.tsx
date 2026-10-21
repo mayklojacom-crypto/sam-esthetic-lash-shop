@@ -4,6 +4,7 @@ import whatsappIcon from '@/assets/whatsapp-icon.png';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { supabase } from '@/integrations/supabase/client';
+import { FunctionsHttpError } from '@supabase/supabase-js';
 import { z } from 'zod';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
@@ -12,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import DeliveryConsultation from '@/components/DeliveryConsultation';
 import CheckoutTotals from '@/components/CheckoutTotals';
 import { useDelivery } from '@/contexts/DeliveryContext';
-import { checkoutTotals, formatBRL, isServedCity } from '@/lib/checkoutRules';
+import { canRequestPix, checkoutTotals, formatBRL, isServedCity } from '@/lib/checkoutRules';
 
 const checkoutSchema = z.object({
   name: z.string().trim().min(2, 'Nome é obrigatório').max(100),
@@ -75,6 +76,8 @@ const Checkout = () => {
   const loadingCEP = false;
   const { delivery } = useDelivery();
   const [step, setStep] = useState<0 | 1 | 2>(0);
+  const [serverPricing, setServerPricing] = useState<{ subtotal: number; discount: number; freight: number; total: number } | null>(null);
+  const [pixError, setPixError] = useState('');
 
   // Coupon state
   const [couponInput, setCouponInput] = useState('');
@@ -101,9 +104,12 @@ const Checkout = () => {
 
   const totals = checkoutTotals(totalPrice, appliedCoupon?.discount || 0, delivery?.price ?? null);
   const finalTotal = totals.productsTotal;
+  const pixAvailable = canRequestPix(delivery, form.number);
+  const displayTotal = serverPricing?.total ?? checkoutTotals(totalPrice, appliedCoupon?.discount || 0, delivery?.quote?.price ?? null).total;
+  useEffect(() => { setServerPricing(null); setPixError(''); }, [items, appliedCoupon, delivery, form.number]);
 
   useEffect(() => {
-    if (delivery) setForm(prev => ({ ...prev, ...delivery.address }));
+    if (delivery) setForm(prev => ({ ...prev, ...delivery.address, number: delivery.quote?.number || '' }));
     else setStep(0);
   }, [delivery]);
 
@@ -288,19 +294,20 @@ const Checkout = () => {
   };
 
   const handlePixPayment = async () => {
-    if (!delivery || totals.total === null) {
-      toast.error('O frete precisa ser confirmado antes do pagamento online.');
+    if (!delivery || !pixAvailable || displayTotal === null) {
+      toast.error('Calcule o frete com o número do endereço antes de pagar.');
       return;
     }
     const data = validate();
     if (!data) return;
 
     setLoadingMP(true);
+    setPixError('');
     try {
       const mpItems = items.map(i => ({
-        name: i.selectedSize ? `${i.product.name} (${i.selectedSize})` : i.product.name,
+        id: i.product.id,
         quantity: i.quantity,
-        price: i.product.price,
+        size: i.selectedSize || undefined,
       }));
 
       const { data: response, error } = await supabase.functions.invoke('create-pix-payment', {
@@ -313,11 +320,22 @@ const Checkout = () => {
             phone: data.phone,
             address: buildAddress(),
             notes: data.notes || '',
+            complement: data.complement || '',
           },
+          delivery: { cep: delivery.address.cep, number: data.number.trim(), quoteToken: delivery.quote?.quoteToken },
+          couponCode: appliedCoupon?.code,
+          expectedTotal: displayTotal,
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error instanceof FunctionsHttpError) {
+          const detail = await error.context.json().catch(() => null);
+          if (detail?.code === 'TOTAL_CHANGED' && detail.pricing) setServerPricing(detail.pricing);
+          throw new Error(detail?.error || 'Não foi possível gerar o Pix. Tente novamente.');
+        }
+        throw error;
+      }
 
       if (response?.qr_code_base64 && response?.qr_code) {
         setPixData({
@@ -333,7 +351,9 @@ const Checkout = () => {
       }
     } catch (err) {
       console.error('Pix payment error:', err);
-      toast.error('Erro ao gerar pagamento Pix. Tente novamente.');
+      const message = err instanceof Error ? err.message : 'Erro ao gerar pagamento Pix. Tente novamente.';
+      setPixError(message);
+      toast.error(message);
     } finally {
       setLoadingMP(false);
     }
@@ -555,7 +575,7 @@ const Checkout = () => {
                     <div className="space-y-3">
                       <Button
                         onClick={handlePixPayment}
-                        disabled={loadingMP || totals.total === null}
+                        disabled={loadingMP || !pixAvailable}
                         className="w-full bg-primary text-primary-foreground py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:brightness-110 transition-all text-sm disabled:opacity-60"
                       >
                         {loadingMP ? <Loader2 size={18} className="animate-spin" /> : <QrCode size={18} />}
@@ -563,8 +583,9 @@ const Checkout = () => {
                       </Button>
 
                       <p className="text-[11px] text-muted-foreground text-center">
-                        Pix indisponível sem cotação de rota válida e revalidada pela loja. Confirme o frete e o pagamento no atendimento.
+                        {pixAvailable ? 'Produtos e frete serão conferidos antes de gerar o QR Code.' : 'Para pagar com Pix, clique em Editar na sua entrega e calcule o frete com o número do endereço.'}
                       </p>
+                      {pixError && <p role="alert" className="text-sm text-destructive">{pixError}</p>}
 
                       <div className="flex items-center gap-3">
                         <div className="flex-1 h-px bg-border" />
@@ -647,7 +668,7 @@ const Checkout = () => {
                 )}
               </div>
 
-              <CheckoutTotals subtotal={totalPrice} discountRate={appliedCoupon?.discount || 0} freight={delivery?.price ?? null} estimate={delivery?.quote?.price ?? null} />
+              <CheckoutTotals subtotal={serverPricing?.subtotal ?? totalPrice} discountRate={serverPricing ? (serverPricing.subtotal ? serverPricing.discount / serverPricing.subtotal : 0) : appliedCoupon?.discount || 0} freight={serverPricing?.freight ?? delivery?.price ?? null} estimate={delivery?.quote?.price ?? null} />
 
               {/* Trust badges */}
               <div className="mt-4 pt-4 border-t border-border space-y-2">

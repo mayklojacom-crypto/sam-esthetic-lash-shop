@@ -48,14 +48,21 @@ export interface DeliveryAddress {
   state: string;
 }
 
-// No linked, usable route service or server-revalidated quote exists yet.
 // Never hydrate a payable price from browser/session storage.
 export interface LocalDelivery {
   address: DeliveryAddress;
   service: 'Entrega por aplicativo';
   price: null;
-  // Display-only road-route quote from the server; not trusted for payment.
-  quote?: { distanceKm: number; price: number; number?: string };
+  // Browser values are display-only; payment verifies the signed token server-side.
+  quote?: { distanceKm: number; price: number; number?: string; quoteToken?: string; expiresAt?: number };
+}
+
+export function canRequestPix(delivery: LocalDelivery | null, number: string, now = Date.now()) {
+  const quote = delivery?.quote;
+  return !!delivery && isServedCity(delivery.address.city, delivery.address.state) && !!quote &&
+    Number.isFinite(quote.price) && quote.price >= 0 && !!quote.quoteToken &&
+    typeof quote.expiresAt === 'number' && quote.expiresAt > now &&
+    !!number.trim() && quote.number === number.trim();
 }
 
 export function checkoutTotals(subtotal: number, discountRate = 0, freight: number | null = null) {

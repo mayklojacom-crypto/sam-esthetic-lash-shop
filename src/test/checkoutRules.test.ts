@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateLocalFreight, checkoutTotals, confirmedPurchase, formatBRL, freightForRoadRoute, isServedCity, LOCAL_FREIGHT_RULE, type RoadRouteResult } from '@/lib/checkoutRules';
+import { canRequestPix, calculateLocalFreight, checkoutTotals, confirmedPurchase, formatBRL, freightForRoadRoute, isServedCity, LOCAL_FREIGHT_RULE, type RoadRouteResult } from '@/lib/checkoutRules';
 
 describe('owner-defined road-distance tariff', () => {
   it('uses the exact origin CEP', () => expect(LOCAL_FREIGHT_RULE.originCep).toBe('74963580'));
@@ -32,6 +32,12 @@ describe('road-route validation', () => {
 });
 
 describe('local delivery', () => {
+  const delivery = { address: { cep: '74963580', street: 'Rua', neighborhood: 'Centro', city: 'Aparecida de Goiânia', state: 'GO' }, service: 'Entrega por aplicativo' as const, price: null,
+    quote: { distanceKm: 5, price: 6, number: '10', quoteToken: 'signed-test-token', expiresAt: 2000 } };
+  it('allows requesting Pix with a current signed quote', () => expect(canRequestPix(delivery, '10', 1000)).toBe(true));
+  it('blocks Pix without a signed quote', () => expect(canRequestPix({ ...delivery, quote: { ...delivery.quote, quoteToken: undefined } }, '10', 1000)).toBe(false));
+  it('blocks Pix after quote expiry', () => expect(canRequestPix(delivery, '10', 2000)).toBe(false));
+  it('blocks Pix after changing house number', () => expect(canRequestPix(delivery, '11', 1000)).toBe(false));
   it('serves Goiânia in GO without a CEP prefix condition', () => expect(isServedCity('Goiânia', 'GO')).toBe(true));
   it('serves Aparecida de Goiânia in GO', () => expect(isServedCity('Aparecida de Goiania', 'GO')).toBe(true));
   it('rejects other municipalities', () => expect(isServedCity('Brasília', 'DF')).toBe(false));
