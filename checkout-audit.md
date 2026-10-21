@@ -4,7 +4,7 @@
 - CEP consultation in cart and the first checkout step, using the existing ViaCEP lookup.
 - Municipality + GO validation, without postcode prefix assumptions.
 - Reused local delivery selection, editable and stored in sessionStorage; no customer identifiers in this selection.
-- Owner-defined tariff implemented in checkoutRules: origin CEP 74963-580; below 5 km R$7; at/above 5 km R$1.80 × the TOTAL unrounded road-route distance, rounding the final price only. Unknown freight remains null, not free delivery.
+- Owner-defined tariff implemented in checkoutRules: origin CEP 74963-580; below 5 km R$7; at/above 5 km R$1.20 × the TOTAL unrounded road-route distance, rounding the final price only. Unknown freight remains null, not free delivery.
 - Subtotal, pending freight and pending full total displayed before personal data. Existing payment-required fields/validation preserved in later steps.
 - Brazilian currency formatting; no invented Pix-specific discount or unsupported instalment promise on product cards, product page or checkout.
 - Pending freight blocks Pix creation rather than charging an incomplete/incorrect total. Existing payment functions and credentials are unchanged.

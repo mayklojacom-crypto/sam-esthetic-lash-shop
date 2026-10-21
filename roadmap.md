@@ -9,5 +9,6 @@
 - [x] Implement the owner-defined central tariff and disclose it before personal data.
 - [x] Test distance boundaries, invalid routes/destinations, shared totals and payment blocking.
 - [x] Report provider, limitations and any necessary server/payment changes; do not deploy.
-- [ ] Automatic route quotes/online freight payment: blocked by no linked usable road-route provider and pending authorization for server quotation/payment revalidation changes. Accessible unlinked Google Maps is a candidate, not verified here; no paid API setup is authorized.
+- [x] Update the tariff to R$1.20/km at 5 km or above (below 5 km stays R$7.00) in checkoutRules, the route function and the tests.
+- [ ] Online freight payment: the route quote is live and display-only; blocked by payment functions not yet revalidating freight server-side, so delivery.price stays null and Pix remains blocked.
 - [ ] Analytics activation: blocked by absent consent configuration, GA4 destination and Ads conversion action label.

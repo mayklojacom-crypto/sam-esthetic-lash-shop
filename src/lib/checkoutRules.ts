@@ -11,7 +11,7 @@ export const LOCAL_FREIGHT_RULE = Object.freeze({
   originCep: '74963580',
   thresholdKm: 5,
   belowThresholdPrice: 7,
-  pricePerKm: 1.8,
+  pricePerKm: 1.2,
 });
 
 // Use unrounded road-route kilometres; round the final monetary result only.
