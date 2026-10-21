@@ -1,15 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { validatedPayment } from '../_shared/validated-payment.ts';
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+  if (req.method !== 'POST') return new Response(JSON.stringify({ error: 'Método inválido' }), { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   try {
     const MP_ACCESS_TOKEN = Deno.env.get('MP_ACCESS_TOKEN');
@@ -17,41 +15,16 @@ serve(async (req) => {
       throw new Error('MP_ACCESS_TOKEN not configured');
     }
 
-    const { items, customer, siteUrl } = await req.json();
-
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return new Response(JSON.stringify({ error: 'Items are required' }), {
-        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    if (!customer || !customer.name || !customer.phone || !customer.address) {
-      return new Response(JSON.stringify({ error: 'Customer data is required' }), {
-        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Calculate total
-    let total = 0;
-    const mpItems = items.map((item: any) => {
-      const price = Number(item.price);
-      const quantity = Number(item.quantity);
-      total += price * quantity;
-      return {
-        title: item.name,
-        quantity,
-        unit_price: price,
-        currency_id: 'BRL',
-      };
-    });
-
-    const externalReference = `order_${Date.now()}`;
-    const baseUrl = siteUrl || 'https://samestheticlash.shop';
-
-    // Save order to database so webhook can retrieve it
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!supabaseUrl || !supabaseKey) throw new Error('Pagamento não configurado');
     const supabase = createClient(supabaseUrl, supabaseKey);
+    const priced = await validatedPayment(await req.json(), supabase, supabaseKey);
+    const { items, customer, total } = priced;
+    if (Math.round(priced.expectedTotal * 100) !== Math.round(total * 100)) return new Response(JSON.stringify({ error: 'O valor foi atualizado. Confira o total e confirme novamente.', code: 'TOTAL_CHANGED', pricing: { subtotal: priced.subtotal, discount: priced.discount, freight: priced.freight, total } }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const externalReference = `order_${crypto.randomUUID()}`;
+    const baseUrl = 'https://lash-glam-shop.lovable.app';
+    const mpItems = [{ title: 'Pedido Sam Esthetic com entrega local', quantity: 1, unit_price: total, currency_id: 'BRL' }];
 
     const { error: insertError } = await supabase.from('orders').insert({
       external_reference: externalReference,
@@ -100,7 +73,7 @@ serve(async (req) => {
     if (!mpResponse.ok) {
       console.error('Mercado Pago error:', mpData);
       return new Response(JSON.stringify({ error: 'Failed to create payment preference', details: mpData }), {
-        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        status: mpResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
@@ -110,8 +83,8 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Pagamento indisponível' }), {
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
 });

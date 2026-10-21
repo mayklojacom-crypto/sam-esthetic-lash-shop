@@ -1,15 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { validatedPayment } from '../_shared/validated-payment.ts';
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+  if (req.method !== 'POST') return new Response(JSON.stringify({ error: 'Método inválido' }), { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   try {
     const MP_ACCESS_TOKEN = Deno.env.get('MP_ACCESS_TOKEN');
@@ -17,32 +15,14 @@ serve(async (req) => {
       throw new Error('MP_ACCESS_TOKEN not configured');
     }
 
-    const { items, customer } = await req.json();
-
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return new Response(JSON.stringify({ error: 'Items are required' }), {
-        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    if (!customer || !customer.name || !customer.phone || !customer.address || !customer.email || !customer.cpf) {
-      return new Response(JSON.stringify({ error: 'Customer data is required (name, phone, address, email, cpf)' }), {
-        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Calculate total
-    let total = 0;
-    items.forEach((item: any) => {
-      total += Number(item.price) * Number(item.quantity);
-    });
-
-    const externalReference = `order_${Date.now()}`;
-
-    // Save order to database
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!supabaseUrl || !supabaseKey) throw new Error('Pagamento não configurado');
     const supabase = createClient(supabaseUrl, supabaseKey);
+    const priced = await validatedPayment(await req.json(), supabase, supabaseKey);
+    const { items, customer, total } = priced;
+    if (Math.round(priced.expectedTotal * 100) !== Math.round(total * 100)) return new Response(JSON.stringify({ error: 'O valor foi atualizado. Confira o total e confirme novamente.', code: 'TOTAL_CHANGED', pricing: { subtotal: priced.subtotal, discount: priced.discount, freight: priced.freight, total } }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const externalReference = `order_${crypto.randomUUID()}`;
 
     const { error: insertError } = await supabase.from('orders').insert({
       external_reference: externalReference,
@@ -98,7 +78,7 @@ serve(async (req) => {
     if (!mpResponse.ok) {
       console.error('Mercado Pago error:', JSON.stringify(mpData));
       return new Response(JSON.stringify({ error: 'Failed to create Pix payment', details: mpData }), {
-        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        status: mpResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
@@ -117,14 +97,16 @@ serve(async (req) => {
       qr_code: transactionData?.qr_code || null,
       ticket_url: transactionData?.ticket_url || null,
       external_reference: externalReference,
+      total,
+      freight: priced.freight,
     }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
     console.error('Error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : 'Não foi possível gerar o Pix' }), {
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
 });

@@ -10,5 +10,5 @@
 - [x] Test distance boundaries, invalid routes/destinations, shared totals and payment blocking.
 - [x] Report provider, limitations and any necessary server/payment changes; do not deploy.
 - [x] Update the tariff to R$1.20/km at 5 km or above (below 5 km stays R$7.00) in checkoutRules, the route function and the tests.
-- [ ] Online freight payment: the route quote is live and display-only; blocked by payment functions not yet revalidating freight server-side, so delivery.price stays null and Pix remains blocked.
+- [x] Enable Pix with authorized server-side product, coupon and signed route-quote verification; deploy payment functions only, without real test orders or site publication. 100 tests passed; deployed payment endpoints reject invalid input. Live Maps/QR generation remains unverified and must be checked by the owner on the authorized app origin.
 - [ ] Analytics activation: blocked by absent consent configuration, GA4 destination and Ads conversion action label.
