@@ -487,14 +487,14 @@ const Checkout = () => {
                   <div className="space-y-4">
                     <p className="text-sm text-muted-foreground">{delivery?.address.city} / GO · CEP {delivery?.address.cep}</p>
 
-                    {renderInput('street', 'Rua / Avenida', 'Nome da rua', <MapPin size={16} />, 'text', '', loadingCEP)}
+                    {renderInput('street', 'Rua / Avenida', 'Nome da rua', <MapPin size={16} />, 'text', '', true)}
 
                     <div className="grid grid-cols-2 gap-4">
                       {renderInput('number', 'Número', 'Nº', <span className="text-xs font-bold">Nº</span>)}
                       {renderInput('complement', 'Complemento', 'Apto, bloco...', <span className="text-xs">🏠</span>)}
                     </div>
 
-                    {renderInput('neighborhood', 'Bairro', 'Seu bairro', <MapPin size={16} />, 'text', '', loadingCEP)}
+                    {renderInput('neighborhood', 'Bairro', 'Seu bairro', <MapPin size={16} />, 'text', '', true)}
 
                   </div>
                 </div>

@@ -21,7 +21,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
     const priced = await validatedPayment(await req.json(), supabase, supabaseKey);
     const { items, customer, total } = priced;
-    if (Math.round(priced.expectedTotal * 100) !== Math.round(total * 100)) return new Response(JSON.stringify({ error: 'O valor foi atualizado. Confira o total e confirme novamente.', code: 'TOTAL_CHANGED', pricing: priced }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    if (Math.round(priced.expectedTotal * 100) !== Math.round(total * 100)) return new Response(JSON.stringify({ error: 'O valor foi atualizado. Confira o total e confirme novamente.', code: 'TOTAL_CHANGED', pricing: { subtotal: priced.subtotal, discount: priced.discount, freight: priced.freight, total } }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     const externalReference = `order_${crypto.randomUUID()}`;
 
     const { error: insertError } = await supabase.from('orders').insert({
