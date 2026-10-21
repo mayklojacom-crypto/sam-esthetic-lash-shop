@@ -5,8 +5,9 @@
 - [x] Correct unvalidated confirmation and audit analytics.
 - [x] Test rules and mobile/desktop flows without payment/order writes.
 - [x] Report changed files and external blockers; do not publish.
-- [ ] Investigate existing road-route provider without contracting or credential creation.
-- [ ] Implement the owner-defined central tariff and disclose it before personal data.
-- [ ] Test distance boundaries, invalid routes/destinations, shared totals and payment blocking.
-- [ ] Report provider, limitations and any necessary server/payment changes; do not deploy.
+- [x] Investigate existing road-route provider without contracting or credential creation.
+- [x] Implement the owner-defined central tariff and disclose it before personal data.
+- [x] Test distance boundaries, invalid routes/destinations, shared totals and payment blocking.
+- [x] Report provider, limitations and any necessary server/payment changes; do not deploy.
+- [ ] Automatic route quotes/online freight payment: blocked by no linked usable road-route provider and pending authorization for server quotation/payment revalidation changes. Accessible unlinked Google Maps is a candidate, not verified here; no paid API setup is authorized.
 - [ ] Analytics activation: blocked by absent consent configuration, GA4 destination and Ads conversion action label.

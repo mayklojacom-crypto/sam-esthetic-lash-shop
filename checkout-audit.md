@@ -4,7 +4,7 @@
 - CEP consultation in cart and the first checkout step, using the existing ViaCEP lookup.
 - Municipality + GO validation, without postcode prefix assumptions.
 - Reused local delivery selection, editable and stored in sessionStorage; no customer identifiers in this selection.
-- Existing local rule preserved: Uber/99Pop arranged through atendimento, with unknown freight represented as null, not free delivery.
+- Owner-defined tariff implemented in checkoutRules: origin CEP 74963-580; below 5 km R$7; at/above 5 km R$1.80 × the TOTAL unrounded road-route distance, rounding the final price only. Unknown freight remains null, not free delivery.
 - Subtotal, pending freight and pending full total displayed before personal data. Existing payment-required fields/validation preserved in later steps.
 - Brazilian currency formatting; no invented Pix-specific discount or unsupported instalment promise on product cards, product page or checkout.
 - Pending freight blocks Pix creation rather than charging an incomplete/incorrect total. Existing payment functions and credentials are unchanged.
@@ -19,7 +19,7 @@
 - view_item, add_to_cart and begin_checkout are not configured in the inspected application; purchase was an unvalidated Meta page-mount event and has been removed. These events are not declared resolved.
 - Existing PageView tags still load unconditionally in index.html; this review did not change credentials, IDs or invent a consent mechanism. Consent configuration remains a prerequisite for new ecommerce tracking.
 - confirmedPurchase returns only a verified transaction_id, BRL and database order total; no name, CPF, email or phone. It is a validation helper, not an enabled analytics sender. Consequently no new purchase event or event deduplication sender is claimed operational.
-- No existing local automatic fare exists: calculate-shipping is the existing PAC/SEDEX calculation used for non-local destinations, which are not served. It is not substituted for local app delivery. Local online payment cannot safely charge freight until a real quote mechanism or confirmed rate exists.
+- No existing usable automatic road-route quotation exists: calculate-shipping is a legacy PAC/SEDEX calculator, not local road routing. ViaCEP resolves postal addresses only. The commercial tariff is now defined, but actual route distance is still unavailable.
 - Checkout previously displayed coupon reductions without sending them to create-pix-payment. Payment functions remain unchanged, and Pix remains unavailable with pending local freight, so this mismatch cannot generate an incorrect charge in the revised local flow. Server-validated coupon support is a prerequisite for enabling discounted online payments.
 - Product instalment advertising was removed because the active checkout offers Pix/WhatsApp, not card preference creation. The existing card preference function remains untouched.
 - Existing banner artwork and metadata may still contain earlier delivery claims; artwork was not replaced, and index.html was not edited.
@@ -31,6 +31,20 @@
 - Direct thank-you without a reference does not display success or emit Purchase.
 - No real order/payment creation, no WhatsApp send, no customer record/stock/credential/RLS changes, no publishing.
 - Approved confirmation UI was exercised using a synthetic mocked lookup; a real paid transaction was intentionally not created or claimed tested.
+
+## Owner-defined freight update (2026-10-21)
+- Google Maps Platform (managed by Lovable) is accessible in the workspace but NOT linked to this project. It is a candidate for Routes API, not an operational or verified route provider here. No connection, credentials, paid request or API contract was created; no live Maps test was attempted under the sandbox limitation.
+- No alternate existing road-route provider was found in application code or accessible connections. ViaCEP remains the existing address lookup, not evidence of distance. No coordinates or route distances were fabricated and no straight-line approximation is used.
+- The tariff and origin are disclosed in the cart and first checkout step before personal data. Rota/frete confirmation via WhatsApp remains the alternative. A CEP-only lookup does not establish an exact street-number route or a payable quote.
+- Pure freightForRoadRoute validates served municipality + GO, road-route status/type, exact origin/destination CEP and finite nonnegative metres. It is NOT a server-issued quote and is intentionally not connected to payment. Unit route fixtures are synthetic boundary inputs, not measured journeys.
+- Shared delivery selection still persists only pending freight. Client-edited numeric freight cannot be restored from session storage; invalid freight keeps totals pending. Both cart and checkout summaries consume the same delivery price.
+- 60 tests pass across checkoutRules, DeliveryContext and useVerifiedOrder, including 4.99 / 5 / 5.01 km, 10 km, unrounded distance, negative/non-finite/overflow values, destinations outside cities/GO, route failure/mismatch/non-road data, totals, and client-storage tampering.
+- Browser check uses a real available catalog product and real origin CEP lookup, reuses delivery in checkout, verifies tariff before data, pending totals, disabled Pix, rejects an outside-city CEP and tests address-lookup failure. Route failure is unit-tested; real route calls remain unavailable/unverified. All function POSTs were blocked in the browser test, including incidental visit telemetry; no real orders, payments, leads or WhatsApp messages were created.
+
+### Necessary before enabling online quoted payment (not implemented/deployed)
+- An authorized usable road-route provider plus an exact destination address/number and trusted, expiring server quote bound to that destination; revalidate distance and calculate tariff server-side from authoritative data, never from client price/km.
+- Existing create-pix-payment and create-mp-preference currently trust submitted item prices/quantities and have no server-side freight/coupon verification. Both need canonical product/discount/freight totals and quote revalidation before enabling online payment. The current frontend block does not secure direct calls to those existing deployed endpoints.
+- Server payment changes must include approved amount/currency comparison against the canonical order total; storage/permissions may be needed if a persistent quote record is selected. These requirements are reported only: no payment integration, function, RLS, permission, catalog, price, stock or deployment was changed.
 
 ## Changed files
 - src/App.tsx
