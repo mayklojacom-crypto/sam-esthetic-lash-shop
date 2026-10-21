@@ -107,7 +107,7 @@ const Cart = () => {
 
         <div className="px-4 mt-5">
           <DeliveryConsultation />
-          <CheckoutTotals subtotal={totalPrice} freight={delivery?.price ?? null} />
+          <CheckoutTotals subtotal={totalPrice} freight={delivery?.price ?? null} estimate={delivery?.quote?.price ?? null} />
         </div>
 
         {/* Footer - fixed on mobile */}
