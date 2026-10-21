@@ -405,7 +405,7 @@ const Checkout = () => {
           <div className="space-y-5">
             <DeliveryConsultation />
             {step === 0 && <>
-              <CheckoutTotals subtotal={totalPrice} discountRate={appliedCoupon?.discount || 0} freight={delivery?.price ?? null} />
+              <CheckoutTotals subtotal={totalPrice} discountRate={appliedCoupon?.discount || 0} freight={delivery?.price ?? null} estimate={delivery?.quote?.price ?? null} />
               <Button className="w-full" disabled={!delivery} onClick={() => setStep(1)}>Continuar com meus dados <ChevronRight /></Button>
             </>}
             {step === 1 && (
@@ -647,7 +647,7 @@ const Checkout = () => {
                 )}
               </div>
 
-              <CheckoutTotals subtotal={totalPrice} discountRate={appliedCoupon?.discount || 0} freight={delivery?.price ?? null} />
+              <CheckoutTotals subtotal={totalPrice} discountRate={appliedCoupon?.discount || 0} freight={delivery?.price ?? null} estimate={delivery?.quote?.price ?? null} />
 
               {/* Trust badges */}
               <div className="mt-4 pt-4 border-t border-border space-y-2">

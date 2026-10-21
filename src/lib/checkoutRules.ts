@@ -54,6 +54,8 @@ export interface LocalDelivery {
   address: DeliveryAddress;
   service: 'Entrega por aplicativo';
   price: null;
+  // Display-only road-route quote from the server; not trusted for payment.
+  quote?: { distanceKm: number; price: number; number?: string };
 }
 
 export function checkoutTotals(subtotal: number, discountRate = 0, freight: number | null = null) {
