@@ -280,7 +280,8 @@ const ProductDetail = () => {
                 </Button>
               </div>
               <p className="hidden md:flex items-center justify-center gap-1.5 text-xs text-muted-foreground mt-3">
-                🔒 Compra 100% segura · 🛵 Entrega local em até 30 min (Goiânia e Aparecida)
+                🔒 Compra 100% segura · 🛵 Entrega em Goiânia e Aparecida • Consulte frete e prazo
+
               </p>
 
               {/* Descrição — depois das opções de compra */}
