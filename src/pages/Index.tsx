@@ -313,7 +313,7 @@ const Index = () => {
               <div className="flex flex-col items-center md:items-start gap-3">
                 <img src="/logo.png" alt="Sam Esthetic" className="h-12 w-auto" />
                 <p className="text-xs text-muted-foreground text-center md:text-left leading-relaxed max-w-[320px]">
-                  Especialistas em materiais para Lash Design e Nail Designer. Entrega local rápida em Goiânia e Aparecida de Goiânia — receba em até 30 minutos.
+                  Especialistas em materiais para Lash Design e Nail Designer. Entrega exclusiva em Goiânia e Aparecida de Goiânia, com prazo sujeito ao endereço e à disponibilidade.
                 </p>
                 <p className="font-hand text-xl text-primary">feito com 💗 em Goiânia</p>
               </div>
