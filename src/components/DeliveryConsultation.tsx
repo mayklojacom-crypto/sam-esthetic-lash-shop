@@ -15,8 +15,30 @@ export default function DeliveryConsultation() {
   const request = useRef(0);
   useEffect(() => () => { request.current += 1; }, []);
 
+  // A saved quote from an older visit may lack a valid signature or be expired:
+  // silently refresh it in place so Pix becomes available without re-entering the address.
+  const refreshed = useRef(false);
+  const [refreshing, setRefreshing] = useState(false);
+  useEffect(() => {
+    const q = delivery?.quote;
+    if (refreshed.current || !delivery || !q?.number) return;
+    if (q.quoteToken && typeof q.expiresAt === 'number' && q.expiresAt > Date.now() + 5 * 60_000) return;
+    refreshed.current = true;
+    const current = delivery;
+    const num = q.number;
+    setRefreshing(true);
+    supabase.functions.invoke('local-route-freight', { body: { cep: current.address.cep, number: num } })
+      .then(({ data, error: routeError }) => {
+        if (!routeError && data?.quoteToken && Number.isFinite(data.distanceKm) && Number.isFinite(data.price) && data.price >= 0) {
+          selectDelivery({ ...current, quote: { distanceKm: data.distanceKm, price: data.price, number: num, quoteToken: data.quoteToken, expiresAt: data.expiresAt } });
+        }
+      })
+      .finally(() => setRefreshing(false));
+  }, [delivery, selectDelivery]);
+
   const consult = async () => {
     const digits = cep.replace(/\D/g, '');
+    const numberArg = number;
     const id = ++request.current;
     selectDelivery(null);
     setError('');
@@ -37,10 +59,10 @@ export default function DeliveryConsultation() {
         service: 'Entrega por aplicativo', price: null,
         address: { cep: digits, street: address.logradouro || '', neighborhood: address.bairro || '', city: address.localidade, state: address.uf },
       };
-      const { data, error: routeError } = await supabase.functions.invoke('local-route-freight', { body: { cep: digits, number: number.trim() } });
+      const { data, error: routeError } = await supabase.functions.invoke('local-route-freight', { body: { cep: digits, number: numberArg.trim() } });
       if (id !== request.current) return;
       if (!routeError && data && Number.isFinite(data.distanceKm) && data.distanceKm >= 0 && Number.isFinite(data.price) && data.price >= 0) {
-        next.quote = { distanceKm: data.distanceKm, price: data.price, number: number.trim() || undefined,
+        next.quote = { distanceKm: data.distanceKm, price: data.price, number: numberArg.trim() || undefined,
           quoteToken: data.quoteToken, expiresAt: data.expiresAt };
       }
       selectDelivery(next);
@@ -70,7 +92,7 @@ export default function DeliveryConsultation() {
             <div className="rounded-lg bg-secondary p-3">
               <p className="text-sm">Distância pela rota: <strong>{km(delivery.quote.distanceKm)} km</strong></p>
               <p className="text-base font-bold text-primary">Frete: {formatBRL(delivery.quote.price)}</p>
-              <p className="text-xs text-muted-foreground mt-1">{delivery.quote.quoteToken ? 'Frete incluído no total e conferido antes do pagamento.' : 'Calcule o frete novamente para pagar com Pix.'}</p>
+              <p className="text-xs text-muted-foreground mt-1">{refreshing ? 'Atualizando o frete…' : delivery.quote.quoteToken ? 'Frete incluído no total e conferido antes do pagamento.' : 'Clique em Editar e calcule o frete novamente para pagar com Pix.'}</p>
             </div>
           ) : (
             <>
