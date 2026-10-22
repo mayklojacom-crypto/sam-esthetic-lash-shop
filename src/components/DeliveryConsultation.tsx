@@ -15,9 +15,21 @@ export default function DeliveryConsultation() {
   const request = useRef(0);
   useEffect(() => () => { request.current += 1; }, []);
 
-  const consult = async () => {
-    const digits = cep.replace(/\D/g, '');
+  // A saved quote from an older visit has no valid signature: refresh it automatically.
+  const refreshed = useRef(false);
+  useEffect(() => {
+    const q = delivery?.quote;
+    if (refreshed.current || !delivery || !q?.number) return;
+    if (q.quoteToken && typeof q.expiresAt === 'number' && q.expiresAt > Date.now() + 5 * 60_000) return;
+    refreshed.current = true;
+    void consult(delivery.address.cep, q.number);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [delivery]);
+
+  const consult = async (cepArg = cep, numberArg = number) => {
+    const digits = cepArg.replace(/\D/g, '');
     const id = ++request.current;
+    if (numberArg !== number) setNumber(numberArg);
     selectDelivery(null);
     setError('');
     if (digits.length !== 8) { setError('Digite um CEP com 8 números.'); return; }
