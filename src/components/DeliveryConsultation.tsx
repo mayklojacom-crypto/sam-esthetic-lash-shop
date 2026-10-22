@@ -49,10 +49,10 @@ export default function DeliveryConsultation() {
         service: 'Entrega por aplicativo', price: null,
         address: { cep: digits, street: address.logradouro || '', neighborhood: address.bairro || '', city: address.localidade, state: address.uf },
       };
-      const { data, error: routeError } = await supabase.functions.invoke('local-route-freight', { body: { cep: digits, number: number.trim() } });
+      const { data, error: routeError } = await supabase.functions.invoke('local-route-freight', { body: { cep: digits, number: numberArg.trim() } });
       if (id !== request.current) return;
       if (!routeError && data && Number.isFinite(data.distanceKm) && data.distanceKm >= 0 && Number.isFinite(data.price) && data.price >= 0) {
-        next.quote = { distanceKm: data.distanceKm, price: data.price, number: number.trim() || undefined,
+        next.quote = { distanceKm: data.distanceKm, price: data.price, number: numberArg.trim() || undefined,
           quoteToken: data.quoteToken, expiresAt: data.expiresAt };
       }
       selectDelivery(next);
