@@ -15,21 +15,31 @@ export default function DeliveryConsultation() {
   const request = useRef(0);
   useEffect(() => () => { request.current += 1; }, []);
 
-  // A saved quote from an older visit has no valid signature: refresh it automatically.
+  // A saved quote from an older visit may lack a valid signature or be expired:
+  // silently refresh it in place so Pix becomes available without re-entering the address.
   const refreshed = useRef(false);
+  const [refreshing, setRefreshing] = useState(false);
   useEffect(() => {
     const q = delivery?.quote;
     if (refreshed.current || !delivery || !q?.number) return;
     if (q.quoteToken && typeof q.expiresAt === 'number' && q.expiresAt > Date.now() + 5 * 60_000) return;
     refreshed.current = true;
-    void consult(delivery.address.cep, q.number);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [delivery]);
+    const current = delivery;
+    const num = q.number;
+    setRefreshing(true);
+    supabase.functions.invoke('local-route-freight', { body: { cep: current.address.cep, number: num } })
+      .then(({ data, error: routeError }) => {
+        if (!routeError && data?.quoteToken && Number.isFinite(data.distanceKm) && Number.isFinite(data.price) && data.price >= 0) {
+          selectDelivery({ ...current, quote: { distanceKm: data.distanceKm, price: data.price, number: num, quoteToken: data.quoteToken, expiresAt: data.expiresAt } });
+        }
+      })
+      .finally(() => setRefreshing(false));
+  }, [delivery, selectDelivery]);
 
-  const consult = async (cepArg = cep, numberArg = number) => {
-    const digits = cepArg.replace(/\D/g, '');
+  const consult = async () => {
+    const digits = cep.replace(/\D/g, '');
+    const numberArg = number;
     const id = ++request.current;
-    if (numberArg !== number) setNumber(numberArg);
     selectDelivery(null);
     setError('');
     if (digits.length !== 8) { setError('Digite um CEP com 8 números.'); return; }
