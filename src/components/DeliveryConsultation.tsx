@@ -92,7 +92,7 @@ export default function DeliveryConsultation() {
             <div className="rounded-lg bg-secondary p-3">
               <p className="text-sm">Distância pela rota: <strong>{km(delivery.quote.distanceKm)} km</strong></p>
               <p className="text-base font-bold text-primary">Frete: {formatBRL(delivery.quote.price)}</p>
-              <p className="text-xs text-muted-foreground mt-1">{delivery.quote.quoteToken ? 'Frete incluído no total e conferido antes do pagamento.' : 'Calcule o frete novamente para pagar com Pix.'}</p>
+              <p className="text-xs text-muted-foreground mt-1">{refreshing ? 'Atualizando o frete…' : delivery.quote.quoteToken ? 'Frete incluído no total e conferido antes do pagamento.' : 'Clique em Editar e calcule o frete novamente para pagar com Pix.'}</p>
             </div>
           ) : (
             <>
