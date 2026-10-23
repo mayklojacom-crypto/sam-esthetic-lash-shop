@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { trackPurchase, track, setAnalyticsSender, resetAnalyticsMemory, analyticsConfig, toAnalyticsItem, type AnalyticsConfig } from '@/lib/analytics';
+import { analyticsDebugLog, trackPurchase, track, setAnalyticsSender, resetAnalyticsMemory, analyticsConfig, toAnalyticsItem, type AnalyticsConfig } from '@/lib/analytics';
 import { saveConsent, readConsent, CONSENT_KEY } from '@/lib/consent';
 import { confirmedPurchase } from '@/lib/checkoutRules';
 
@@ -10,7 +10,7 @@ vi.mock('@/integrations/supabase/client', () => ({ supabase: { rpc: (...a: unkno
 vi.mock('@/components/Header', () => ({ default: () => null }));
 vi.mock('@/components/BottomNav', () => ({ default: () => null }));
 
-const enabled: AnalyticsConfig = { ga4MeasurementId: 'G-TEST', adsPurchaseSendTo: 'AW-1/test', consentGranted: () => true };
+const enabled: AnalyticsConfig = { ga4MeasurementId: 'G-TEST', adsPurchaseSendTo: 'AW-1/test', consentGranted: () => true, publicHost: () => true };
 const calls: [string, Record<string, unknown>][] = [];
 const real = { ...analyticsConfig };
 
@@ -18,6 +18,7 @@ beforeEach(() => {
   calls.length = 0; localStorage.clear(); resetAnalyticsMemory(); lookup.mockReset();
   setAnalyticsSender((_c, name, params) => { calls.push([name, params]); });
   Object.assign(analyticsConfig, { ga4MeasurementId: null, adsPurchaseSendTo: null, consentGranted: () => false });
+  analyticsDebugLog.length = 0;
 });
 
 describe('purchase', () => {
@@ -50,13 +51,13 @@ describe('purchase', () => {
 
 describe('separate destinations and consent', () => {
   const p = { transaction_id: 'order_ads', currency: 'BRL' as const, value: 25 };
-  it('real config: Ads send_to is the verified Compra (1) value and GA4 stays unset', () => {
+  it('real config: verified Ads send_to and a GA4 measurement ID', () => {
     expect(real.adsPurchaseSendTo).toBe('AW-18052419500/xk4JCPjmp5McEKyfiKBD');
-    expect(real.ga4MeasurementId).toBeNull();
+    expect(real.ga4MeasurementId).toMatch(/^G-[A-Z0-9]+$/);
   });
   it('Ads purchase is sent without a GA4 ID when cookies are accepted', () => {
     saveConsent('granted');
-    expect(trackPurchase(p, real)).toBe(true);
+    expect(trackPurchase(p, { ...real, ga4MeasurementId: null, publicHost: () => true })).toBe(true);
     expect(calls).toEqual([['conversion', { transaction_id: 'order_ads', currency: 'BRL', value: 25, send_to: 'AW-18052419500/xk4JCPjmp5McEKyfiKBD' }]]);
   });
   it('refused cookies: no purchase sent', () => {
@@ -72,6 +73,31 @@ describe('separate destinations and consent', () => {
     saveConsent('granted'); saveConsent('denied');
     expect(readConsent()).toMatchObject({ choice: 'denied', version: expect.any(String), at: expect.any(String) });
     expect(localStorage.getItem(CONSENT_KEY)).not.toBeNull();
+  });
+});
+
+describe('domains and page_view', () => {
+  it('only samestheticlash.shop and www are public', async () => {
+    const { isPublicHost } = await import('@/lib/analyticsIds');
+    expect(isPublicHost('samestheticlash.shop')).toBe(true);
+    expect(isPublicHost('www.samestheticlash.shop')).toBe(true);
+    expect(isPublicHost('lash-glam-shop.lovable.app')).toBe(false);
+    expect(isPublicHost('localhost')).toBe(false);
+  });
+  it('preview host: events go only to the local debug log, never to gtag', () => {
+    setAnalyticsSender(null);
+    const gtag = vi.fn(); (window as unknown as { gtag: unknown }).gtag = gtag;
+    saveConsent('granted');
+    trackPurchase({ transaction_id: 'order_prev', currency: 'BRL', value: 12 }, { ...real, publicHost: () => false });
+    expect(gtag).not.toHaveBeenCalledWith('event', expect.anything(), expect.anything());
+    expect(analyticsDebugLog.map(e => e.name)).toEqual(['purchase', 'conversion']);
+  });
+  it('page_view once per navigation, none without consent', () => {
+    Object.assign(analyticsConfig, enabled);
+    track.pageView('/catalogo', 'k1'); track.pageView('/catalogo', 'k1'); track.pageView('/produto/x', 'k2');
+    Object.assign(analyticsConfig, { consentGranted: () => false });
+    track.pageView('/carrinho', 'k3');
+    expect(calls.map(c => [c[0], c[1].page_path])).toEqual([['page_view', '/catalogo'], ['page_view', '/produto/x']]);
   });
 });
 
