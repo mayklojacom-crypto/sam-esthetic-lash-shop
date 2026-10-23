@@ -3,8 +3,8 @@ export const CONSENT_KEY = 'sam_cookie_consent';
 export const CONSENT_VERSION = 'v1-2026-10';
 export const CONSENT_NOTICE =
   'Usamos cookies do Google (Google Ads e Analytics) e da Meta (Facebook/Instagram) para medir visitas, compras e melhorar nossos anúncios. Nenhum nome, CPF, e-mail, telefone ou endereço é enviado.';
-export const GOOGLE_TAG_ID = 'AW-18052419500';
-export const META_PIXEL_ID = '1484172626568462';
+import { GA4_MEASUREMENT_ID, GOOGLE_ADS_TAG_ID as GOOGLE_TAG_ID, META_PIXEL_ID, isPublicHost } from './analyticsIds';
+export { GOOGLE_TAG_ID, META_PIXEL_ID };
 
 export type ConsentChoice = 'granted' | 'denied';
 export interface ConsentRecord { choice: ConsentChoice; at: string; version: string }
@@ -45,6 +45,8 @@ function loadGoogle() {
   gtag('consent', 'default', { ad_storage: 'granted', analytics_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'granted' });
   gtag('js', new Date());
   gtag('config', GOOGLE_TAG_ID);
+  // GA4 only on the public domains; page_view is sent by RouteTracker on every SPA navigation (no automatic one).
+  if (isPublicHost()) gtag('config', GA4_MEASUREMENT_ID, { send_page_view: false });
   loadScript(`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`);
 }
 

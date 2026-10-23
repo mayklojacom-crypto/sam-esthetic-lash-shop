@@ -35,6 +35,7 @@ import AdminLeads from "./pages/admin/AdminLeads.tsx";
 import AdminCoupons from "./pages/admin/AdminCoupons.tsx";
 import VisitorTracker from "./components/VisitorTracker.tsx";
 import CookieConsent from "./components/CookieConsent.tsx";
+import RouteTracker from "./components/RouteTracker.tsx";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
           <BrowserRouter>
             <VisitorTracker />
             <CookieConsent />
+            <RouteTracker />
             <DeliveryTickerBar />
             <Routes>
               <Route path="/" element={<Index />} />
