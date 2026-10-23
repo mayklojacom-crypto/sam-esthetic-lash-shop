@@ -1,3 +1,4 @@
+import { openCookieSettings } from "@/lib/consent";
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Truck, ShieldCheck, CreditCard, Leaf, Search, X } from 'lucide-react';
