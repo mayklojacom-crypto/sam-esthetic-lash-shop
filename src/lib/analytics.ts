@@ -1,19 +1,21 @@
+import { hasAdConsent } from './consent';
+
 // Central ecommerce measurement. Never put customer name, CPF, e-mail, phone or address in params.
 // Destinations are explicit and disabled until the owner supplies real IDs and a consent integration exists.
 
 export interface AnalyticsConfig {
   /** GA4 measurement ID (G-...). Not configured: no ID exists in this project. */
   ga4MeasurementId: string | null;
-  /** Google Ads purchase conversion send_to (AW-18052419500/<label>). Not configured: label unknown. */
+  /** Google Ads purchase conversion send_to (existing action "Compra (1)"). */
   adsPurchaseSendTo: string | null;
-  /** Advertising/analytics consent. No consent banner/CMP exists, so this stays false. */
+  /** Cookie choice from src/lib/consent.ts, read at send time. */
   consentGranted: () => boolean;
 }
 
 export const analyticsConfig: AnalyticsConfig = {
   ga4MeasurementId: null,
-  adsPurchaseSendTo: null,
-  consentGranted: () => false,
+  adsPurchaseSendTo: 'AW-18052419500/xk4JCPjmp5McEKyfiKBD',
+  consentGranted: hasAdConsent,
 };
 
 export interface AnalyticsItem {
@@ -45,6 +47,9 @@ function gtagSender(): Sender | null {
 
 export function analyticsEnabled(config = analyticsConfig) {
   return !!config.ga4MeasurementId && config.consentGranted();
+}
+export function adsPurchaseEnabled(config = analyticsConfig) {
+  return !!config.adsPurchaseSendTo && config.consentGranted();
 }
 
 export function toAnalyticsItem(product: { id: string; name: string; price: number; category?: string }, quantity = 1, size?: string): AnalyticsItem {
@@ -119,11 +124,10 @@ export function trackPurchase(purchase: { transaction_id: string; currency: 'BRL
   sentOnce.add(key);
   try { localStorage.setItem(PURCHASE_KEY, JSON.stringify([...handled, purchase.transaction_id].slice(-50))); } catch { /* ignore */ }
   const params = { transaction_id: purchase.transaction_id, currency: 'BRL', value: round(purchase.value) };
-  const sent = send('purchase', params, config);
+  // GA4 and Ads are independent destinations; each needs its own ID and consent.
+  const ga4Sent = send('purchase', params, config);
   const gtag = gtagSender();
-  if (gtag && config.adsPurchaseSendTo && config.consentGranted()) {
-    gtag('event', 'conversion', { ...params, send_to: config.adsPurchaseSendTo });
-    return true;
-  }
-  return sent;
+  const adsSent = !!gtag && adsPurchaseEnabled(config);
+  if (adsSent) gtag!('event', 'conversion', { ...params, send_to: config.adsPurchaseSendTo });
+  return ga4Sent || adsSent;
 }

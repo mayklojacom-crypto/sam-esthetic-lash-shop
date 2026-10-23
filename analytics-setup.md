@@ -1,24 +1,39 @@
-# Ecommerce measurement (frontend only, preview, not published)
+# Ecommerce measurement and cookie choice (preview only, not published)
 
-Central module: `src/lib/analytics.ts`. All events go through it. No customer name, CPF, e-mail, phone or address is sent.
+Modules: `src/lib/analytics.ts` (events), `src/lib/consent.ts` (cookie choice + Google/Meta tag loading), `src/components/CookieConsent.tsx` (banner). No customer name, CPF, e-mail, phone or address is sent.
+
+## Cookie choice
+- Banner with "Recusar" and "Aceitar" (equal buttons, nothing preselected) shown to every visitor until a choice is made.
+- Stored in localStorage `sam_cookie_consent`: `{ choice, at (ISO time), version }`. Version `v1-2026-10` resolves to the notice text `CONSENT_NOTICE` in consent.ts (Google Ads/Analytics and Meta, measurement and ads).
+- Review/change: "Cookies" link in the homepage footer. Change in another tab applies via storage event.
+- No choice or refused: Google tag (AW-18052419500) and Meta Pixel (1484172626568462) are NOT loaded; no requests to Google/Meta (browser-checked).
+- Accepted: Google tag and Meta Pixel load (PageView), and ecommerce events can be sent.
+- Accepted then refused: Google `consent update` denied, Meta `fbq('consent','revoke')`, and new events stop. Old blocked events are never replayed.
+- Refusing never blocks cart, checkout or Pix payment.
+- The `<noscript>` Meta pixel was removed, because it fired without consent.
+- Inline tags were removed from index.html; the same IDs now load from consent.ts.
+
+## Destinations (enabled independently, both need accepted cookies)
+| Destination | Value | State |
+|---|---|---|
+| Google Ads purchase ("Compra (1)") | `AW-18052419500/xk4JCPjmp5McEKyfiKBD` | Configured; sends `conversion` with transaction_id, BRL, value after an approved order, when accepted |
+| GA4 | `ga4MeasurementId: null` | NOT configured; waiting for the existing property ID. No GA4 events are sent and no GA4 tag is loaded |
+| Meta | Pixel PageView only | No Meta ecommerce/Purchase events |
 
 ## Events
-| Event | Where | When | Dedup |
-|---|---|---|---|
-| view_item | ProductDetail | product opened | once per product + navigation |
-| add_to_cart | ProductDetail, ProductCard | user adds | per click |
-| begin_checkout | Checkout | checkout opened with items | once per navigation |
-| add_shipping_info | Checkout | signed freight quote available | once per quote |
-| add_payment_info (pix) | Checkout | Pix QR generated (NOT a sale) | once per order reference |
-| contato_whatsapp | Checkout, WhatsApp floating modal | WhatsApp opened (NOT a sale) | per click |
-| purchase (+ Ads conversion) | /obrigado, /pagamento/status | only `confirmedPurchase`: exact reference, payment_status approved, database total, BRL | once per transaction_id per browser (localStorage), also when disabled, so nothing is replayed later |
+| Event | Where | When | Dedup | Destination today |
+|---|---|---|---|---|
+| view_item | ProductDetail | product opened | once per product + navigation | GA4 (off) |
+| add_to_cart | ProductDetail, ProductCard | user adds | per click | GA4 (off) |
+| begin_checkout | Checkout | opened with items | once per navigation | GA4 (off) |
+| add_shipping_info | Checkout | signed freight quote | once per quote | GA4 (off) |
+| add_payment_info (pix) | Checkout | Pix QR generated, NOT a sale | once per reference | GA4 (off) |
+| contato_whatsapp | Checkout, WhatsApp modal | WhatsApp opened, NOT a sale | per click | GA4 (off) |
+| purchase / Ads conversion | /obrigado, /pagamento/status | only `confirmedPurchase` (exact reference, approved, database total, BRL) | once per transaction_id per browser, also when blocked | Ads (on with consent), GA4 (off) |
 
-Direct visits to /obrigado, pending orders, Pix generation and WhatsApp never send purchase.
-
-## Not configured (everything is disabled until all are set)
-1. `ga4MeasurementId`: null. No GA4 G- ID exists in this project. A GA4 config tag must also load it.
-2. `adsPurchaseSendTo`: null. Needs `AW-18052419500/<label>` from the Google Ads purchase conversion action. Label unknown.
-3. `consentGranted`: returns false. No consent banner/CMP exists. Must be connected to a real advertising/analytics consent choice.
-4. Meta Pixel: existing PageView unchanged; no Meta ecommerce events added.
-5. Existing tags in index.html (Meta Pixel, AW-18052419500 config) are unchanged and still load without consent.
-6. Not covered: server-side purchase (webhook), gclid storage, purchase when the customer closes the page before the approval screen.
+## Pending / not covered
+1. GA4 measurement ID (and loading its tag) — waiting for the owner.
+2. Google Ads goals: "Compra (1)" is inactive in Ads; the GA4 "ads_conversion_Compra_1" goal (page visit to /obrigado) should not be primary. Must be adjusted in Google Ads.
+3. Privacy policy page naming Google/Meta has not been created.
+4. A purchase is not counted if the customer closes the page before the approval screen (no server-side sending).
+5. The banner is shown to everyone (not only regulated regions), as requested.
