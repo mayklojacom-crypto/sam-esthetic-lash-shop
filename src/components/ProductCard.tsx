@@ -6,6 +6,7 @@ import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { formatBRL } from '@/lib/checkoutRules';
+import { track, toAnalyticsItem } from '@/lib/analytics';
 
 interface Props {
   product: Product;
@@ -30,6 +31,7 @@ const ProductCard = ({ product, index = 0 }: Props) => {
       return;
     }
     for (let i = 0; i < qty; i += 1) addItem(product);
+    track.addToCart(toAnalyticsItem(product, qty));
     toast.success(`${qty}x adicionado ao carrinho! 🛍️`, { duration: 1500 });
   };
 

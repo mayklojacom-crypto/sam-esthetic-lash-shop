@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, ShoppingBag, MessageCircle, ArrowLeft, Package, Heart } from 'lucide-react';
 import Header from '@/components/Header';
@@ -5,6 +6,7 @@ import BottomNav from '@/components/BottomNav';
 import { useVerifiedOrder } from '@/hooks/useVerifiedOrder';
 import { Button } from '@/components/ui/button';
 import { formatBRL } from '@/lib/checkoutRules';
+import { trackPurchase } from '@/lib/analytics';
 
 declare global {
   interface Window {
@@ -18,7 +20,8 @@ const ThankYou = () => {
   const orderId = searchParams.get('pedido') || '';
   const { purchase, loading, error, retry } = useVerifiedOrder(orderId);
 
-  // Do not emit Purchase on a page visit. No configured consent gate or GA4 purchase destination exists.
+  // Purchase only from the verified approved order (exact reference + database total), once per transaction.
+  useEffect(() => { trackPurchase(purchase); }, [purchase?.transaction_id]);
   if (!purchase) return (
     <div className="min-h-screen bg-background pb-24">
       <Header />

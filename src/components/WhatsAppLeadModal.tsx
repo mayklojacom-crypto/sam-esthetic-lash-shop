@@ -9,6 +9,7 @@ import whatsappIcon from '@/assets/whatsapp-icon.png';
 import { Loader2, MessageCircle } from 'lucide-react';
 import { formatBRL } from '@/lib/checkoutRules';
 import { useDelivery } from '@/contexts/DeliveryContext';
+import { track } from '@/lib/analytics';
 
 const WHATSAPP_NUMBER = '5562998755213';
 
@@ -80,6 +81,7 @@ export const WhatsAppLeadModal = ({ open, onOpenChange, mode = 'order' }: Props)
       message = `Olá Sam Esthetic! 💜\n\n*Meu nome:* ${trimmedName}\n*WhatsApp:* ${phone}\n\nGostaria de tirar uma dúvida.`;
     }
 
+    track.whatsappContact('botao_flutuante', isOrder ? 'order' : 'contact');
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
     if (isOrder) clearCart();
     setLoading(false);

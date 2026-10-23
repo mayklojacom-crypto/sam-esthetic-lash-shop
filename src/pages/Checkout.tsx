@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, ShieldCheck, CreditCard, Loader2, Lock, MapPin, User, Phone, FileText, ChevronRight, Copy, Check, QrCode } from 'lucide-react';
 import whatsappIcon from '@/assets/whatsapp-icon.png';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { track, toAnalyticsItem } from '@/lib/analytics';
 import { useCart } from '@/contexts/CartContext';
 import { supabase } from '@/integrations/supabase/client';
 import { FunctionsHttpError } from '@supabase/supabase-js';
@@ -107,6 +108,12 @@ const Checkout = () => {
   const pixAvailable = canRequestPix(delivery, form.number);
   const displayTotal = serverPricing?.total ?? checkoutTotals(totalPrice, appliedCoupon?.discount || 0, delivery?.quote?.price ?? null).total;
   useEffect(() => { setServerPricing(null); setPixError(''); }, [items, appliedCoupon, delivery, form.number]);
+
+  const analyticsItems = items.map(i => toAnalyticsItem(i.product, i.quantity, i.selectedSize));
+  const location = useLocation();
+  useEffect(() => { track.beginCheckout(analyticsItems, location.key); }, [location.key, items.length > 0]);
+  const quoteToken = delivery?.quote?.quoteToken;
+  useEffect(() => { if (quoteToken) track.addShippingInfo(analyticsItems, quoteToken); }, [quoteToken]);
 
   useEffect(() => {
     if (delivery) setForm(prev => ({ ...prev, ...delivery.address, number: delivery.quote?.number || '' }));
@@ -287,6 +294,7 @@ const Checkout = () => {
     }
 
     const encoded = encodeURIComponent(message);
+    track.whatsappContact('checkout', 'order');
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`, '_blank');
     clearCart();
     toast.success('Conversa aberta no WhatsApp. O pedido ainda depende de confirmação.');
@@ -345,6 +353,7 @@ const Checkout = () => {
           external_reference: response.external_reference,
         });
         setPixStatus('pending');
+        track.addPaymentInfo(analyticsItems, response.external_reference);
         toast.success('QR Code Pix gerado! Escaneie para pagar.');
       } else {
         throw new Error('QR Code não retornado');
