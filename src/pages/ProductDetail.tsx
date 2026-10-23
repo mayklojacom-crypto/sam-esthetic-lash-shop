@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, ShoppingBag, Minus, Plus, Share2, Zap } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import { useProducts, useProductBySlug } from '@/hooks/useProducts';
@@ -9,12 +9,14 @@ import BottomNav from '@/components/BottomNav';
 import ProductCard from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
 import { formatBRL } from '@/lib/checkoutRules';
+import { track, toAnalyticsItem } from '@/lib/analytics';
 
 import { useCountdown, pad } from '@/hooks/useCountdown';
 
 const ProductDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -36,6 +38,10 @@ const ProductDetail = () => {
     window.scrollTo(0, 0);
     setSelectedImage('');
   }, [slug]);
+
+  useEffect(() => {
+    if (product) track.viewItem(toAnalyticsItem(product), `${product.id}:${location.key}`);
+  }, [product?.id, location.key]);
 
   const suggested = useMemo(() => {
     if (!product) return [];
@@ -86,6 +92,7 @@ const ProductDetail = () => {
       return;
     }
     for (let i = 0; i < qty; i++) addItem(product, selectedSize || undefined);
+    track.addToCart(toAnalyticsItem(product, qty, selectedSize || undefined));
     toast.success(`${qty}x adicionado ao carrinho! 🛍️`, {
       duration: 1500,
       style: { background: 'hsl(272 60% 45%)', color: '#fff', border: 'none' },
@@ -102,6 +109,7 @@ const ProductDetail = () => {
       return;
     }
     for (let i = 0; i < qty; i++) addItem(product, selectedSize || undefined);
+    track.addToCart(toAnalyticsItem(product, qty, selectedSize || undefined));
     navigate('/checkout');
   };
 
