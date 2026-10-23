@@ -34,6 +34,7 @@ import AdminBlogComments from "./pages/admin/AdminBlogComments.tsx";
 import AdminLeads from "./pages/admin/AdminLeads.tsx";
 import AdminCoupons from "./pages/admin/AdminCoupons.tsx";
 import VisitorTracker from "./components/VisitorTracker.tsx";
+import CookieConsent from "./components/CookieConsent.tsx";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <VisitorTracker />
+            <CookieConsent />
             <DeliveryTickerBar />
             <Routes>
               <Route path="/" element={<Index />} />
