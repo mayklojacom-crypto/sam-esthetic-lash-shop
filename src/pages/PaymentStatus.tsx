@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
 import { useVerifiedOrder } from '@/hooks/useVerifiedOrder';
 import { Button } from '@/components/ui/button';
+import { trackPurchase } from '@/lib/analytics';
 
 const PaymentStatus = () => {
   const [searchParams] = useSearchParams();
@@ -19,6 +20,7 @@ const PaymentStatus = () => {
   useEffect(() => {
     if (purchase) {
       clearCart();
+      trackPurchase(purchase);
     }
   }, [purchase?.transaction_id]);
 
