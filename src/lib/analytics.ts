@@ -1,4 +1,5 @@
 import { hasAdConsent } from './consent';
+import { GA4_MEASUREMENT_ID, GOOGLE_ADS_PURCHASE_SEND_TO, isPublicHost } from './analyticsIds';
 
 // Central ecommerce measurement. Never put customer name, CPF, e-mail, phone or address in params.
 // Destinations are explicit and disabled until the owner supplies real IDs and a consent integration exists.
@@ -10,12 +11,19 @@ export interface AnalyticsConfig {
   adsPurchaseSendTo: string | null;
   /** Cookie choice from src/lib/consent.ts, read at send time. */
   consentGranted: () => boolean;
+  /** Real sends only on samestheticlash.shop / www. Elsewhere (preview) events go to a local debug log. */
+  publicHost: () => boolean;
 }
 
+export interface DebugEntry { name: string; params: Record<string, unknown> }
+/** Preview/local verification: what would have been sent. Never leaves the browser. */
+export const analyticsDebugLog: DebugEntry[] = [];
+
 export const analyticsConfig: AnalyticsConfig = {
-  ga4MeasurementId: null,
-  adsPurchaseSendTo: 'AW-18052419500/xk4JCPjmp5McEKyfiKBD',
+  ga4MeasurementId: GA4_MEASUREMENT_ID,
+  adsPurchaseSendTo: GOOGLE_ADS_PURCHASE_SEND_TO,
   consentGranted: hasAdConsent,
+  publicHost: () => isPublicHost(),
 };
 
 export interface AnalyticsItem {
@@ -39,8 +47,12 @@ let sender: Sender | null = null;
 export function setAnalyticsSender(next: Sender | null) { sender = next; }
 export function resetAnalyticsMemory() { sentOnce.clear(); }
 
-function gtagSender(): Sender | null {
+function gtagSender(config: AnalyticsConfig = analyticsConfig): Sender | null {
   if (sender) return sender;
+  if (!config.publicHost()) return (_c, name, params) => {
+    analyticsDebugLog.push({ name, params });
+    if (typeof window !== 'undefined') (window as unknown as { __samAnalytics?: DebugEntry[] }).__samAnalytics = analyticsDebugLog;
+  };
   const g = typeof window !== 'undefined' ? (window as unknown as { gtag?: Sender }).gtag : undefined;
   return typeof g === 'function' ? g : null;
 }
@@ -68,7 +80,7 @@ export function itemsValue(items: AnalyticsItem[]) {
 }
 
 function send(name: string, params: Params, config = analyticsConfig) {
-  const gtag = gtagSender();
+  const gtag = gtagSender(config);
   if (!gtag || !analyticsEnabled(config)) return false;
   gtag('event', name, { ...params, send_to: config.ga4MeasurementId });
   return true;
@@ -82,6 +94,10 @@ function once(key: string, fn: () => void) {
 }
 
 export const track = {
+  /** SPA page view, once per navigation entry (GA4 automatic page_view is disabled). */
+  pageView(path: string, navKey: string) {
+    once(`page_view:${navKey}`, () => send('page_view', { page_path: path, page_location: typeof window !== 'undefined' ? window.location.origin + path : path }));
+  },
   viewItem(item: AnalyticsItem, onceKey: string) {
     once(`view_item:${onceKey}`, () => send('view_item', { currency: 'BRL', value: itemsValue([item]), items: [item] }));
   },
@@ -126,7 +142,7 @@ export function trackPurchase(purchase: { transaction_id: string; currency: 'BRL
   const params = { transaction_id: purchase.transaction_id, currency: 'BRL', value: round(purchase.value) };
   // GA4 and Ads are independent destinations; each needs its own ID and consent.
   const ga4Sent = send('purchase', params, config);
-  const gtag = gtagSender();
+  const gtag = gtagSender(config);
   const adsSent = !!gtag && adsPurchaseEnabled(config);
   if (adsSent) gtag!('event', 'conversion', { ...params, send_to: config.adsPurchaseSendTo });
   return ga4Sent || adsSent;
