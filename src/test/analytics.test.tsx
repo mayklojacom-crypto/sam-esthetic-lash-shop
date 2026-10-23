@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { trackPurchase, track, setAnalyticsSender, resetAnalyticsMemory, analyticsConfig, toAnalyticsItem, type AnalyticsConfig } from '@/lib/analytics';
+import { saveConsent, readConsent, CONSENT_KEY } from '@/lib/consent';
 import { confirmedPurchase } from '@/lib/checkoutRules';
 
 const lookup = vi.fn();
@@ -11,6 +12,7 @@ vi.mock('@/components/BottomNav', () => ({ default: () => null }));
 
 const enabled: AnalyticsConfig = { ga4MeasurementId: 'G-TEST', adsPurchaseSendTo: 'AW-1/test', consentGranted: () => true };
 const calls: [string, Record<string, unknown>][] = [];
+const real = { ...analyticsConfig };
 
 beforeEach(() => {
   calls.length = 0; localStorage.clear(); resetAnalyticsMemory(); lookup.mockReset();
@@ -43,6 +45,33 @@ describe('purchase', () => {
     expect(trackPurchase(p)).toBe(false);
     expect(calls).toEqual([]);
     expect(trackPurchase(p, enabled)).toBe(false);
+  });
+});
+
+describe('separate destinations and consent', () => {
+  const p = { transaction_id: 'order_ads', currency: 'BRL' as const, value: 25 };
+  it('real config: Ads send_to is the verified Compra (1) value and GA4 stays unset', () => {
+    expect(real.adsPurchaseSendTo).toBe('AW-18052419500/xk4JCPjmp5McEKyfiKBD');
+    expect(real.ga4MeasurementId).toBeNull();
+  });
+  it('Ads purchase is sent without a GA4 ID when cookies are accepted', () => {
+    saveConsent('granted');
+    expect(trackPurchase(p, real)).toBe(true);
+    expect(calls).toEqual([['conversion', { transaction_id: 'order_ads', currency: 'BRL', value: 25, send_to: 'AW-18052419500/xk4JCPjmp5McEKyfiKBD' }]]);
+  });
+  it('refused cookies: no purchase sent', () => {
+    saveConsent('denied');
+    expect(trackPurchase(p, real)).toBe(false);
+    expect(calls.filter(c => c[0] === 'conversion' || c[0] === 'purchase')).toEqual([]);
+  });
+  it('no choice yet: nothing sent', () => {
+    expect(trackPurchase(p, real)).toBe(false);
+    expect(calls).toEqual([]);
+  });
+  it('choice is stored with time and version, and can be changed', () => {
+    saveConsent('granted'); saveConsent('denied');
+    expect(readConsent()).toMatchObject({ choice: 'denied', version: expect.any(String), at: expect.any(String) });
+    expect(localStorage.getItem(CONSENT_KEY)).not.toBeNull();
   });
 });
 
