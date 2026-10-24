@@ -1,5 +1,6 @@
 import { openCookieSettings } from "@/lib/consent";
 import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate, Link } from 'react-router-dom';
 import { Truck, ShieldCheck, CreditCard, Leaf, Search, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -50,6 +51,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
+      <Helmet>
+        <link rel="canonical" href="https://samestheticlash.shop/" />
+      </Helmet>
       <Header />
 
 
