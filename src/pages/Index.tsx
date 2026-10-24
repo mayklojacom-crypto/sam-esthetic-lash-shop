@@ -52,7 +52,18 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-0">
       <Helmet>
+        <title>Sam Esthetic — Materiais Premium para Lash Design e Nail Designer</title>
+        <meta name="description" content="Materiais profissionais para Lash Design e Nail Designer em Goiânia e Aparecida de Goiânia. Cílios, colas, pinças e acessórios com entrega local — consulte frete e prazo." />
         <link rel="canonical" href="https://samestheticlash.shop/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Sam Esthetic — Materiais Premium para Lash Design e Nail Designer" />
+        <meta property="og:description" content="Cílios, colas, pinças e acessórios profissionais. Entrega local em Goiânia e Aparecida — consulte frete e prazo." />
+        <meta property="og:url" content="https://samestheticlash.shop/" />
+        <meta property="og:image" content="https://samestheticlash.shop/favicon.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Sam Esthetic — Materiais Premium para Lash Design" />
+        <meta name="twitter:description" content="Materiais profissionais para Lash Design e Nail Designer. Entrega local em Goiânia e Aparecida de Goiânia — consulte frete e prazo." />
+        <meta name="twitter:image" content="https://samestheticlash.shop/favicon.png" />
       </Helmet>
       <Header />
 
