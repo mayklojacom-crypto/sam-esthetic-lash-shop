@@ -47,6 +47,10 @@ const BlogPost = () => {
 
   useEffect(() => {
     if (!slug) return;
+    let cancelled = false;
+    setLoading(true);
+    setPost(null);
+    setComments([]);
     supabase
       .from('blog_posts')
       .select('*')
@@ -55,6 +59,7 @@ const BlogPost = () => {
       .lte('published_at', new Date().toISOString())
       .maybeSingle()
       .then(({ data }) => {
+        if (cancelled) return;
         setPost(data as Post | null);
         setLoading(false);
         if (data) {
@@ -64,9 +69,10 @@ const BlogPost = () => {
             .eq('post_id', data.id)
             .eq('approved', true)
             .order('created_at', { ascending: false })
-            .then(({ data: c }) => setComments(c || []));
+            .then(({ data: c }) => { if (!cancelled) setComments(c || []); });
         }
       });
+    return () => { cancelled = true; };
   }, [slug]);
 
   const submitComment = async (e: React.FormEvent) => {
@@ -104,6 +110,10 @@ const BlogPost = () => {
 
   const { blocks, usedProductIds } = buildBlogBlocks(post.content, relatedProducts);
   const leftoverProducts = relatedProducts.filter(p => !usedProductIds.includes(p.id));
+  const canonical = `https://samestheticlash.shop/blog/${encodeURIComponent(post.slug)}`;
+  const seoTitle = post.meta_title || `${post.title} — Sam Esthetic`;
+  const seoDescription = post.meta_description || post.excerpt;
+  const coverImage = post.cover_image ? new URL(post.cover_image, 'https://samestheticlash.shop').href : undefined;
 
   const proseClass = `prose prose-lg md:prose-xl max-w-none
     prose-headings:text-foreground prose-headings:font-bold prose-headings:tracking-tight
@@ -120,24 +130,34 @@ const BlogPost = () => {
   return (
     <div className="min-h-screen bg-background pb-24 md:pb-8">
       <Helmet>
-        <title>{post.meta_title || `${post.title} — Sam Esthetic`}</title>
-        <meta name="description" content={post.meta_description || post.excerpt} />
-        <link rel="canonical" href={`/blog/${post.slug}`} />
-        <meta property="og:title" content={post.meta_title || post.title} />
-        <meta property="og:description" content={post.meta_description || post.excerpt} />
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <link rel="canonical" href={canonical} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
         <meta property="og:type" content="article" />
-        <meta property="og:url" content={`/blog/${post.slug}`} />
-        {post.cover_image && <meta property="og:image" content={post.cover_image} />}
+        <meta property="og:url" content={canonical} />
+        {coverImage && <meta property="og:image" content={coverImage} />}
+        {coverImage && <meta property="og:image:alt" content={post.title} />}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        {coverImage && <meta name="twitter:image" content={coverImage} />}
+        {coverImage && <meta name="twitter:image:alt" content={post.title} />}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "Article",
+            "@type": "BlogPosting",
+            "@id": `${canonical}#article`,
+            url: canonical,
+            mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
             headline: post.title,
             description: post.excerpt,
-            image: post.cover_image,
+            ...(coverImage ? { image: coverImage } : {}),
             datePublished: post.published_at,
+            inLanguage: 'pt-BR',
             author: { "@type": "Organization", name: "Sam Esthetic" },
-          })}
+          }).replace(/</g, '\\u003c')}
         </script>
       </Helmet>
       <Header />

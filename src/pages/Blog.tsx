@@ -33,13 +33,27 @@ const Blog = () => {
   }, []);
 
   const [featured, ...rest] = posts;
+  const coverImage = featured?.cover_image
+    ? new URL(featured.cover_image, 'https://samestheticlash.shop').href
+    : undefined;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-lilac/40 via-background to-pink-soft/30 pb-24 md:pb-8">
       <Helmet>
         <title>Blog Sam Esthetic — Dicas de Lash Design</title>
         <meta name="description" content="Dicas, tutoriais e novidades sobre extensão de cílios, lash design e cuidados. Aprenda com a Sam Esthetic." />
-        <link rel="canonical" href="/blog" />
+        <link rel="canonical" href="https://samestheticlash.shop/blog" />
+        <meta property="og:title" content="Blog Sam Esthetic — Dicas de Lash Design" />
+        <meta property="og:description" content="Dicas, tutoriais e novidades sobre extensão de cílios, lash design e cuidados. Aprenda com a Sam Esthetic." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://samestheticlash.shop/blog" />
+        {coverImage && <meta property="og:image" content={coverImage} />}
+        {coverImage && <meta property="og:image:alt" content={featured.title} />}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Blog Sam Esthetic — Dicas de Lash Design" />
+        <meta name="twitter:description" content="Dicas, tutoriais e novidades sobre extensão de cílios, lash design e cuidados. Aprenda com a Sam Esthetic." />
+        {coverImage && <meta name="twitter:image" content={coverImage} />}
+        {coverImage && <meta name="twitter:image:alt" content={featured.title} />}
       </Helmet>
       <Header />
 

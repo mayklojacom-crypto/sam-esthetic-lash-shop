@@ -1,4 +1,5 @@
 # Checkout improvements
+- [x] Public blog SEO: static Google verification, 16-URL sitemap, self-referencing metadata and crawlable product links; three real articles verified, 120 tests passed, build OK; no publication.
 - [x] Inspect delivery, payments and analytics.
 - [x] Add shared early local delivery consultation and honest totals.
 - [x] Delay personal data and preserve payment requirements.

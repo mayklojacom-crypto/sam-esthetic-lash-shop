@@ -1,6 +1,6 @@
 import { Minus, Plus } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Product } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
@@ -67,7 +67,9 @@ const ProductCard = ({ product, index = 0 }: Props) => {
       </div>
       <div className="px-2.5 pb-2.5 pt-1 flex flex-col flex-1 text-center">
         <h3 className="text-[12px] sm:text-[13px] font-medium text-foreground line-clamp-2 leading-snug min-h-[2.5rem]">
-          {product.name}
+          <Link to={`/produto/${product.slug}`} onClick={event => event.stopPropagation()}>
+            {product.name}
+          </Link>
         </h3>
         <div className="mt-1.5 min-h-[4.6rem]">
           <div className="flex items-baseline justify-center gap-1 text-accent">
