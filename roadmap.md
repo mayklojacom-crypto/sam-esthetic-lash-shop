@@ -1,4 +1,5 @@
 # Checkout improvements
+- [ ] Public blog SEO: static Google verification, blog/article sitemap entries, self-referencing metadata and crawlable product links; validate without publication.
 - [x] Inspect delivery, payments and analytics.
 - [x] Add shared early local delivery consultation and honest totals.
 - [x] Delay personal data and preserve payment requirements.
