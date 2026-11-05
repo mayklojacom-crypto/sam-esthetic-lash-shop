@@ -104,7 +104,6 @@ const Checkout = () => {
     } catch { /* ignore */ }
   }, [form]);
 
-  const totals = checkoutTotals(totalPrice, appliedCoupon?.discount || 0, delivery?.price ?? null);
   const pixAvailable = canRequestPix(delivery, form.number);
   const displayTotal = serverPricing?.total ?? checkoutTotals(totalPrice, appliedCoupon?.discount || 0, delivery?.quote?.price ?? null).total;
   useEffect(() => { setServerPricing(null); setPixError(''); }, [items, appliedCoupon, delivery, form.number]);
