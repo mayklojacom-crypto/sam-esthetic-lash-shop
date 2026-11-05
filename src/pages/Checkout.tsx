@@ -16,7 +16,7 @@ import SupportLink from '@/components/SupportLink';
 import PolicyLinks from '@/components/PolicyLinks';
 import { fetchRouteQuote } from '@/lib/routeQuote';
 import { useDelivery } from '@/contexts/DeliveryContext';
-import { canRequestPix, checkoutTotals, formatBRL, isServedCity } from '@/lib/checkoutRules';
+import { canRequestPix, checkoutTotals, formatBRL } from '@/lib/checkoutRules';
 
 const checkoutSchema = z.object({
   name: z.string().trim().min(2, 'Nome é obrigatório').max(100),
@@ -105,7 +105,6 @@ const Checkout = () => {
   }, [form]);
 
   const totals = checkoutTotals(totalPrice, appliedCoupon?.discount || 0, delivery?.price ?? null);
-  const finalTotal = totals.productsTotal;
   const pixAvailable = canRequestPix(delivery, form.number);
   const displayTotal = serverPricing?.total ?? checkoutTotals(totalPrice, appliedCoupon?.discount || 0, delivery?.quote?.price ?? null).total;
   useEffect(() => { setServerPricing(null); setPixError(''); }, [items, appliedCoupon, delivery, form.number]);
