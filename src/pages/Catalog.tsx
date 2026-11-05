@@ -7,6 +7,8 @@ import ProductCard from '@/components/ProductCard';
 import CategoryFilter from '@/components/CategoryFilter';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
+import { Button } from '@/components/ui/button';
+import { CatalogEmpty, CatalogError, ProductGridSkeleton } from '@/components/CatalogStatus';
 
 const categoryMeta: Record<string, { title: string; description: string }> = {
   cilios: { title: 'Cílios Profissionais', description: 'Cílios volume russo, YY, clássico e mais para lash designers.' },
@@ -26,7 +28,7 @@ const Catalog = () => {
   const initialCat = categoria || searchParams.get('cat') || 'todos';
   const [category, setCategory] = useState(initialCat);
   const [search, setSearch] = useState(searchParams.get('q') || '');
-  const { products } = useProducts();
+  const { products, status, reload } = useProducts();
 
   useEffect(() => {
     setSearch(searchParams.get('q') || '');
@@ -101,20 +103,28 @@ const Catalog = () => {
 
         {/* Results */}
         <div className="px-4 mt-5">
-          <p className="text-xs text-muted-foreground mb-4 font-medium uppercase tracking-wider">
-            {filtered.length} produto(s) encontrado(s)
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
-            {filtered.map((p, i) => (
-              <ProductCard key={p.id} product={p} index={i} />
-            ))}
-          </div>
-          {filtered.length === 0 && (
-            <div className="text-center py-16 animate-fade-in">
-              <p className="text-4xl mb-3">😕</p>
-              <p className="text-muted-foreground font-medium">Nenhum produto encontrado</p>
-              <p className="text-sm text-muted-foreground mt-1">Tente buscar por outro termo</p>
-            </div>
+          {status === 'loading' && <ProductGridSkeleton />}
+          {status === 'error' && <CatalogError onRetry={reload} />}
+          {status === 'ready' && (
+            <>
+              <p className="text-xs text-muted-foreground mb-4 font-medium uppercase tracking-wider">
+                {filtered.length} produto(s) encontrado(s)
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
+                {filtered.map((p, i) => (
+                  <ProductCard key={p.id} product={p} index={i} />
+                ))}
+              </div>
+              {filtered.length === 0 && (
+                <CatalogEmpty
+                  title={products.length === 0 ? 'Nenhum produto disponível no momento' : 'Nenhum produto encontrado'}
+                  hint={products.length === 0 ? 'Estamos atualizando o catálogo. Volte em breve.' : 'Tente outro termo ou veja todas as categorias.'}
+                  action={products.length > 0 && (search || category !== 'todos') ? (
+                    <Button variant="outline" onClick={() => { setSearch(''); setCategory('todos'); }}>Ver todos os produtos</Button>
+                  ) : undefined}
+                />
+              )}
+            </>
           )}
         </div>
       </div>
