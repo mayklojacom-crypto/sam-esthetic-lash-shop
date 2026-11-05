@@ -3,12 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import whatsappIcon from '@/assets/whatsapp-icon.png';
 import { Loader2, MessageCircle } from 'lucide-react';
-import { formatBRL } from '@/lib/checkoutRules';
-import { useDelivery } from '@/contexts/DeliveryContext';
 import { track } from '@/lib/analytics';
 
 const WHATSAPP_NUMBER = '5562998755213';
@@ -16,8 +13,8 @@ const WHATSAPP_NUMBER = '5562998755213';
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  /** Contexto opcional: quando não há carrinho, usar mensagem genérica */
-  mode?: 'order' | 'contact';
+  /** Support only: WhatsApp never creates or finalizes an order. */
+  mode?: 'contact';
 }
 
 const formatPhone = (v: string) => {
@@ -27,14 +24,11 @@ const formatPhone = (v: string) => {
   return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
 };
 
-export const WhatsAppLeadModal = ({ open, onOpenChange, mode = 'order' }: Props) => {
-  const { items, totalPrice, clearCart } = useCart();
-  const { delivery } = useDelivery();
+export const WhatsAppLeadModal = ({ open, onOpenChange, }: Props) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const isOrder = mode === 'order' && items.length > 0;
 
   const submit = async () => {
     const trimmedName = name.trim();
@@ -49,41 +43,18 @@ export const WhatsAppLeadModal = ({ open, onOpenChange, mode = 'order' }: Props)
         body: {
           customer_name: trimmedName,
           customer_phone: phone,
-          items: isOrder
-            ? items.map(i => ({
-                name: i.product.name,
-                quantity: i.quantity,
-                price: i.product.price,
-                size: i.selectedSize || null,
-              }))
-            : [],
-          total: isOrder ? totalPrice : 0,
+          items: [],
+          total: 0,
         },
       });
     } catch {
       // não bloqueia o envio ao WhatsApp
     }
 
-    let message: string;
-    if (isOrder) {
-      const itemsList = items
-        .map(({ product, quantity, selectedSize }) => {
-          const sizeText = selectedSize ? ` (${selectedSize})` : '';
-          return `▪️ ${quantity}x ${product.name}${sizeText} — ${formatBRL(product.price * quantity)}`;
-        })
-        .join('\n');
-      message =
-        `🛍️ *Olá Sam Esthetic!*\n\n*Cliente:* ${trimmedName}\n*WhatsApp:* ${phone}\n\nQuero finalizar este pedido:\n\n${itemsList}\n\n` +
-        `💰 *Subtotal: ${formatBRL(totalPrice)}*\n*Frete:* a combinar por aplicativo\n*Total com frete:* a confirmar\n` +
-        `${delivery ? `*Entrega:* CEP ${delivery.address.cep}, ${delivery.address.city} / GO\n` : ''}` +
-        `\nAguardo retorno para combinar entrega e pagamento. Obrigado!`;
-    } else {
-      message = `Olá Sam Esthetic! 💜\n\n*Meu nome:* ${trimmedName}\n*WhatsApp:* ${phone}\n\nGostaria de tirar uma dúvida.`;
-    }
+    const message = `Olá Sam Esthetic! 💜\n\n*Meu nome:* ${trimmedName}\n*WhatsApp:* ${phone}\n\nGostaria de tirar uma dúvida.`;
 
-    track.whatsappContact('botao_flutuante', isOrder ? 'order' : 'contact');
+    track.whatsappContact('botao_flutuante', 'contact');
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
-    if (isOrder) clearCart();
     setLoading(false);
     onOpenChange(false);
     setName('');
@@ -97,12 +68,10 @@ export const WhatsAppLeadModal = ({ open, onOpenChange, mode = 'order' }: Props)
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <img src={whatsappIcon} alt="" className="w-5 h-5" />
-            {isOrder ? 'Finalizar pelo WhatsApp' : 'Falar no WhatsApp'}
+            Falar no WhatsApp
           </DialogTitle>
           <DialogDescription>
-            {isOrder
-              ? 'Deixe seu nome e WhatsApp para agilizarmos o atendimento e a entrega.'
-              : 'Para te atender melhor, precisamos do seu nome e WhatsApp.'}
+Para te atender melhor, precisamos do seu nome e WhatsApp. Compras são finalizadas no próprio site.
           </DialogDescription>
         </DialogHeader>
 
@@ -128,12 +97,6 @@ export const WhatsAppLeadModal = ({ open, onOpenChange, mode = 'order' }: Props)
             />
           </div>
 
-          {isOrder && (
-            <div className="bg-muted/60 rounded-xl p-2.5 text-xs text-muted-foreground">
-              {items.length} item(ns) · <span className="font-bold text-foreground">{formatBRL(totalPrice)} + frete a combinar</span>
-            </div>
-          )}
-
           <Button
             onClick={submit}
             disabled={loading}
@@ -144,7 +107,7 @@ export const WhatsAppLeadModal = ({ open, onOpenChange, mode = 'order' }: Props)
             ) : (
               <>
                 <MessageCircle className="w-4 h-4 mr-1.5" />
-                {isOrder ? 'Enviar pedido' : 'Abrir conversa'}
+                Abrir conversa
               </>
             )}
           </Button>

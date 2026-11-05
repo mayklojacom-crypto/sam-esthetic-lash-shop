@@ -17,6 +17,9 @@ import OrderTracking from "./pages/OrderTracking.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import Blog from "./pages/Blog.tsx";
 import BlogPost from "./pages/BlogPost.tsx";
+import PrivacyPolicy from "./pages/policies/PrivacyPolicy.tsx";
+import ReturnsPolicy from "./pages/policies/ReturnsPolicy.tsx";
+import DeliveryPolicy from "./pages/policies/DeliveryPolicy.tsx";
 import WhatsAppFloat from "./components/WhatsAppFloat.tsx";
 import ExitIntentPopup from "./components/ExitIntentPopup.tsx";
 import DeliveryTickerBar from "./components/DeliveryTickerBar.tsx";
@@ -64,6 +67,9 @@ const App = () => (
               <Route path="/meu-pedido" element={<OrderTracking />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/privacidade" element={<PrivacyPolicy />} />
+              <Route path="/trocas-e-devolucoes" element={<ReturnsPolicy />} />
+              <Route path="/entrega" element={<DeliveryPolicy />} />
               {/* Admin routes — hidden, no menu link */}
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin" element={<AdminLayout />}>

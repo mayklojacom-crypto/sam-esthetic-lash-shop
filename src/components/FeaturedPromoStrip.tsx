@@ -13,6 +13,7 @@ interface PromoStrip {
 const FeaturedPromoStrip = () => {
   const navigate = useNavigate();
   const [strip, setStrip] = useState<PromoStrip | null>(null);
+  const [broken, setBroken] = useState(false);
 
   useEffect(() => {
     supabase
@@ -23,10 +24,14 @@ const FeaturedPromoStrip = () => {
       .order('sort_order', { ascending: true })
       .limit(1)
       .maybeSingle()
-      .then(({ data }) => setStrip(data));
+      .then(({ data, error }) => {
+        if (error) console.warn('Faixa promocional indisponível:', error);
+        setStrip(data);
+      });
   }, []);
 
-  if (!strip?.image_url) return null;
+  // Optional decoration: hide quietly (with a console warning) instead of showing a broken image.
+  if (!strip?.image_url || broken) return null;
 
   const openLink = () => {
     const destination = strip.link.trim();
@@ -63,6 +68,7 @@ const FeaturedPromoStrip = () => {
             alt={strip.alt}
             className="block h-auto min-h-[82px] max-h-[220px] w-full object-cover md:min-h-0"
             loading="lazy"
+            onError={() => { console.warn('Imagem da faixa promocional falhou:', strip.id); setBroken(true); }}
           />
         </picture>
       </div>

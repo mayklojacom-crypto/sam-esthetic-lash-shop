@@ -11,6 +11,8 @@ import promoMaster from '@/assets/promo-master-beauty.png';
 import promoProtagonista from '@/assets/promo-protagonista.png';
 import { categories } from '@/data/products';
 import { useProducts } from '@/hooks/useProducts';
+import PolicyLinks from '@/components/PolicyLinks';
+import { CatalogEmpty, CatalogError, ProductGridSkeleton } from '@/components/CatalogStatus';
 import ProductCard from '@/components/ProductCard';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
@@ -27,7 +29,7 @@ import stLashzinha from '@/assets/stickers/lashzinha.png';
 
 const Index = () => {
   const navigate = useNavigate();
-  const { products } = useProducts();
+  const { products, status: productsStatus, reload: reloadProducts } = useProducts();
   const featured = products.filter(p => p.featured);
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
   const [search, setSearch] = useState('');
@@ -92,7 +94,7 @@ const Index = () => {
           {[
             { icon: <ShieldCheck size={18} />, text: 'Segurinha 🔒' },
             { icon: <Truck size={18} />, text: 'Entrega rápida 🛵' },
-            { icon: <CreditCard size={18} />, text: 'Pix & Cartão 💳' },
+            { icon: <CreditCard size={18} />, text: 'Pagamento via Pix ✨' },
           ].map((item, i) => (
             <div key={i} className="bg-card rounded-xl border border-border p-3 flex flex-col items-center gap-1.5 text-center shadow-sm">
               <div className="text-primary">{item.icon}</div>
@@ -163,6 +165,11 @@ const Index = () => {
               Ver todos →
             </button>
           </div>
+          {productsStatus === 'loading' && <ProductGridSkeleton count={5} />}
+          {productsStatus === 'error' && <CatalogError onRetry={reloadProducts} />}
+          {productsStatus === 'ready' && featured.length === 0 && (
+            <CatalogEmpty title="Destaques em atualização" hint="Veja todos os produtos disponíveis no catálogo." />
+          )}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
             {featured.map((p, i) => (
               <ProductCard key={p.id} product={p} index={i} />
@@ -341,6 +348,7 @@ const Index = () => {
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
                   </a>
                 </div>
+                <PolicyLinks className="md:!justify-end" />
                 <button type="button" onClick={openCookieSettings} className="text-xs text-muted-foreground underline hover:text-primary">
                   Cookies
                 </button>
