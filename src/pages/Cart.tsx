@@ -1,24 +1,22 @@
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ShieldCheck } from 'lucide-react';
-import whatsappIcon from '@/assets/whatsapp-icon.png';
 import { useCart } from '@/contexts/CartContext';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
-import WhatsAppLeadModal from '@/components/WhatsAppLeadModal';
+import SupportLink from '@/components/SupportLink';
+import PolicyLinks from '@/components/PolicyLinks';
 import { Button } from '@/components/ui/button';
 import DeliveryConsultation from '@/components/DeliveryConsultation';
 import CheckoutTotals from '@/components/CheckoutTotals';
 import { useDelivery } from '@/contexts/DeliveryContext';
-import { formatBRL } from '@/lib/checkoutRules';
+import { checkoutTotals, formatBRL } from '@/lib/checkoutRules';
 
 const Cart = () => {
   const navigate = useNavigate();
   const { items, updateQuantity, removeItem, totalPrice } = useCart();
-  const [waOpen, setWaOpen] = useState(false);
   const { delivery } = useDelivery();
-
-  const sendToWhatsApp = () => setWaOpen(true);
+  const cartTotal = checkoutTotals(totalPrice, 0, delivery?.quote?.price ?? null).total;
+  const goCheckout = () => navigate('/checkout');
 
   if (items.length === 0) {
     return (
@@ -111,64 +109,44 @@ const Cart = () => {
         </div>
 
         {/* Footer - fixed on mobile */}
-        <div className="fixed bottom-[68px] left-0 right-0 bg-card/95 backdrop-blur-2xl border-t border-border/30 p-4 space-y-3 md:hidden">
+        <div className="fixed bottom-[68px] left-0 right-0 bg-card/95 backdrop-blur-2xl border-t border-border/30 p-4 space-y-2.5 md:hidden">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground font-medium">Produtos · + frete a combinar</span>
-            <span className="text-2xl font-extrabold text-primary">{formatBRL(totalPrice)}</span>
+            <span className="text-sm text-muted-foreground font-medium">{cartTotal === null ? 'Produtos · frete pelo CEP' : 'Total com frete'}</span>
+            <span className="text-2xl font-extrabold text-primary">{formatBRL(cartTotal ?? totalPrice)}</span>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              disabled={!delivery}
-              onClick={sendToWhatsApp}
-              className="bg-accent text-accent-foreground py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-1.5 text-[13px]"
-            >
-              <img src={whatsappIcon} alt="" className="w-4 h-4" />
-              WhatsApp
-            </Button>
-            <Button
-              onClick={() => navigate('/checkout')}
-              className="bg-primary text-primary-foreground py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-1.5 text-[13px]"
-            >
-              Continuar <ArrowRight size={15} strokeWidth={2.5} />
-            </Button>
-          </div>
-          <p className="text-[10px] text-center text-muted-foreground flex items-center justify-center gap-1">
-            <ShieldCheck size={11} /> Entrega local · Valor e prazo a confirmar
-          </p>
+          <Button
+            onClick={goCheckout}
+            className="w-full bg-primary text-primary-foreground py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-1.5 text-sm"
+          >
+            Continuar para pagamento <ArrowRight size={15} strokeWidth={2.5} />
+          </Button>
+          <div className="text-center"><SupportLink source="carrinho" /></div>
         </div>
 
         {/* Desktop checkout footer */}
         <div className="hidden md:block px-4 mt-6">
           <div className="bg-card rounded-2xl border border-border/60 p-5 shadow-card space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground font-medium">Produtos · + frete a combinar</span>
-              <span className="text-2xl font-extrabold text-primary">{formatBRL(totalPrice)}</span>
+              <span className="text-sm text-muted-foreground font-medium">{cartTotal === null ? 'Produtos · frete pelo CEP' : 'Total com frete'}</span>
+              <span className="text-2xl font-extrabold text-primary">{formatBRL(cartTotal ?? totalPrice)}</span>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                disabled={!delivery}
-              onClick={sendToWhatsApp}
-                className="bg-accent text-accent-foreground py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2 text-sm"
-              >
-                <img src={whatsappIcon} alt="" className="w-4 h-4" />
-                Confirmar frete
-              </Button>
-              <Button
-                onClick={() => navigate('/checkout')}
-                className="bg-primary text-primary-foreground py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2 text-sm"
-              >
-                Continuar pedido <ArrowRight size={15} strokeWidth={2.5} />
-              </Button>
-            </div>
+            <Button
+              onClick={goCheckout}
+              className="w-full bg-primary text-primary-foreground py-3.5 rounded-2xl font-bold active:scale-[0.98] transition-all shadow-md flex items-center justify-center gap-2 text-sm"
+            >
+              Continuar para pagamento <ArrowRight size={15} strokeWidth={2.5} />
+            </Button>
             <p className="text-xs text-center text-muted-foreground flex items-center justify-center gap-1.5 pt-1">
-              <ShieldCheck size={13} className="text-primary" /> Entrega exclusiva em Goiânia e Aparecida de Goiânia
+              <ShieldCheck size={13} className="text-primary" /> Pagamento via Pix no site · Entrega em Goiânia e Aparecida de Goiânia
             </p>
+            <div className="text-center"><SupportLink source="carrinho" /></div>
+            <PolicyLinks />
           </div>
         </div>
+        <div className="md:hidden px-4 mt-4 mb-44"><PolicyLinks /></div>
       </div>
 
       <BottomNav />
-      <WhatsAppLeadModal open={waOpen} onOpenChange={setWaOpen} mode="order" />
     </div>
   );
 };
