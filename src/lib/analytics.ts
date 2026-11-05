@@ -118,7 +118,7 @@ export const track = {
     once(`add_payment_info:${reference}`, () => send('add_payment_info', { currency: 'BRL', value: itemsValue(items), payment_type: 'pix', items }));
   },
   /** WhatsApp contact: a lead signal, never a purchase. */
-  whatsappContact(source: 'checkout' | 'botao_flutuante', mode: 'order' | 'contact') {
+  whatsappContact(source: 'checkout' | 'carrinho' | 'botao_flutuante', mode: 'order' | 'contact') {
     send('contato_whatsapp', { source, mode });
   },
 };

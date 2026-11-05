@@ -83,7 +83,7 @@ const ProductCard = ({ product, index = 0 }: Props) => {
             <p className="text-[10px] text-muted-foreground">pagamento rápido e seguro</p>
           )}
           <p className="mt-1 text-[10px] text-foreground">
-            Frete local a combinar
+            Frete calculado pelo CEP
           </p>
         </div>
         <div className="mt-auto grid grid-cols-[68px_1fr] gap-1.5" onClick={event => event.stopPropagation()}>

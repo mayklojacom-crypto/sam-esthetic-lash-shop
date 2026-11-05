@@ -2,6 +2,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, ShoppingBag, Minus, Plus, Share2, Zap } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
 import { useProducts, useProductBySlug } from '@/hooks/useProducts';
+import { CatalogError } from '@/components/CatalogStatus';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import Header from '@/components/Header';
@@ -23,7 +24,7 @@ const ProductDetail = () => {
   const [selectedImage, setSelectedImage] = useState('');
   
 
-  const { product, loading } = useProductBySlug(slug);
+  const { product, loading, error: productError, reload: reloadProduct } = useProductBySlug(slug);
   const { products } = useProducts();
   const promoEndsAt = product?.promoActive ? product?.promoEndsAt : null;
   const promoCd = useCountdown(promoEndsAt || null);
@@ -53,8 +54,25 @@ const ProductDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground text-sm">Carregando...</div>
+      <div className="min-h-screen bg-background" role="status" aria-label="Carregando produto">
+        <div className="max-w-5xl mx-auto px-4 pt-6 md:grid md:grid-cols-2 md:gap-8 space-y-4 md:space-y-0">
+          <div className="aspect-square w-full rounded-2xl bg-muted animate-pulse" />
+          <div className="space-y-3">
+            <div className="h-6 w-3/4 rounded bg-muted animate-pulse" />
+            <div className="h-10 w-1/3 rounded bg-muted animate-pulse" />
+            <div className="h-12 w-full rounded-xl bg-muted animate-pulse" />
+          </div>
+        </div>
+        <span className="sr-only">Carregando produto…</span>
+      </div>
+    );
+  }
+
+  if (productError) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center px-4 pb-20 animate-fade-in">
+        <div className="w-full max-w-md"><CatalogError onRetry={reloadProduct} /></div>
+        <BottomNav />
       </div>
     );
   }
@@ -201,7 +219,7 @@ const ProductDetail = () => {
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Frete local a combinar, sem desconto exclusivo por forma de pagamento.
+                  Entrega em Goiânia e Aparecida de Goiânia · frete calculado pelo CEP no carrinho.
                 </p>
               </div>
 
