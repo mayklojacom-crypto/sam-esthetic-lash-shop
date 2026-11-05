@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Loader2, MapPin, Pencil, Truck } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Loader2, MapPin, Pencil, RefreshCw, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useDelivery } from '@/contexts/DeliveryContext';
-import { supabase } from '@/integrations/supabase/client';
 import { formatBRL, isServedCity, type LocalDelivery } from '@/lib/checkoutRules';
+import { fetchRouteQuote } from '@/lib/routeQuote';
 
 export default function DeliveryConsultation() {
   const { delivery, selectDelivery } = useDelivery();
@@ -25,24 +26,29 @@ export default function DeliveryConsultation() {
     if (q.quoteToken && typeof q.expiresAt === 'number' && q.expiresAt > Date.now() + 5 * 60_000) return;
     refreshed.current = true;
     const current = delivery;
-    const num = q.number;
     setRefreshing(true);
-    supabase.functions.invoke('local-route-freight', { body: { cep: current.address.cep, number: num } })
-      .then(({ data, error: routeError }) => {
-        if (!routeError && data?.quoteToken && Number.isFinite(data.distanceKm) && Number.isFinite(data.price) && data.price >= 0) {
-          selectDelivery({ ...current, quote: { distanceKm: data.distanceKm, price: data.price, number: num, quoteToken: data.quoteToken, expiresAt: data.expiresAt } });
-        }
-      })
+    fetchRouteQuote(current.address.cep, q.number)
+      .then(quote => { if (quote?.quoteToken) selectDelivery({ ...current, quote }); })
       .finally(() => setRefreshing(false));
   }, [delivery, selectDelivery]);
 
+  const retryQuote = async () => {
+    if (!delivery) return;
+    const current = delivery;
+    setRefreshing(true);
+    const quote = await fetchRouteQuote(current.address.cep, number || current.quote?.number || '');
+    setRefreshing(false);
+    if (quote) selectDelivery({ ...current, quote });
+  };
+
   const consult = async () => {
     const digits = cep.replace(/\D/g, '');
-    const numberArg = number;
+    const numberArg = number.trim();
     const id = ++request.current;
     selectDelivery(null);
     setError('');
     if (digits.length !== 8) { setError('Digite um CEP com 8 números.'); return; }
+    if (!numberArg) { setError('Informe o número do endereço para calcular o frete.'); return; }
     setLoading(true);
     try {
       const response = await fetch(`https://viacep.com.br/ws/${digits}/json/`, { signal: AbortSignal.timeout(12000) });
@@ -59,46 +65,49 @@ export default function DeliveryConsultation() {
         service: 'Entrega por aplicativo', price: null,
         address: { cep: digits, street: address.logradouro || '', neighborhood: address.bairro || '', city: address.localidade, state: address.uf },
       };
-      const { data, error: routeError } = await supabase.functions.invoke('local-route-freight', { body: { cep: digits, number: numberArg.trim() } });
+      const quote = await fetchRouteQuote(digits, numberArg);
       if (id !== request.current) return;
-      if (!routeError && data && Number.isFinite(data.distanceKm) && data.distanceKm >= 0 && Number.isFinite(data.price) && data.price >= 0) {
-        next.quote = { distanceKm: data.distanceKm, price: data.price, number: numberArg.trim() || undefined,
-          quoteToken: data.quoteToken, expiresAt: data.expiresAt };
-      }
+      next.quote = quote ?? { distanceKm: NaN, price: NaN, number: numberArg } as never;
+      if (!quote) delete next.quote;
       selectDelivery(next);
     } catch {
-      if (id === request.current) setError('Não foi possível consultar a entrega agora. Tente novamente; o frete continua pendente.');
+      if (id === request.current) setError('Não foi possível consultar o CEP agora. Confira sua conexão e tente novamente.');
     } finally {
       if (id === request.current) setLoading(false);
     }
   };
 
-  const km = (v: number) => v.toLocaleString('pt-BR', { maximumFractionDigits: 1 });
-
   return (
     <section aria-label="Consulta de entrega" className="border-y border-border py-5 space-y-3">
       <h2 className="font-bold flex items-center gap-2"><Truck className="w-5 h-5 text-primary" /> Sua entrega</h2>
-      <p className="text-sm text-muted-foreground">Exclusiva para Goiânia e Aparecida de Goiânia. Entrega em até 30 minutos. Prazo sujeito ao endereço e à disponibilidade.</p>
+      <p className="text-sm text-muted-foreground">
+        Entregamos em Goiânia e Aparecida de Goiânia. Informe o CEP e o número para ver o frete antes de pagar.{' '}
+        <Link to="/entrega" className="text-primary underline">Como funciona a entrega</Link>
+      </p>
       {delivery ? (
         <div className="space-y-3">
           <div className="flex items-start justify-between gap-2">
             <p className="text-sm min-w-0"><MapPin className="inline w-4 h-4 text-primary mr-1" />
-              {delivery.address.street && `${delivery.address.street}${delivery.quote?.number ? `, ${delivery.quote.number}` : ''}, `}{delivery.address.neighborhood && `${delivery.address.neighborhood} — `}
+              {delivery.address.street && `${delivery.address.street}${delivery.quote?.number || number ? `, ${delivery.quote?.number || number}` : ''}, `}{delivery.address.neighborhood && `${delivery.address.neighborhood} — `}
               {delivery.address.city} / GO<br />CEP {delivery.address.cep.slice(0, 5)}-{delivery.address.cep.slice(5)}
             </p>
             <Button variant="ghost" size="sm" onClick={() => { selectDelivery(null); setError(''); }}><Pencil /> Editar</Button>
           </div>
           {delivery.quote ? (
             <div className="rounded-lg bg-secondary p-3">
-              <p className="text-sm">Distância pela rota: <strong>{km(delivery.quote.distanceKm)} km</strong></p>
               <p className="text-base font-bold text-primary">Frete: {formatBRL(delivery.quote.price)}</p>
-              <p className="text-xs text-muted-foreground mt-1">{refreshing ? 'Atualizando o frete…' : delivery.quote.quoteToken ? 'Frete incluído no total e conferido antes do pagamento.' : 'Clique em Editar e calcule o frete novamente para pagar com Pix.'}</p>
+              <p className="text-xs text-muted-foreground mt-1">{refreshing ? 'Atualizando o frete…' : 'Frete incluído no total e conferido novamente antes do pagamento.'}</p>
             </div>
           ) : (
-            <>
-              <p className="text-sm font-semibold text-primary">Frete pendente · Confirmar pelo WhatsApp</p>
-              <p className="text-xs text-muted-foreground">Não conseguimos calcular a rota agora. O frete será confirmado no atendimento pelo WhatsApp. Não é frete grátis.</p>
-            </>
+            <div className="rounded-lg border border-border bg-card p-3 space-y-2" role="status">
+              <p className="text-sm font-semibold text-foreground">Endereço atendido ✓ · frete ainda não calculado</p>
+              <p className="text-xs text-muted-foreground">
+                Nosso cálculo de rota não respondeu agora. Você pode seguir preenchendo seus dados — tentaremos calcular de novo antes do pagamento, e o valor só é cobrado depois de aparecer para você.
+              </p>
+              <Button type="button" variant="outline" size="sm" disabled={refreshing} onClick={() => void retryQuote()}>
+                {refreshing ? <Loader2 className="animate-spin" /> : <RefreshCw />} Tentar calcular de novo
+              </Button>
+            </div>
           )}
         </div>
       ) : (
