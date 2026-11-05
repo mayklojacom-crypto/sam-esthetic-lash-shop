@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Product } from '@/data/products';
 
@@ -23,12 +23,16 @@ const mapRow = (r: any): Product => ({
   stock: typeof r.stock === 'number' ? r.stock : 999,
 });
 
+export type ProductsStatus = 'loading' | 'ready' | 'error';
+
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [status, setStatus] = useState<ProductsStatus>('loading');
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let active = true;
+    setStatus('loading');
     (async () => {
       const { data, error } = await supabase
         .from('products')
@@ -37,20 +41,29 @@ export function useProducts() {
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false });
       if (!active) return;
-      if (!error && data) setProducts(data.map(mapRow));
-      setLoading(false);
+      if (error || !data) {
+        // Keep the real error visible to the UI instead of showing an empty store.
+        console.error('Falha ao carregar produtos:', error);
+        setStatus('error');
+        return;
+      }
+      setProducts(data.map(mapRow));
+      setStatus('ready');
     })();
     return () => {
       active = false;
     };
-  }, []);
+  }, [attempt]);
 
-  return { products, loading };
+  const reload = useCallback(() => setAttempt(a => a + 1), []);
+  return { products, loading: status === 'loading', status, error: status === 'error', reload };
 }
 
 export function useProductBySlug(slug: string | undefined) {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (!slug) {
@@ -59,6 +72,7 @@ export function useProductBySlug(slug: string | undefined) {
     }
     let active = true;
     setLoading(true);
+    setError(false);
     (async () => {
       const { data, error } = await supabase
         .from('products')
@@ -67,14 +81,16 @@ export function useProductBySlug(slug: string | undefined) {
         .eq('active', true)
         .maybeSingle();
       if (!active) return;
-      if (!error && data) setProduct(mapRow(data));
-      else setProduct(null);
+      if (error) console.error('Falha ao carregar produto:', error);
+      setError(!!error);
+      setProduct(!error && data ? mapRow(data) : null);
       setLoading(false);
     })();
     return () => {
       active = false;
     };
-  }, [slug]);
+  }, [slug, attempt]);
 
-  return { product, loading };
+  const reload = useCallback(() => setAttempt(a => a + 1), []);
+  return { product, loading, error, reload };
 }
