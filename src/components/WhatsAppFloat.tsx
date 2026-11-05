@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import whatsappIcon from '@/assets/whatsapp-icon.png';
 import WhatsAppLeadModal from './WhatsAppLeadModal';
-import { useCart } from '@/contexts/CartContext';
 import { useLocation } from 'react-router-dom';
 
 const WhatsAppFloat = () => {
   const [open, setOpen] = useState(false);
-  const { items } = useCart();
   const location = useLocation();
 
   if (location.pathname.startsWith('/produto/') || ['/carrinho', '/checkout'].includes(location.pathname)) return null;
@@ -21,7 +19,7 @@ const WhatsAppFloat = () => {
       >
         <img src={whatsappIcon} alt="WhatsApp" className="w-8 h-8" />
       </button>
-      <WhatsAppLeadModal open={open} onOpenChange={setOpen} mode={items.length > 0 ? 'order' : 'contact'} />
+      <WhatsAppLeadModal open={open} onOpenChange={setOpen} mode="contact" />
     </>
   );
 };
