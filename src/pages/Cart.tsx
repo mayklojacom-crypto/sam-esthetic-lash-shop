@@ -143,7 +143,7 @@ const Cart = () => {
             <PolicyLinks />
           </div>
         </div>
-        <div className="md:hidden px-4 mt-4 mb-44"><PolicyLinks /></div>
+        <div className="md:hidden px-4 mt-4"><PolicyLinks /></div>
       </div>
 
       <BottomNav />

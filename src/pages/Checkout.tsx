@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, ShieldCheck, CreditCard, Loader2, Lock, MapPin, User, Phone, FileText, ChevronRight, Copy, Check, QrCode } from 'lucide-react';
-import whatsappIcon from '@/assets/whatsapp-icon.png';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { track, toAnalyticsItem } from '@/lib/analytics';
 import { useCart } from '@/contexts/CartContext';
@@ -13,6 +12,9 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import DeliveryConsultation from '@/components/DeliveryConsultation';
 import CheckoutTotals from '@/components/CheckoutTotals';
+import SupportLink from '@/components/SupportLink';
+import PolicyLinks from '@/components/PolicyLinks';
+import { fetchRouteQuote } from '@/lib/routeQuote';
 import { useDelivery } from '@/contexts/DeliveryContext';
 import { canRequestPix, checkoutTotals, formatBRL, isServedCity } from '@/lib/checkoutRules';
 
@@ -30,8 +32,6 @@ const checkoutSchema = z.object({
   state: z.string().trim().min(2, 'Estado é obrigatório').max(2),
   notes: z.string().max(500).optional(),
 });
-
-const WHATSAPP_NUMBER = '5562998755213';
 
 const formatCPF = (value: string) => {
   const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -75,7 +75,8 @@ const Checkout = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loadingMP, setLoadingMP] = useState(false);
   const loadingCEP = false;
-  const { delivery } = useDelivery();
+  const { delivery, selectDelivery } = useDelivery();
+  const [quoting, setQuoting] = useState(false);
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const [serverPricing, setServerPricing] = useState<{ subtotal: number; discount: number; freight: number; total: number } | null>(null);
   const [pixError, setPixError] = useState('');
@@ -116,7 +117,7 @@ const Checkout = () => {
   useEffect(() => { if (quoteToken) track.addShippingInfo(analyticsItems, quoteToken); }, [quoteToken]);
 
   useEffect(() => {
-    if (delivery) setForm(prev => ({ ...prev, ...delivery.address, number: delivery.quote?.number || '' }));
+    if (delivery) setForm(prev => ({ ...prev, ...delivery.address, number: delivery.quote?.number || prev.number }));
     else setStep(0);
   }, [delivery]);
 
@@ -245,69 +246,30 @@ const Checkout = () => {
     return parts.join(', ');
   };
 
-  const handleWhatsApp = async () => {
-    if (!delivery || !isServedCity(form.city, form.state) || form.cep.replace(/\D/g, '') !== delivery.address.cep) {
-      setStep(0);
-      toast.error('Consulte um endereço na nossa área de entrega antes de continuar.');
-      return;
-    }
-    const data = validate();
-    if (!data) return;
-
-    const shippingText = '*Frete:* confirmar rota rodoviária e valor conforme a regra da loja; não incluído no subtotal';
-
-    const itemsList = items
-      .map(i => {
-        const sizeText = i.selectedSize ? ` (${i.selectedSize})` : '';
-        return `▪️ ${i.quantity}x ${i.product.name}${sizeText} — ${formatBRL(i.product.price * i.quantity)}`;
-      })
-      .join('\n');
-
-    const message = `🛍️ *NOVO PEDIDO — Sam Esthetic*\n\n` +
-      `*Cliente:* ${data.name}\n` +
-      `*CPF:* ${data.cpf}\n` +
-      `*E-mail:* ${data.email}\n` +
-      `*Telefone:* ${data.phone}\n` +
-      `*Endereço:* ${buildAddress()}\n` +
-      `${data.notes ? `*Obs:* ${data.notes}\n` : ''}` +
-      `\n*Itens:*\n${itemsList}\n\n` +
-      `${shippingText}\n` +
-      `💰 *Subtotal dos produtos: ${formatBRL(finalTotal)}*\n*Total com frete:* a confirmar`;
-
-    // Save lead (fire-and-forget — não bloqueia a ida ao WhatsApp)
-    try {
-      await supabase.functions.invoke('create-lead', {
-        body: {
-          customer_name: data.name,
-          customer_phone: data.phone,
-          items: items.map(i => ({
-            name: i.product.name,
-            quantity: i.quantity,
-            price: i.product.price,
-            size: i.selectedSize || null,
-          })),
-          total: finalTotal,
-        },
-      });
-    } catch {
-      // ignora — não bloqueia o fluxo do cliente
-    }
-
-    const encoded = encodeURIComponent(message);
-    track.whatsappContact('checkout', 'order');
-    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`, '_blank');
-    clearCart();
-    toast.success('Conversa aberta no WhatsApp. O pedido ainda depende de confirmação.');
-    navigate('/');
-  };
-
   const handlePixPayment = async () => {
-    if (!delivery || !pixAvailable || displayTotal === null) {
-      toast.error('Calcule o frete com o número do endereço antes de pagar.');
+    if (!delivery) {
+      setStep(0);
+      toast.error('Informe o CEP de entrega para continuar.');
       return;
     }
     const data = validate();
     if (!data) return;
+
+    // Freight not calculated yet (or address number changed): ask the route calculator again.
+    // The customer must see the new total before any charge, so we stop here after a successful quote.
+    if (!pixAvailable || displayTotal === null) {
+      setQuoting(true);
+      setPixError('');
+      const quote = await fetchRouteQuote(delivery.address.cep, data.number);
+      setQuoting(false);
+      if (quote?.quoteToken) {
+        selectDelivery({ ...delivery, quote });
+        toast.success(`Frete calculado: ${formatBRL(quote.price)}. Confira o total e toque em Pagar com Pix.`);
+      } else {
+        setPixError('Ainda não conseguimos calcular o frete deste endereço. Seus dados estão salvos: tente novamente em instantes. Nenhum valor foi cobrado.');
+      }
+      return;
+    }
 
     setLoadingMP(true);
     setPixError('');
@@ -584,31 +546,19 @@ const Checkout = () => {
                     <div className="space-y-3">
                       <Button
                         onClick={handlePixPayment}
-                        disabled={loadingMP || !pixAvailable}
+                        disabled={loadingMP || quoting}
                         className="w-full bg-primary text-primary-foreground py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:brightness-110 transition-all text-sm disabled:opacity-60"
                       >
-                        {loadingMP ? <Loader2 size={18} className="animate-spin" /> : <QrCode size={18} />}
-                        {loadingMP ? 'Gerando QR Code...' : 'Pagar com Pix'}
+                        {loadingMP || quoting ? <Loader2 size={18} className="animate-spin" /> : <QrCode size={18} />}
+                        {loadingMP ? 'Gerando QR Code...' : quoting ? 'Calculando frete...' : pixAvailable ? `Pagar com Pix${displayTotal !== null ? ` · ${formatBRL(displayTotal)}` : ''}` : 'Calcular frete e continuar'}
                       </Button>
 
                       <p className="text-[11px] text-muted-foreground text-center">
-                        {pixAvailable ? 'Produtos e frete serão conferidos antes de gerar o QR Code.' : 'Para pagar com Pix, clique em Editar na sua entrega e calcule o frete com o número do endereço.'}
+                        {pixAvailable ? 'Produtos e frete serão conferidos antes de gerar o QR Code.' : 'Vamos calcular o frete deste endereço e mostrar o total antes de gerar o Pix.'}
                       </p>
                       {pixError && <p role="alert" className="text-sm text-destructive">{pixError}</p>}
 
-                      <div className="flex items-center gap-3">
-                        <div className="flex-1 h-px bg-border" />
-                        <span className="text-xs text-muted-foreground font-medium">ou</span>
-                        <div className="flex-1 h-px bg-border" />
-                      </div>
-
-                      <Button
-                        onClick={handleWhatsApp}
-                        className="w-full bg-accent text-accent-foreground py-3.5 rounded-xl font-bold flex items-center justify-center gap-2.5 hover:brightness-110 transition-all text-sm"
-                      >
-                        <img src={whatsappIcon} alt="WhatsApp" className="w-5 h-5" />
-                        Confirmar frete pelo WhatsApp
-                      </Button>
+                      <div className="text-center pt-1"><SupportLink source="checkout" /></div>
                     </div>
                   )}
                 </div>
@@ -683,12 +633,13 @@ const Checkout = () => {
               <div className="mt-4 pt-4 border-t border-border space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <ShieldCheck size={14} className="text-primary flex-shrink-0" />
-                  <span className="text-[11px] font-medium">Compra 100% segura</span>
+                  <span className="text-[11px] font-medium">Pix processado pelo Mercado Pago</span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Lock size={14} className="text-primary flex-shrink-0" />
-                  <span className="text-[11px] font-medium">Dados protegidos e criptografados</span>
+                  <span className="text-[11px] font-medium">Conexão segura (HTTPS)</span>
                 </div>
+                <PolicyLinks className="pt-2 !justify-start" />
               </div>
             </div>
           </div>
