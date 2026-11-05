@@ -67,8 +67,7 @@ export default function DeliveryConsultation() {
       };
       const quote = await fetchRouteQuote(digits, numberArg);
       if (id !== request.current) return;
-      next.quote = quote ?? { distanceKm: NaN, price: NaN, number: numberArg } as never;
-      if (!quote) delete next.quote;
+      if (quote) next.quote = quote;
       selectDelivery(next);
     } catch {
       if (id === request.current) setError('Não foi possível consultar o CEP agora. Confira sua conexão e tente novamente.');
