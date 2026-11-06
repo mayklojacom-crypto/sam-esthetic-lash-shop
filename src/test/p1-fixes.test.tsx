@@ -80,3 +80,16 @@ describe('image fallback', () => {
     expect(container.querySelector('img')?.getAttribute('src')).toBe('https://x.test/a.jpg');
   });
 });
+
+describe('remote store images', () => {
+  const U = 'https://nuhwvyvlmfnsypcdtwpm.supabase.co/storage/v1/object/public/product-images/cola-hs-16-1783783271131.png';
+  it('exact known URL gets local WebP copies and keeps the original src', () => {
+    const { container } = render(<ResponsiveImage src={U} alt="Cola" />);
+    expect(container.querySelector('source')?.getAttribute('srcset')).toBe('/products/opt-remote/cola-hs-16-1783783271131-400.v1.webp 400w, /products/opt-remote/cola-hs-16-1783783271131-800.v1.webp 800w');
+    expect(container.querySelector('img')?.getAttribute('src')).toBe(U);
+  });
+  it('a different or changed URL is left untouched', () => {
+    expect(localWebpSrcSet(U + '?v=2')).toBeNull();
+    expect(localWebpSrcSet(U.replace('cola-hs-16', 'cola-nova'))).toBeNull();
+  });
+});
