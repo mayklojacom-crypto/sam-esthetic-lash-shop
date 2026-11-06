@@ -104,7 +104,7 @@ const Cart = () => {
         </div>
 
         <div className="px-4 mt-5">
-          <DeliveryConsultation />
+          <DeliveryConsultation productsTotal={checkoutTotals(totalPrice).productsTotal} />
           <CheckoutTotals subtotal={totalPrice} freight={delivery?.price ?? null} estimate={delivery?.quote?.price ?? null} />
         </div>
 
