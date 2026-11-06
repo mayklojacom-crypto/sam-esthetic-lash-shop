@@ -45,7 +45,7 @@ describe('local delivery', () => {
 });
 describe('totals', () => {
   it('never turns pending freight into a zero total', () => {
-    expect(checkoutTotals(100)).toEqual({ subtotal: 100, discount: 0, productsTotal: 100, freight: null, total: null });
+    expect(checkoutTotals(100)).toEqual({ subtotal: 100, discount: 0, productsTotal: 100, freight: null, freeFreight: false, total: null });
   });
   it('adds confirmed freight without discounting it', () => expect(checkoutTotals(100, .1, 12).total).toBe(102));
   it('allows zero freight only when explicitly confirmed', () => expect(checkoutTotals(100, 0, 0).total).toBe(100));
@@ -66,4 +66,7 @@ describe('verified purchases', () => {
     expect(confirmedPurchase({ external_reference: 'order_1', payment_status: 'approved', total: 102 }, 'order_1')).toEqual({ transaction_id: 'order_1', currency: 'BRL', value: 102 });
   });
   it('rejects invalid values', () => expect(confirmedPurchase({ external_reference: 'order_1', payment_status: 'approved', total: NaN }, 'order_1')).toBeNull());
+});describe('free freight threshold', () => {
+  it('R$270,00 pays the route freight', () => expect(checkoutTotals(270, 0, 7).freight).toBe(7));
+  it('R$270,01 has zero freight', () => expect(checkoutTotals(270.01, 0, 7).freight).toBe(0));
 });
