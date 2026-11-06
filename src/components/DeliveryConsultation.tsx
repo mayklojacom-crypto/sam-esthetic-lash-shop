@@ -4,10 +4,10 @@ import { Loader2, MapPin, Pencil, RefreshCw, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useDelivery } from '@/contexts/DeliveryContext';
-import { formatBRL, isServedCity, type LocalDelivery } from '@/lib/checkoutRules';
+import { FREE_FREIGHT_ABOVE, formatBRL, isServedCity, type LocalDelivery } from '@/lib/checkoutRules';
 import { fetchRouteQuote } from '@/lib/routeQuote';
 
-export default function DeliveryConsultation() {
+export default function DeliveryConsultation({ productsTotal }: { productsTotal?: number } = {}) {
   const { delivery, selectDelivery } = useDelivery();
   const [cep, setCep] = useState(delivery?.address.cep || '');
   const [number, setNumber] = useState(delivery?.quote?.number || '');
@@ -94,7 +94,7 @@ export default function DeliveryConsultation() {
           </div>
           {delivery.quote ? (
             <div className="rounded-lg bg-secondary p-3">
-              <p className="text-base font-bold text-primary">Frete: {formatBRL(delivery.quote.price)}</p>
+              <p className="text-base font-bold text-primary">Frete: {formatBRL(productsTotal !== undefined && productsTotal > FREE_FREIGHT_ABOVE ? 0 : delivery.quote.price)}{productsTotal !== undefined && productsTotal > FREE_FREIGHT_ABOVE && " · Grátis"}</p>
               <p className="text-xs text-muted-foreground mt-1">{refreshing ? 'Atualizando o frete…' : 'Frete incluído no total e conferido novamente antes do pagamento.'}</p>
             </div>
           ) : (
