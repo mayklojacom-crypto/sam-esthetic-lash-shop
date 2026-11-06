@@ -1,3 +1,4 @@
+import ResponsiveImage from '@/components/ResponsiveImage';
 import { Link } from 'react-router-dom';
 import type { Product } from '@/data/products';
 import { Sparkles, ArrowRight } from 'lucide-react';
@@ -22,7 +23,10 @@ const InlineProductPickCard = ({ product, label = 'a queridinha pra isso 💗' }
         className="group flex gap-3 md:gap-4 items-center"
       >
         <div className="shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden bg-white border border-lilac/60 shadow-sm">
-          <img
+          <ResponsiveImage
+            width={400}
+            height={400}
+            sizes="160px"
             src={product.image}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

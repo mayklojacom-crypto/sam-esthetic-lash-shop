@@ -6,6 +6,12 @@ import { supabase } from '@/integrations/supabase/client';
 import bannerAgenda from '@/assets/banner-agenda-continuar.jpg';
 import bannerPedeRecebe from '@/assets/banner-pede-recebe-hoje.jpg';
 import bannerQueridinhas from '@/assets/banner-queridinhas-colas.jpg';
+import bannerAgenda768 from '@/assets/banner-agenda-continuar-768.v1.webp';
+import bannerAgenda1440 from '@/assets/banner-agenda-continuar-1440.v1.webp';
+import bannerPedeRecebe768 from '@/assets/banner-pede-recebe-hoje-768.v1.webp';
+import bannerPedeRecebe1440 from '@/assets/banner-pede-recebe-hoje-1440.v1.webp';
+import bannerQueridinhas768 from '@/assets/banner-queridinhas-colas-768.v1.webp';
+import bannerQueridinhas1440 from '@/assets/banner-queridinhas-colas-1440.v1.webp';
 
 interface Banner {
   id: string;
@@ -13,12 +19,14 @@ interface Banner {
   image_mobile_url?: string | null;
   link: string;
   alt: string;
+  /** Local WebP srcset for bundled fallback art only; remote banners are used as-is. */
+  webpSrcSet?: string;
 }
 
 const fallback: Banner[] = [
-  { id: 'f1', image_url: bannerAgenda, alt: 'Tudo para sua agenda continuar', link: '/catalogo' },
-  { id: 'f2', image_url: bannerPedeRecebe, alt: 'Pede agora e recebe hoje', link: '/catalogo' },
-  { id: 'f3', image_url: bannerQueridinhas, alt: 'As queridinhas da lash', link: '/catalogo?cat=colas' },
+  { id: 'f1', image_url: bannerAgenda, webpSrcSet: `${bannerAgenda768} 768w, ${bannerAgenda1440} 1440w`, alt: 'Tudo para sua agenda continuar', link: '/catalogo' },
+  { id: 'f2', image_url: bannerPedeRecebe, webpSrcSet: `${bannerPedeRecebe768} 768w, ${bannerPedeRecebe1440} 1440w`, alt: 'Pede agora e recebe hoje', link: '/catalogo' },
+  { id: 'f3', image_url: bannerQueridinhas, webpSrcSet: `${bannerQueridinhas768} 768w, ${bannerQueridinhas1440} 1440w`, alt: 'As queridinhas da lash', link: '/catalogo?cat=colas' },
 ];
 
 const HeroBannerCarousel = () => {
@@ -89,10 +97,16 @@ const HeroBannerCarousel = () => {
           {visible.map((b, i) => (
             <picture key={b.id} className="block min-w-full">
               {b.image_mobile_url && <source media="(max-width: 767px)" srcSet={b.image_mobile_url} />}
+              {b.webpSrcSet && <source type="image/webp" srcSet={b.webpSrcSet} sizes="(min-width: 768px) 768px, 100vw" />}
               <img
                 src={b.image_url}
                 alt={b.alt}
+                width={1448}
+                height={1086}
+                // High priority only for the first banner; the rest load lazily.
                 loading={i === 0 ? 'eager' : 'lazy'}
+                decoding={i === 0 ? 'sync' : 'async'}
+                {...(i === 0 ? { fetchpriority: 'high' } : {})}
                 className="w-full h-auto object-cover cursor-pointer rounded-2xl"
                 onClick={() => navigate(b.link || '/catalogo')}
                 onError={() => handleError(b)}

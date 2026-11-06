@@ -7,7 +7,11 @@ const RouteTracker = () => {
   const location = useLocation();
   useEffect(() => {
     if (location.pathname.startsWith('/admin')) return;
-    track.pageView(location.pathname, location.key);
+    const measure = () => track.pageView(location.pathname, location.key);
+    measure();
+    // Late consent: measure only the current page; once() keeps it to one per navigation.
+    window.addEventListener('sam-consent-change', measure);
+    return () => window.removeEventListener('sam-consent-change', measure);
   }, [location.key, location.pathname]);
   return null;
 };

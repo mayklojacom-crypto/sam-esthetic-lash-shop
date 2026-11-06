@@ -97,6 +97,8 @@ const Blog = () => {
                   {featured.cover_image && (
                     <div className="aspect-[16/10] md:aspect-auto overflow-hidden bg-lilac/30 relative">
                       <img
+                        width={1280}
+                        height={720}
                         src={featured.cover_image}
                         alt={featured.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
@@ -139,6 +141,8 @@ const Blog = () => {
                     {p.cover_image && (
                       <div className="aspect-[16/10] overflow-hidden bg-lilac/30">
                         <img
+                          width={1280}
+                          height={720}
                           src={p.cover_image}
                           alt={p.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
