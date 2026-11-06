@@ -1,5 +1,7 @@
 export interface RequestedItem { id: string; quantity: number; size?: string }
 export interface CatalogProduct { id: string; name: string; price: number | string; active: boolean; stock: number; sizes: string[] | null }
+/** Owner rule: free delivery strictly ABOVE R$270.00 of products after discount (route already validated in the served area). */
+export const FREE_FREIGHT_ABOVE_CENTS = 27000;
 export function priceOrder(items: RequestedItem[], products: CatalogProduct[], freight: number, discountPercent = 0) {
   if (!Array.isArray(items) || items.length < 1 || items.length > 50 || !Number.isFinite(freight) || freight < 0 ||
       !Number.isFinite(discountPercent) || discountPercent < 0 || discountPercent > 100) throw new Error('Valores do pedido inválidos');
@@ -20,7 +22,7 @@ export function priceOrder(items: RequestedItem[], products: CatalogProduct[], f
     return { id: product.id, name: item.size ? `${product.name} (${item.size})` : product.name, size: item.size || null, quantity: item.quantity, price: cents / 100 };
   });
   const discountCents = Math.round(subtotalCents * discountPercent / 100);
-  const freightCents = Math.round(freight * 100);
+  const freightCents = subtotalCents - discountCents > FREE_FREIGHT_ABOVE_CENTS ? 0 : Math.round(freight * 100);
   const totalCents = subtotalCents - discountCents + freightCents;
   if (!Number.isSafeInteger(totalCents) || totalCents <= 0) throw new Error('Total inválido');
   // Adjustment lines preserve totals for the existing PDFs and order consumers.
