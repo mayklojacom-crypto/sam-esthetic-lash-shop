@@ -1,3 +1,4 @@
+import ResponsiveImage from '@/components/ResponsiveImage';
 import { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -11,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useProducts } from '@/hooks/useProducts';
-import { buildBlogBlocks } from '@/lib/blogInlineProducts';
+import { buildBlogBlocks, fixBlogProductLinks } from '@/lib/blogInlineProducts';
 import InlineProductPickCard from '@/components/InlineProductPickCard';
 
 interface Post {
@@ -37,7 +38,7 @@ interface Comment {
 const BlogPost = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
-  const { products } = useProducts();
+  const { products, status: catalogStatus } = useProducts();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -108,7 +109,9 @@ const BlogPost = () => {
   const wordCount = post.content.replace(/<[^>]+>/g, '').split(/\s+/).filter(Boolean).length;
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
-  const { blocks, usedProductIds } = buildBlogBlocks(post.content, relatedProducts);
+  // Product links are checked only once the active catalog has loaded.
+  const activeSlugs = catalogStatus === 'ready' ? new Set(products.map(p => p.slug)) : null;
+  const { blocks, usedProductIds } = buildBlogBlocks(fixBlogProductLinks(post.content, activeSlugs), relatedProducts);
   const leftoverProducts = relatedProducts.filter(p => !usedProductIds.includes(p.id));
   const canonical = `https://samestheticlash.shop/blog/${encodeURIComponent(post.slug)}`;
   const seoTitle = post.meta_title || `${post.title} — Sam Esthetic`;
@@ -183,7 +186,7 @@ const BlogPost = () => {
         {post.excerpt && <p className="text-lg text-muted-foreground mb-6 leading-relaxed">{post.excerpt}</p>}
 
         {post.cover_image && (
-          <img src={post.cover_image} alt={post.title} className="w-full rounded-2xl mb-8 aspect-[16/9] object-cover" />
+          <ResponsiveImage src={post.cover_image} alt={post.title} width={1280} height={720} sizes="(min-width: 768px) 768px, 100vw" priority className="w-full rounded-2xl mb-8 aspect-[16/9] object-cover" />
         )}
 
         <div className="bg-white/70 backdrop-blur-sm rounded-3xl border border-lilac/40 shadow-pink p-5 md:p-8 my-8">

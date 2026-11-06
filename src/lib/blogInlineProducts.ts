@@ -94,3 +94,51 @@ export function buildBlogBlocks(html: string, products: Product[]): {
 
   return { blocks, usedProductIds };
 }
+
+/** Old blog slugs that point to a product now published under another slug (same model only). */
+export const BLOG_PRODUCT_SLUG_ALIASES: Record<string, string> = {
+  'pinca-nagaraku-n07': 'pinca-nagaraku-n07-acoplar',
+  'higrometro-pequeno': 'higrometro',
+};
+
+const OWN_HOSTS = new Set(['samestheticlash.shop', 'www.samestheticlash.shop']);
+
+function productSlugFromHref(href: string): string | null {
+  let path = href.trim();
+  if (/^https?:\/\//i.test(path)) {
+    try {
+      const u = new URL(path);
+      if (!OWN_HOSTS.has(u.hostname.toLowerCase())) return null; // external link: leave alone
+      path = u.pathname;
+    } catch { return null; }
+  }
+  const m = path.match(/^\/produto\/([^/?#]+)\/?(?:[?#].*)?$/);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+/**
+ * Render-time fix for /produto/ links inside blog HTML (the stored post is not changed).
+ * - activeSlugs null = catalog not ready yet: links are left untouched.
+ * - Known alias whose destination is active: link points to the destination.
+ * - Product not in the active catalog: the link is removed, its text stays.
+ * - External links are never touched.
+ */
+export function fixBlogProductLinks(html: string, activeSlugs: Set<string> | null): string {
+  if (!html || !activeSlugs || typeof document === 'undefined') return html;
+  const container = document.createElement('div');
+  container.innerHTML = html;
+  container.querySelectorAll('a[href]').forEach((a) => {
+    const slug = productSlugFromHref(a.getAttribute('href') || '');
+    if (!slug) return;
+    if (activeSlugs.has(slug)) return;
+    const alias = BLOG_PRODUCT_SLUG_ALIASES[slug];
+    if (alias && activeSlugs.has(alias)) {
+      a.setAttribute('href', `/produto/${alias}`);
+      return;
+    }
+    const span = document.createElement('span');
+    while (a.firstChild) span.appendChild(a.firstChild);
+    a.replaceWith(span);
+  });
+  return container.innerHTML;
+}

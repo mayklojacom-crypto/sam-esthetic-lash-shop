@@ -64,6 +64,7 @@ const FeaturedPromoStrip = () => {
         <picture>
           {strip.image_mobile_url && <source media="(max-width: 767px)" srcSet={strip.image_mobile_url} />}
           <img
+            decoding="async"
             src={strip.image_url}
             alt={strip.alt}
             className="block h-auto min-h-[82px] max-h-[220px] w-full object-cover md:min-h-0"
