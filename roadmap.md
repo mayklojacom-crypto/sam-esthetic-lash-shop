@@ -17,3 +17,4 @@
 - [ ] Analytics activation: blocked by absent consent configuration, GA4 destination and Ads conversion action label.
 - [x] P1: WebP local images, blog product-link aliases, consent-aware once() tracking (applied 2026-11-06)
 - [ ] Free delivery above R$270: pending backend pricing approval (see pendencias-frete.md)
+- [x] Remote store photos/banners/covers: local WebP copies mapped by exact URL (2026-11-06)
