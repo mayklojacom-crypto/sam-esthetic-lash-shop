@@ -1,3 +1,4 @@
+import ResponsiveImage from '@/components/ResponsiveImage';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -96,7 +97,7 @@ const Blog = () => {
                 <div className="grid md:grid-cols-2 gap-0">
                   {featured.cover_image && (
                     <div className="aspect-[16/10] md:aspect-auto overflow-hidden bg-lilac/30 relative">
-                      <img
+                      <ResponsiveImage sizes="(min-width: 768px) 50vw, 100vw"
                         width={1280}
                         height={720}
                         src={featured.cover_image}
@@ -140,7 +141,7 @@ const Blog = () => {
                   >
                     {p.cover_image && (
                       <div className="aspect-[16/10] overflow-hidden bg-lilac/30">
-                        <img
+                        <ResponsiveImage sizes="(min-width: 768px) 50vw, 100vw"
                           width={1280}
                           height={720}
                           src={p.cover_image}

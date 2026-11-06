@@ -1,3 +1,4 @@
+import ResponsiveImage from '@/components/ResponsiveImage';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -63,7 +64,7 @@ const FeaturedPromoStrip = () => {
       >
         <picture>
           {strip.image_mobile_url && <source media="(max-width: 767px)" srcSet={strip.image_mobile_url} />}
-          <img
+          <ResponsiveImage sizes="100vw"
             decoding="async"
             src={strip.image_url}
             alt={strip.alt}
