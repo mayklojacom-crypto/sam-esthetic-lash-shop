@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { localWebpSrcSet, knownImageSize } from '@/lib/responsiveImage';
 // Bundled with the site build so they load on any host (Hostinger included).
 import bannerAgenda from '@/assets/banner-agenda-continuar.jpg';
 import bannerPedeRecebe from '@/assets/banner-pede-recebe-hoje.jpg';
@@ -96,13 +97,18 @@ const HeroBannerCarousel = () => {
         >
           {visible.map((b, i) => (
             <picture key={b.id} className="block min-w-full">
+              {b.image_mobile_url && localWebpSrcSet(b.image_mobile_url) && (
+                <source media="(max-width: 767px)" type="image/webp" srcSet={localWebpSrcSet(b.image_mobile_url)!} sizes="100vw" />
+              )}
               {b.image_mobile_url && <source media="(max-width: 767px)" srcSet={b.image_mobile_url} />}
-              {b.webpSrcSet && <source type="image/webp" srcSet={b.webpSrcSet} sizes="(min-width: 768px) 768px, 100vw" />}
+              {(b.webpSrcSet || localWebpSrcSet(b.image_url)) && (
+                <source type="image/webp" srcSet={b.webpSrcSet || localWebpSrcSet(b.image_url)!} sizes="(min-width: 768px) 768px, 100vw" />
+              )}
               <img
                 src={b.image_url}
                 alt={b.alt}
-                width={1448}
-                height={1086}
+                width={knownImageSize(b.image_url)?.width ?? 1448}
+                height={knownImageSize(b.image_url)?.height ?? 1086}
                 // High priority only for the first banner; the rest load lazily.
                 loading={i === 0 ? 'eager' : 'lazy'}
                 decoding={i === 0 ? 'sync' : 'async'}
