@@ -1,3 +1,4 @@
+import ResponsiveImage from '@/components/ResponsiveImage';
 import { Minus, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -46,11 +47,13 @@ const ProductCard = ({ product, index = 0 }: Props) => {
       style={{ animationDelay: `${index * 0.06}s` }}
     >
       <div className="relative aspect-square bg-card overflow-hidden p-2">
-        <img
+        <ResponsiveImage
           src={product.image}
           alt={product.name}
+          width={400}
+          height={400}
+          sizes="(min-width: 1024px) 240px, (min-width: 768px) 30vw, 50vw"
           className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.03]"
-          loading="lazy"
         />
         {discount && !outOfStock && (
           <span className="absolute top-2 left-2 bg-accent text-accent-foreground text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-sm">

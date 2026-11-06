@@ -86,11 +86,16 @@ function send(name: string, params: Params, config = analyticsConfig) {
   return true;
 }
 
-/** Fires at most once per key in this page session (guards rerenders / StrictMode). */
-function once(key: string, fn: () => void) {
-  if (sentOnce.has(key)) return;
-  sentOnce.add(key);
-  fn();
+/**
+ * Fires at most once per key in this page session (guards rerenders / StrictMode).
+ * The key is consumed only when the event was actually sent, so an event blocked by
+ * missing consent can still be measured once after the visitor accepts cookies.
+ */
+function once(key: string, fn: () => boolean) {
+  if (sentOnce.has(key)) return false;
+  const sent = fn();
+  if (sent) sentOnce.add(key);
+  return sent;
 }
 
 export const track = {

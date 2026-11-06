@@ -1,3 +1,4 @@
+import ResponsiveImage from '@/components/ResponsiveImage';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, ShoppingBag, Minus, Plus, Share2, Zap } from 'lucide-react';
 import { useState, useMemo, useEffect } from 'react';
@@ -41,7 +42,12 @@ const ProductDetail = () => {
   }, [slug]);
 
   useEffect(() => {
-    if (product) track.viewItem(toAnalyticsItem(product), `${product.id}:${location.key}`);
+    if (!product) return;
+    const measure = () => track.viewItem(toAnalyticsItem(product), `${product.id}:${location.key}`);
+    measure();
+    // Late consent: measure only this product view, once per navigation.
+    window.addEventListener('sam-consent-change', measure);
+    return () => window.removeEventListener('sam-consent-change', measure);
   }, [product?.id, location.key]);
 
   const suggested = useMemo(() => {
@@ -143,7 +149,7 @@ const ProductDetail = () => {
           {/* Image */}
           <div className="relative animate-fade-in">
             <div className="aspect-square bg-card overflow-hidden md:rounded-3xl p-3">
-              <img src={activeImage} alt={product.name} className="w-full h-full object-contain" />
+              <ResponsiveImage key={activeImage} src={activeImage} alt={product.name} width={800} height={800} sizes="(min-width: 768px) 50vw, 100vw" priority className="w-full h-full object-contain" />
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent md:hidden" />
             <button
@@ -184,7 +190,7 @@ const ProductDetail = () => {
                     onClick={() => setSelectedImage(image)}
                     className={`h-12 w-12 overflow-hidden rounded-md border-2 p-0 ${activeImage === image ? 'border-primary' : 'border-transparent'}`}
                   >
-                    <img src={image} alt="" className="h-full w-full object-contain" />
+                    <ResponsiveImage src={image} alt="" width={400} height={400} sizes="80px" className="h-full w-full object-contain" />
                   </Button>
                 ))}
               </div>
