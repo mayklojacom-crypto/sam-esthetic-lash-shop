@@ -15,3 +15,5 @@
 - [x] Enable Pix with authorized server-side product, coupon and signed route-quote verification; deploy payment functions only, without real test orders or site publication. 100 tests passed; deployed payment endpoints reject invalid input. Live Maps/QR generation remains unverified and must be checked by the owner on the authorized app origin.
 - [x] Central frontend ecommerce events + verified-only purchase, disabled by default (analytics-setup.md).
 - [ ] Analytics activation: blocked by absent consent configuration, GA4 destination and Ads conversion action label.
+- [x] P1: WebP local images, blog product-link aliases, consent-aware once() tracking (applied 2026-11-06)
+- [ ] Free delivery above R$270: pending backend pricing approval (see pendencias-frete.md)
