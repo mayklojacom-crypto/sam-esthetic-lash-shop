@@ -65,12 +65,18 @@ export function canRequestPix(delivery: LocalDelivery | null, number: string, no
     !!number.trim() && quote.number === number.trim();
 }
 
+/** Owner rule: free delivery strictly ABOVE this products total (after discount); same value as server payment-pricing. */
+export const FREE_FREIGHT_ABOVE = 270;
+
 export function checkoutTotals(subtotal: number, discountRate = 0, freight: number | null = null) {
   const round = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
   const discount = round(subtotal * discountRate);
   const productsTotal = round(subtotal - discount);
-  const validFreight = freight !== null && Number.isFinite(freight) && freight >= 0 ? round(freight) : null;
-  return { subtotal: round(subtotal), discount, productsTotal, freight: validFreight,
+  const routeFreight = freight !== null && Number.isFinite(freight) && freight >= 0 ? round(freight) : null;
+  // Free only with a valid route quote: unknown freight stays null.
+  const freeFreight = routeFreight !== null && productsTotal > FREE_FREIGHT_ABOVE;
+  const validFreight = freeFreight ? 0 : routeFreight;
+  return { subtotal: round(subtotal), discount, productsTotal, freight: validFreight, freeFreight,
     total: validFreight === null ? null : round(productsTotal + validFreight) };
 }
 
