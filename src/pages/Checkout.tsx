@@ -392,7 +392,7 @@ const Checkout = () => {
         <div className="md:grid md:grid-cols-[1fr_380px] md:gap-6">
           {/* Left Column - Form */}
           <div className="space-y-5">
-            <DeliveryConsultation />
+            <DeliveryConsultation productsTotal={checkoutTotals(totalPrice, appliedCoupon?.discount || 0).productsTotal} />
             {step === 0 && <>
               <CheckoutTotals subtotal={totalPrice} discountRate={appliedCoupon?.discount || 0} freight={delivery?.price ?? null} estimate={delivery?.quote?.price ?? null} />
               <Button className="w-full" disabled={!delivery} onClick={() => setStep(1)}>Continuar com meus dados <ChevronRight /></Button>
