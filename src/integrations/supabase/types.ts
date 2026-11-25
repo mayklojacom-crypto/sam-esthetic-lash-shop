@@ -331,6 +331,48 @@ export type Database = {
         }
         Relationships: []
       }
+      pos_expenses: {
+        Row: {
+          amount: number
+          cancelled: boolean
+          cancelled_at: string | null
+          category: string
+          created_at: string
+          created_by: string
+          description: string
+          expense_date: string
+          id: string
+          notes: string
+          payment_method: string
+        }
+        Insert: {
+          amount: number
+          cancelled?: boolean
+          cancelled_at?: string | null
+          category: string
+          created_at?: string
+          created_by?: string
+          description: string
+          expense_date: string
+          id?: string
+          notes?: string
+          payment_method: string
+        }
+        Update: {
+          amount?: number
+          cancelled?: boolean
+          cancelled_at?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          expense_date?: string
+          id?: string
+          notes?: string
+          payment_method?: string
+        }
+        Relationships: []
+      }
       pos_sales: {
         Row: {
           cancelled: boolean
