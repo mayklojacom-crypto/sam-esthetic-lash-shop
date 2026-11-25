@@ -2,7 +2,7 @@ import { openCookieSettings } from "@/lib/consent";
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, Link } from 'react-router-dom';
-import { Truck, ShieldCheck, CreditCard, Leaf, Search, X } from 'lucide-react';
+import { Truck, Leaf, Search, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import whatsappIcon from '@/assets/whatsapp-icon.png';
 import HeroBannerCarousel from '@/components/HeroBannerCarousel';
@@ -11,6 +11,7 @@ import promoMaster from '@/assets/promo-master-beauty.png';
 import promoProtagonista from '@/assets/promo-protagonista.png';
 import { categories } from '@/data/products';
 import { useProducts } from '@/hooks/useProducts';
+import TrustBadges from '@/components/TrustBadges';
 import PolicyLinks from '@/components/PolicyLinks';
 import { CatalogEmpty, CatalogError, ProductGridSkeleton } from '@/components/CatalogStatus';
 import ProductCard from '@/components/ProductCard';
@@ -89,19 +90,7 @@ const Index = () => {
         {/* Super Ofertas Relâmpago (produtos com cronômetro ativo) */}
         <SuperOfferSection products={products} />
 
-        {/* Trust Bar */}
-        <div className="mx-4 mt-6 grid grid-cols-3 gap-3">
-          {[
-            { icon: <ShieldCheck size={18} />, text: 'Segurinha 🔒' },
-            { icon: <Truck size={18} />, text: 'Entrega rápida 🛵' },
-            { icon: <CreditCard size={18} />, text: 'Pagamento via Pix ✨' },
-          ].map((item, i) => (
-            <div key={i} className="bg-card rounded-xl border border-border p-3 flex flex-col items-center gap-1.5 text-center shadow-sm">
-              <div className="text-primary">{item.icon}</div>
-              <span className="text-[11px] font-semibold text-foreground">{item.text}</span>
-            </div>
-          ))}
-        </div>
+        <TrustBadges />
 
         {/* Categorias */}
         <section className="mt-8">
