@@ -7,7 +7,7 @@ const WhatsAppFloat = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
 
-  if (location.pathname.startsWith('/produto/') || ['/carrinho', '/checkout'].includes(location.pathname)) return null;
+  if (location.pathname.startsWith('/produto/') || location.pathname.startsWith('/admin') || ['/carrinho', '/checkout'].includes(location.pathname)) return null;
 
   return (
     <>

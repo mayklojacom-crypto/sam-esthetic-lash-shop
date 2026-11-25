@@ -29,6 +29,13 @@
       "when": 1789819622485,
       "tag": "0003_add_mobile_image_to_banners",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795569194553,
+      "tag": "0004_migration",
+      "breakpoints": true
     }
   ]
 }

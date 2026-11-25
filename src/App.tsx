@@ -36,6 +36,7 @@ import AdminBlogEditor from "./pages/admin/AdminBlogEditor.tsx";
 import AdminBlogComments from "./pages/admin/AdminBlogComments.tsx";
 import AdminLeads from "./pages/admin/AdminLeads.tsx";
 import AdminCoupons from "./pages/admin/AdminCoupons.tsx";
+import AdminPOS from "./pages/admin/AdminPOS.tsx";
 import VisitorTracker from "./components/VisitorTracker.tsx";
 import CookieConsent from "./components/CookieConsent.tsx";
 import RouteTracker from "./components/RouteTracker.tsx";
@@ -72,6 +73,7 @@ const App = () => (
               <Route path="/entrega" element={<DeliveryPolicy />} />
               {/* Admin routes — hidden, no menu link */}
               <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/caixa" element={<AdminPOS />} />
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<AdminDashboard />} />
                 <Route path="pedidos" element={<AdminOrders />} />
