@@ -1,4 +1,6 @@
 # Checkout improvements
+- [x] Caixa: despesas por período, saldo e compartilhamento de rascunho/venda no WhatsApp; 149 testes passam, telas mobile verificadas com serviço simulado, acesso inválido rejeitado pelo servidor.
+- [ ] Caixa: conferir lançamento e leitura com sessão real da proprietária; bloqueado por ausência de acesso ao login administrativo nesta sessão (é preciso sair e entrar novamente para renovar a assinatura).
 - [x] P0 UX/CRO: bundled hero banners (no host-specific asset URLs), catalog loading/error/empty states, freight by CEP with non-blocking fallback, single site checkout CTA (WhatsApp support only), policy pages; 124 tests, build OK; not published.
 - [x] Public blog SEO: static Google verification, 16-URL sitemap, self-referencing metadata and crawlable product links; three real articles verified, 120 tests passed, build OK; no publication.
 - [x] Inspect delivery, payments and analytics.

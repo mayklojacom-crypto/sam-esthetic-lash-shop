@@ -1,0 +1,4 @@
+CREATE TABLE public.pos_expenses (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), description text NOT NULL CHECK (length(description) BETWEEN 1 AND 200), category text NOT NULL CHECK (category IN ('anuncios','produtos','aluguel','transporte','outros')), amount numeric(12,2) NOT NULL CHECK (amount > 0), expense_date date NOT NULL, payment_method text NOT NULL CHECK (payment_method IN ('pix','dinheiro','credito','debito')), notes text NOT NULL DEFAULT '', cancelled boolean NOT NULL DEFAULT false, cancelled_at timestamptz, created_by text NOT NULL DEFAULT '', created_at timestamptz NOT NULL DEFAULT now());
+GRANT ALL ON public.pos_expenses TO service_role;
+ALTER TABLE public.pos_expenses ENABLE ROW LEVEL SECURITY;
+CREATE INDEX pos_expenses_date_idx ON public.pos_expenses(expense_date);

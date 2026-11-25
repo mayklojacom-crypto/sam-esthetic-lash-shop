@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { encode } from "https://deno.land/x/djwt@v3.0.2/mod.ts";
+import { createAdminSession } from '../_shared/admin-session.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,10 +21,10 @@ Deno.serve(async (req) => {
   try {
     const { email, password, action } = await req.json();
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    const url = Deno.env.get("SUPABASE_URL");
+    const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (!url || !secret) throw new Error('Serviço indisponível');
+    const supabase = createClient(url, secret);
 
     if (action === "setup") {
       // Create first admin user
@@ -56,11 +56,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Credenciais inválidas" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Generate a simple token (SHA-256 of id + timestamp + secret)
-    const secret = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const tokenData = `${users[0].id}:${Date.now()}:${secret}`;
-    const tokenHash = await hashPassword(tokenData);
-    const token = btoa(JSON.stringify({ id: users[0].id, email: users[0].email, ts: Date.now(), h: tokenHash.slice(0, 16) }));
+    const token = await createAdminSession(users[0].id, users[0].email, secret);
 
     return new Response(JSON.stringify({ token, email: users[0].email }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (err) {
