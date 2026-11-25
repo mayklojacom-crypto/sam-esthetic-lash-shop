@@ -18,7 +18,8 @@ const brl = (n: number) => Number(n).toLocaleString('pt-BR', { style: 'currency'
 const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 
 export default function AdminPOS() {
-  const { isAuthenticated, token } = useAdminAuth();
+  const { isAuthenticated, token, logout } = useAdminAuth();
+  const [loadError, setLoadError] = useState('');
   const [tab, setTab] = useState<'vender' | 'relatorio' | 'despesas'>('vender');
   const [products, setProducts] = useState<Prod[]>([]);
   const [loadingP, setLoadingP] = useState(true);
@@ -42,6 +43,7 @@ export default function AdminPOS() {
       headers: { Authorization: `Bearer ${token}` }, body: body ?? {},
     });
     if (error) {
+      if ((error as { context?: Response }).context?.status === 401) { toast.error('Sua sessão expirou. Entre novamente no painel.'); logout(); throw new Error('Sessão expirada'); }
       let msg = error.context?.status === 401 ? 'Entre novamente no painel para acessar o Caixa com segurança' : 'Erro de conexão';
       try { msg = (await (error as { context?: Response }).context?.json())?.error || msg; } catch { /* keep */ }
       throw new Error(msg);
@@ -50,8 +52,8 @@ export default function AdminPOS() {
   };
 
   const loadProducts = async () => {
-    setLoadingP(true);
-    try { setProducts((await call('products')).products); } catch (e) { toast.error((e as Error).message); } finally { setLoadingP(false); }
+    setLoadingP(true); setLoadError('');
+    try { setProducts((await call('products')).products); } catch (e) { setLoadError((e as Error).message); } finally { setLoadingP(false); }
   };
   const loadSales = async () => {
     setLoadingS(true); setReportError('');
@@ -132,7 +134,8 @@ export default function AdminPOS() {
           </div>
           <ul className="flex-1 px-4 py-3 space-y-2 pb-28">
             {loadingP && <li className="text-center text-slate-500 py-10"><Loader2 className="animate-spin inline" /> Carregando produtos…</li>}
-            {!loadingP && filtered.length === 0 && <li className="text-center text-slate-500 py-10">Nenhum produto encontrado</li>}
+            {!loadingP && loadError && <li className="text-center text-red-600 py-10">Não foi possível carregar os produtos: {loadError}. <button className="underline" onClick={loadProducts}>Tentar de novo</button></li>}
+            {!loadingP && !loadError && filtered.length === 0 && <li className="text-center text-slate-500 py-10">Nenhum produto encontrado</li>}
             {filtered.map((p) => {
               const qty = cart[p.id] || 0; const out = p.stock <= 0;
               return (
