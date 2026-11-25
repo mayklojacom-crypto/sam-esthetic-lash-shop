@@ -331,6 +331,48 @@ export type Database = {
         }
         Relationships: []
       }
+      pos_sales: {
+        Row: {
+          cancelled: boolean
+          cancelled_at: string | null
+          created_at: string
+          created_by: string
+          discount: number
+          id: string
+          items: Json
+          notes: string
+          payment_method: string
+          subtotal: number
+          total: number
+        }
+        Insert: {
+          cancelled?: boolean
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string
+          discount?: number
+          id?: string
+          items?: Json
+          notes?: string
+          payment_method?: string
+          subtotal?: number
+          total?: number
+        }
+        Update: {
+          cancelled?: boolean
+          cancelled_at?: string | null
+          created_at?: string
+          created_by?: string
+          discount?: number
+          id?: string
+          items?: Json
+          notes?: string
+          payment_method?: string
+          subtotal?: number
+          total?: number
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           active: boolean
@@ -423,6 +465,56 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      pos_cancel_sale: {
+        Args: { p_id: string }
+        Returns: {
+          cancelled: boolean
+          cancelled_at: string | null
+          created_at: string
+          created_by: string
+          discount: number
+          id: string
+          items: Json
+          notes: string
+          payment_method: string
+          subtotal: number
+          total: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pos_sales"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      pos_register_sale: {
+        Args: {
+          p_created_by: string
+          p_discount: number
+          p_items: Json
+          p_notes: string
+          p_payment_method: string
+        }
+        Returns: {
+          cancelled: boolean
+          cancelled_at: string | null
+          created_at: string
+          created_by: string
+          discount: number
+          id: string
+          items: Json
+          notes: string
+          payment_method: string
+          subtotal: number
+          total: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "pos_sales"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       search_orders_by_cpf: {
         Args: { cpf_query: string }
         Returns: {
