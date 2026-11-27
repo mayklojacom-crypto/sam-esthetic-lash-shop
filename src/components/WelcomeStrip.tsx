@@ -1,38 +1,16 @@
-import { useEffect, useState } from 'react';
-import lashzinha from '@/assets/stickers/lashzinha.png';
+import christmasFrame from '@/assets/christmas-frame.webp.asset.json';
 
-const messages = [
-  'oi, lash lover 💗 bora deixar tudo perfeito hoje?',
-  'chegou material novinho pra você, amor ✨',
-  'qualquer dúvida chama no zap, respondo rapidinho 🤞',
-  'você merece o melhor cíliozinho do Brasil 👁️💕',
-];
-
-/** Faixinha afetiva — só aparece no mobile pra dar personalidade */
+/** Seasonal decoration only; no changes to offers or shopping rules. */
 const WelcomeStrip = () => {
-  const [idx, setIdx] = useState(0);
-
-  useEffect(() => {
-    const i = setInterval(() => setIdx(p => (p + 1) % messages.length), 4500);
-    return () => clearInterval(i);
-  }, []);
-
   return (
-    <div className="mx-4 mt-3 rounded-2xl gradient-girly px-4 py-3 flex items-center gap-3 shadow-pink relative overflow-hidden">
-      <img
-        src={lashzinha}
-        alt=""
-        aria-hidden="true"
-        className="w-11 h-11 sticker animate-wiggle shrink-0"
-        loading="lazy"
-      />
-      <p
-        key={idx}
-        className="font-hand text-lg leading-tight text-primary animate-fade-in"
-      >
-        {messages[idx]}
-      </p>
-    </div>
+    <section aria-label="Boas festas da Sam Esthetic" className="seasonal-welcome relative isolate mx-4 mt-4 mb-4 overflow-hidden">
+      <img src={christmasFrame.url} width={1536} height={1024} alt="" aria-hidden="true" fetchPriority="high" className="absolute inset-0 -z-10 h-full w-full object-cover" />
+      <div className="mx-auto flex h-full w-[62%] flex-col items-center justify-center text-center">
+        <p className="text-[9px] sm:text-[10px] font-semibold uppercase text-primary">Boas festas · Sam Esthetic</p>
+        <h1 className="mt-2 font-hand text-[30px] md:text-[42px] leading-none text-primary">Seu talento merece<br />brilhar nas festas.</h1>
+        <p className="mt-3 max-w-60 text-[10px] md:text-xs leading-relaxed text-foreground">Um Natal cheio de carinho.<br className="md:hidden" /> Um Ano Novo de novas conquistas.</p>
+      </div>
+    </section>
   );
 };
 

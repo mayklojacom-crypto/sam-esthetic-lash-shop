@@ -45,6 +45,11 @@
     --satin: 258 50% 63%;
     --satin-deep: 258 40% 56%;
     --satin-glow: 258 50% 63%;
+    --festive-gold: 40 65% 42%;
+    --festive-pine: 158 30% 34%;
+    --festive-light: 42 88% 76%;
+    --festive-wire: 40 20% 75%;
+    --shadow-festive: 0 2px 8px hsl(var(--festive-gold) / 0.18);
 
     --gradient-primary: linear-gradient(135deg, hsl(272 60% 45%), hsl(310 65% 50%));
     --gradient-accent: linear-gradient(135deg, hsl(330 75% 55%), hsl(350 80% 60%));
@@ -66,6 +71,9 @@
   }
 
   .dark {
+    --festive-gold: 42 70% 68%;
+    --festive-pine: 158 35% 65%;
+    --festive-wire: 40 15% 40%;
     --background: 270 25% 6%;
     --foreground: 0 0% 95%;
 
@@ -201,4 +209,12 @@
     50% { transform: rotate(6deg); }
   }
   .animate-wiggle { animation: wiggle 3s ease-in-out infinite; transform-origin: center; }
+
+  .seasonal-welcome {
+    height: 194px;
+    background: hsl(var(--pink-soft));
+  }
+  @media (min-width: 768px) {
+    .seasonal-welcome { height: 184px; }
+  }
 }
