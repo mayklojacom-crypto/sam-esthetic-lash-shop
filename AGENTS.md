@@ -8,3 +8,4 @@
 - Images render through ResponsiveImage with versioned WebP variants: local /products photos (public/products/opt, localImageVariants.ts) and exact known public store URLs (public/products/opt-remote, remoteImageVariants.ts); stored originals are never rewritten and unknown URLs render as-is, so originals stay the fallback.
 - Shop-counter (caixa) sales go only through admin-pos and the pos_register_sale/pos_cancel_sale database functions, which lock rows, use catalog prices and change stock in one transaction, so sales and stock never diverge.
 - POS expenses are service-only through admin-pos with HMAC-verified admin sessions; expense cancellation preserves history, and WhatsApp sharing is a read-only draft/receipt, never a sale mutation.
+- Brand/seasonal images live as real files in public/brand, not Lovable asset pointers; the owner hosts on Hostinger, where /__l5e asset URLs don't exist.

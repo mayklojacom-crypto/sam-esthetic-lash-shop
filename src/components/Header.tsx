@@ -2,7 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingBag, Menu, X, Search } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useState } from 'react';
-import samLogo from '@/assets/sam-logo.png.asset.json';
+const samLogo = { url: '/brand/sam-logo.webp' };
 
 const Header = () => {
   const navigate = useNavigate();

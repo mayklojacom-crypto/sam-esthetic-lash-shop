@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import whatsappIcon from '@/assets/whatsapp-icon.png';
 import HeroBannerCarousel from '@/components/HeroBannerCarousel';
 import WelcomeStrip from '@/components/WelcomeStrip';
-import samLogo from '@/assets/sam-logo.png.asset.json';
+const samLogo = { url: '/brand/sam-logo.webp' };
 import promoMaster from '@/assets/promo-master-beauty.png';
 import promoProtagonista from '@/assets/promo-protagonista.png';
 import { categories } from '@/data/products';
