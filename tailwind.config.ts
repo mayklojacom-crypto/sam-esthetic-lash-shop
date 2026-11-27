@@ -66,6 +66,8 @@ export default {
         peach: "hsl(var(--peach) / <alpha-value>)",
         cream: "hsl(var(--cream) / <alpha-value>)",
         "pink-soft": "hsl(var(--pink-soft) / <alpha-value>)",
+        "festive-gold": "hsl(var(--festive-gold) / <alpha-value>)",
+        "festive-pine": "hsl(var(--festive-pine) / <alpha-value>)",
       },
       borderRadius: {
         lg: "var(--radius)",

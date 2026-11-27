@@ -72,11 +72,14 @@ const Index = () => {
 
 
       <div className="max-w-6xl mx-auto">
-        {/* Boas-vindas afetiva (só mobile) */}
+        {/* Boas-vindas de fim de ano */}
         <WelcomeStrip />
 
         {/* Hero Banner — sticker Lashzinha ao lado, fora do banner */}
         <div className="relative">
+          <div className="festive-lights" aria-hidden="true">
+            {Array.from({ length: 12 }, (_, i) => <span key={i} />)}
+          </div>
           <HeroBannerCarousel />
           <img
             src={stLashzinha}
@@ -326,7 +329,7 @@ const Index = () => {
                 <p className="text-xs text-muted-foreground text-center md:text-left leading-relaxed max-w-[320px]">
                   Especialistas em materiais para Lash Design e Nail Designer. Entrega exclusiva em Goiânia e Aparecida de Goiânia, com prazo sujeito ao endereço e à disponibilidade.
                 </p>
-                <p className="font-hand text-xl text-primary">feito com 💗 em Goiânia</p>
+                <p className="font-hand text-xl text-primary">Boas festas, lash lover! ✨</p>
               </div>
               <div className="flex flex-col items-center md:items-end gap-4">
                 <div className="flex items-center gap-4 text-muted-foreground">
