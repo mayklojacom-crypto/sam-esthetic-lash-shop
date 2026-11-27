@@ -12,7 +12,6 @@ import promoMaster from '@/assets/promo-master-beauty.png';
 import promoProtagonista from '@/assets/promo-protagonista.png';
 import { categories } from '@/data/products';
 import { useProducts } from '@/hooks/useProducts';
-import TrustBadges from '@/components/TrustBadges';
 import PolicyLinks from '@/components/PolicyLinks';
 import { CatalogEmpty, CatalogError, ProductGridSkeleton } from '@/components/CatalogStatus';
 import ProductCard from '@/components/ProductCard';
@@ -82,8 +81,6 @@ const Index = () => {
 
         {/* Super Ofertas Relâmpago (produtos com cronômetro ativo) */}
         <SuperOfferSection products={products} />
-
-        <TrustBadges />
 
         {/* Categorias */}
         <section className="mt-8">
