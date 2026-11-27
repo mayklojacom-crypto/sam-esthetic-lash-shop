@@ -1,16 +1,16 @@
-import { Sparkles, TreePine } from 'lucide-react';
+import christmasFrame from '@/assets/christmas-frame.webp.asset.json';
 
 /** Seasonal decoration only; no changes to offers or shopping rules. */
 const WelcomeStrip = () => {
   return (
-    <div className="mx-4 mt-3 mb-1 flex items-center justify-center gap-3 border-b border-festive-gold/25 py-3">
-      <TreePine size={24} strokeWidth={1.5} className="shrink-0 text-festive-pine" aria-hidden="true" />
-      <div className="text-center">
-        <p className="font-hand text-2xl leading-tight text-primary">Um fim de ano cheio de beleza</p>
-        <p className="mt-1 text-[10px] sm:text-xs text-muted-foreground">Natal com carinho · Ano Novo com brilho</p>
+    <section aria-label="Boas festas da Sam Esthetic" className="seasonal-welcome relative isolate mx-4 mt-4 mb-4 overflow-hidden">
+      <img src={christmasFrame.url} width={1536} height={1024} alt="" aria-hidden="true" fetchPriority="high" className="absolute inset-0 -z-10 h-full w-full object-cover" />
+      <div className="mx-auto flex h-full w-[62%] flex-col items-center justify-center text-center">
+        <p className="text-[9px] sm:text-[10px] font-semibold uppercase text-primary">Boas festas · Sam Esthetic</p>
+        <h1 className="mt-2 font-hand text-[30px] md:text-[42px] leading-none text-primary">Seu talento merece<br />brilhar nas festas.</h1>
+        <p className="mt-3 max-w-60 text-[10px] md:text-xs leading-relaxed text-foreground">Um Natal cheio de carinho.<br className="md:hidden" /> Um Ano Novo de novas conquistas.</p>
       </div>
-      <Sparkles size={23} strokeWidth={1.5} className="shrink-0 text-festive-gold" aria-hidden="true" />
-    </div>
+    </section>
   );
 };
 

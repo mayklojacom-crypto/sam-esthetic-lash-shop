@@ -1,4 +1,5 @@
 # Checkout improvements
+- [x] Refazer composição de Natal/Ano Novo e aplicar a nova logo no cabeçalho, rodapé e favicon; conferir celular e desktop.
 - [x] Caixa: despesas por período, saldo e compartilhamento de rascunho/venda no WhatsApp; 149 testes passam, telas mobile verificadas com serviço simulado, acesso inválido rejeitado pelo servidor.
 - [ ] Caixa: conferir lançamento e leitura com sessão real da proprietária; bloqueado por ausência de acesso ao login administrativo nesta sessão (é preciso sair e entrar novamente para renovar a assinatura).
 - [x] P0 UX/CRO: bundled hero banners (no host-specific asset URLs), catalog loading/error/empty states, freight by CEP with non-blocking fallback, single site checkout CTA (WhatsApp support only), policy pages; 124 tests, build OK; not published.

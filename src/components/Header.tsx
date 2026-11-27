@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingBag, Menu, X, Search } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useState } from 'react';
+import samLogo from '@/assets/sam-logo.png.asset.json';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -31,12 +32,12 @@ const Header = () => {
 
         {/* Desktop: logo LEFT */}
         <button onClick={() => navigate('/')} className="hidden md:flex items-center gap-3 hover:opacity-90 transition-opacity">
-          <img src="/logo.png" alt="Sam Esthetic" className="h-14 w-auto" />
+          <img src={samLogo.url} alt="Sam Esthetic" width={768} height={320} className="h-auto w-40" />
         </button>
 
         {/* Mobile: logo CENTER */}
         <button onClick={() => navigate('/')} className="flex items-center absolute left-1/2 -translate-x-1/2 md:hidden">
-          <img src="/logo.png" alt="Sam Esthetic" className="h-12 w-auto" />
+          <img src={samLogo.url} alt="Sam Esthetic" width={768} height={320} className="h-auto w-32" />
         </button>
 
         {/* Desktop nav links (center) */}

@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import whatsappIcon from '@/assets/whatsapp-icon.png';
 import HeroBannerCarousel from '@/components/HeroBannerCarousel';
 import WelcomeStrip from '@/components/WelcomeStrip';
+import samLogo from '@/assets/sam-logo.png.asset.json';
 import promoMaster from '@/assets/promo-master-beauty.png';
 import promoProtagonista from '@/assets/promo-protagonista.png';
 import { categories } from '@/data/products';
@@ -26,7 +27,6 @@ import stBow from '@/assets/stickers/bow.png';
 import stStar from '@/assets/stickers/star.png';
 import stCoffee from '@/assets/stickers/coffee.png';
 import stLash from '@/assets/stickers/lash.png';
-import stLashzinha from '@/assets/stickers/lashzinha.png';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -77,17 +77,7 @@ const Index = () => {
 
         {/* Hero Banner — sticker Lashzinha ao lado, fora do banner */}
         <div className="relative">
-          <div className="festive-lights" aria-hidden="true">
-            {Array.from({ length: 12 }, (_, i) => <span key={i} />)}
-          </div>
           <HeroBannerCarousel />
-          <img
-            src={stLashzinha}
-            alt=""
-            aria-hidden="true"
-            className="sticker sticker-tilt-r absolute -top-2 -right-2 w-14 h-14 md:w-20 md:h-20 md:-top-6 md:-right-4 z-10"
-            loading="lazy"
-          />
         </div>
 
         {/* Super Ofertas Relâmpago (produtos com cronômetro ativo) */}
@@ -325,7 +315,7 @@ const Index = () => {
           <div className="border-t border-border pt-8 pb-6">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
               <div className="flex flex-col items-center md:items-start gap-3">
-                <img src="/logo.png" alt="Sam Esthetic" className="h-12 w-auto" />
+                <img src={samLogo.url} alt="Sam Esthetic" width={768} height={320} className="h-auto w-36" loading="lazy" />
                 <p className="text-xs text-muted-foreground text-center md:text-left leading-relaxed max-w-[320px]">
                   Especialistas em materiais para Lash Design e Nail Designer. Entrega exclusiva em Goiânia e Aparecida de Goiânia, com prazo sujeito ao endereço e à disponibilidade.
                 </p>

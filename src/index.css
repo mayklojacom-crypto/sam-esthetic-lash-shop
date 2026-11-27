@@ -210,47 +210,11 @@
   }
   .animate-wiggle { animation: wiggle 3s ease-in-out infinite; transform-origin: center; }
 
-  /* A quiet light garland sits outside the banner artwork. */
-  .festive-lights {
-    display: flex;
-    justify-content: space-around;
-    height: 18px;
-    margin: 0 20px;
-    border-top: 1px solid hsl(var(--festive-wire) / 0.55);
-    pointer-events: none;
-  }
-  .festive-lights span {
-    position: relative;
-    width: 6px;
-    height: 9px;
-    margin-top: 3px;
-    border-radius: 2px 2px 4px 4px;
-    background: hsl(var(--festive-light));
-    box-shadow: var(--shadow-festive);
-    animation: festive-glimmer 4s ease-in-out infinite;
-  }
-  .festive-lights span::before {
-    content: '';
-    position: absolute;
-    left: 2px;
-    top: -4px;
-    width: 2px;
-    height: 4px;
-    background: hsl(var(--festive-wire));
-  }
-  .festive-lights span:nth-child(3n) {
+  .seasonal-welcome {
+    height: 194px;
     background: hsl(var(--pink-soft));
-    animation-delay: -1.5s;
   }
-  .festive-lights span:nth-child(3n + 2) {
-    background: hsl(var(--lilac));
-    animation-delay: -3s;
-  }
-  @keyframes festive-glimmer {
-    0%, 100% { opacity: 0.65; }
-    50% { opacity: 1; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .festive-lights span { animation: none; }
+  @media (min-width: 768px) {
+    .seasonal-welcome { height: 184px; }
   }
 }
