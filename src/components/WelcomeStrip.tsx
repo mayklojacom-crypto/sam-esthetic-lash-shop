@@ -1,4 +1,4 @@
-import christmasFrame from '@/assets/christmas-frame.webp.asset.json';
+const christmasFrame = { url: '/brand/christmas-frame.webp' };
 
 /** Seasonal decoration only; no changes to offers or shopping rules. */
 const WelcomeStrip = () => {
